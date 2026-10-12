@@ -1,7 +1,7 @@
 import { isSlug, type Locale, type PostStatus } from '@soy1limon/core';
 import type { DbClient } from '../clients.ts';
 import type { Tables, TablesInsert, TablesUpdate } from '../database.types.ts';
-import { NotFoundError, unwrap } from '../errors.ts';
+import { DbError, NotFoundError, unwrap } from '../errors.ts';
 import { parseLocale, parsePostStatus } from './parse.ts';
 
 export interface PostRecord {
@@ -195,4 +195,55 @@ export async function syncPostImages(
       p_inline: images.inline,
     }),
   );
+}
+
+/** Other language versions of a post (same translation key). */
+export async function listTranslations(
+  db: DbClient,
+  post: Pick<PostRecord, 'id' | 'translationKey'>,
+): Promise<PostSummary[]> {
+  if (!post.translationKey) return [];
+  const rows = unwrap(
+    'listTranslations',
+    await db
+      .from('posts')
+      .select('id, lang, slug, title, status, published_at, updated_at')
+      .eq('translation_key', post.translationKey)
+      .neq('id', post.id),
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    lang: parseLocale(row.lang),
+    slug: row.slug,
+    title: row.title,
+    status: parsePostStatus(row.status),
+    publishedAt: row.published_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+/**
+ * Marks two posts in different languages as translations of each other by giving them the same
+ * translation key (reusing an existing one). A group holds at most one post per language; the
+ * unique index turns a clash into a ConflictError.
+ */
+export async function linkTranslation(
+  db: DbClient,
+  postId: string,
+  counterpartId: string,
+): Promise<string> {
+  const [post, counterpart] = await Promise.all([getPost(db, postId), getPost(db, counterpartId)]);
+  if (!post || !counterpart) throw new NotFoundError('linkTranslation: post not found');
+  if (post.lang === counterpart.lang) {
+    throw new DbError('A translation must be in a different language.');
+  }
+  const key = counterpart.translationKey ?? post.translationKey ?? crypto.randomUUID();
+  if (counterpart.translationKey !== key)
+    await updatePost(db, counterpart.id, { translationKey: key });
+  if (post.translationKey !== key) await updatePost(db, post.id, { translationKey: key });
+  return key;
+}
+
+export async function unlinkTranslation(db: DbClient, postId: string): Promise<void> {
+  await updatePost(db, postId, { translationKey: null });
 }

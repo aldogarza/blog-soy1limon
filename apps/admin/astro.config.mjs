@@ -41,6 +41,11 @@ export default defineConfig({
         "base-uri 'self'",
         "form-action 'self'",
       ],
+      // Syntax-highlighted code (Shiki) colours tokens with inline style attributes. Allowing only
+      // style *attributes* keeps <style> elements and all scripts under the hash-based policy.
+      styleDirective: {
+        resources: ["'self'", { resource: "'unsafe-inline'", kind: 'attribute' }],
+      },
     },
   },
 });

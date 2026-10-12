@@ -65,6 +65,52 @@ metadata and its history.
 - **History**: every save records a revision, and any older version can be restored.
 - **Deleting** is refused while a post uses the image and needs an explicit confirmation.
 
+## Writing posts
+
+`/posts` lists every post with its status (draft, scheduled, published, archived), language and
+public address. **New post** asks for the language and a title and creates a draft.
+
+The editor (`/posts/<id>`):
+
+- **Title and address**:
+  - While the post is a new draft, the address (slug) follows the title until you edit it.
+  - Its availability is checked live: unique per language, including old addresses of other posts.
+  - Renaming a **published** post keeps the old address as a redirect.
+- **Description and search preview**: a length guide and a mock Google result.
+- **Body**: a plain `<textarea>` with a formatting group.
+  - The group has Bold, Italic, Heading, Link, Lists, Quote, Code and **Insert image**. Shortcuts:
+    Ctrl+B, Ctrl+I and Ctrl+K.
+  - Images are referenced as `![optional alt](image:<id>)`. Without written alt text, the image's alt
+    in the post language is used.
+  - Raw HTML is never rendered.
+  - A plain textarea was chosen over CodeMirror. CodeMirror injects `<style>` elements, which the
+    hash-based CSP blocks, and a native textarea works best with screen readers and never traps Tab.
+- **Cover and gallery**:
+  - Chosen in an accessible `<dialog>` picker that shows each image's alt text in the post language.
+  - The gallery order changes with **Move up / Move down** buttons (no drag and drop needed), and
+    each move is announced.
+- **Tags**: tick existing ones or create a tag (English/Spanish names) in place.
+- **Translation**: pick the counterpart post in the other language. Both share a translation key,
+  which becomes `hreflang` on the public site.
+- **Preview**:
+  - Rendered on the server with the same pipeline as the public site (`packages/markdown`).
+  - Lists what is **needed before publishing**: title, description, body, existing images, and alt
+    text in the post language for every image.
+  - Also lists what is **worth checking**, such as long titles or descriptions and removed HTML.
+- **Publishing**:
+  - Publish now, schedule (local date and time), update, unpublish or archive.
+  - Publishing always validates on the server first.
+- **Saving**:
+  - **Drafts save automatically** (3 s after you stop typing).
+  - Published and scheduled posts only change when you press **Update**, so a half-finished edit can
+    never go live with the next build.
+  - Every change is also kept in the browser, and unsaved work is offered back after a crash or a
+    closed tab.
+- **History**: each manual save or publish records a revision.
+  - You can compare any revision with the editor (accessible diff) or restore it.
+  - Revisions are ordered by insertion (`revisions.seq`), so two saves in the same instant never
+    swap places.
+
 ## Accessibility
 
 The admin follows the same WCAG 2.2 AA rules as the public site.
@@ -79,10 +125,10 @@ The end-to-end tests run axe on every page.
 
 ## Tests
 
-| Command         | What it covers                                                                                                                                |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm test`     | Host checks, staging, form schema (including the single "remove technical data" switch), storage stats                                        |
-| `pnpm test:e2e` | The full upload → describe → process → edit → clean up → delete flow in Chromium, axe on each page, and exiftool checks on the produced files |
+| Command         | What it covers                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm test`     | Host checks, staging, form schema (including the single "remove technical data" switch), storage stats                                                                                                                                                                                                |
+| `pnpm test:e2e` | In Chromium with axe on each page: (1) media: upload → describe → process → edit → clean up → delete, with exiftool checks on the produced files; (2) posts: write → validation blocks a missing alt → cover/gallery/inline/tag → publish → Spanish translation → rename → compare/restore → autosave |
 
 The end-to-end suite builds the admin and runs it on port 4323 against the **local** Supabase
 stack and a temporary media folder. It refuses to start if the database is not local. Chromium

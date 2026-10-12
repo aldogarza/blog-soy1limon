@@ -198,6 +198,7 @@ export type Database = {
           entity_id: string;
           entity_type: string;
           id: string;
+          seq: number;
           snapshot: NonNullable<Json>;
         };
         ComputedFields: never;
@@ -206,6 +207,7 @@ export type Database = {
           entity_id: string;
           entity_type: string;
           id?: string;
+          seq?: never;
           snapshot: NonNullable<Json>;
         };
         Update: {
@@ -213,6 +215,7 @@ export type Database = {
           entity_id?: string;
           entity_type?: string;
           id?: string;
+          seq?: never;
           snapshot?: NonNullable<Json>;
         };
         Relationships: [];

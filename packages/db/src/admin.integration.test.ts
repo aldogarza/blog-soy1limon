@@ -13,6 +13,9 @@ import {
   createPost,
   deletePost,
   getPost,
+  linkTranslation,
+  listTranslations,
+  unlinkTranslation,
   isPostSlugAvailable,
   listPosts,
   type PostInput,
@@ -127,6 +130,41 @@ describe('posts', () => {
     await expect(
       createPost(db, { lang: 'en', slug: uniqueSlug('dup'), translationKey }),
     ).rejects.toBeInstanceOf(ConflictError);
+  });
+});
+
+describe('translations', () => {
+  it('links two posts in different languages with a shared key, reusing an existing one', async () => {
+    const english = await newPost({ title: 'Hello' });
+    const existingKey = crypto.randomUUID();
+    const spanish = await newPost({ lang: 'es', translationKey: existingKey });
+
+    expect(await linkTranslation(db, english.id, spanish.id)).toBe(existingKey);
+    expect((await getPost(db, english.id))?.translationKey).toBe(existingKey);
+    expect(
+      (await listTranslations(db, { id: english.id, translationKey: existingKey })).map(
+        (p) => p.id,
+      ),
+    ).toEqual([spanish.id]);
+
+    await unlinkTranslation(db, english.id);
+    expect((await getPost(db, english.id))?.translationKey).toBeNull();
+  });
+
+  it('refuses to link two posts in the same language', async () => {
+    const a = await newPost();
+    const b = await newPost();
+    await expect(linkTranslation(db, a.id, b.id)).rejects.toThrow(/different language/);
+  });
+
+  it('refuses a second post of the same language in a group', async () => {
+    const english = await newPost();
+    const spanish = await newPost({ lang: 'es' });
+    const otherEnglish = await newPost();
+    await linkTranslation(db, english.id, spanish.id);
+    await expect(linkTranslation(db, otherEnglish.id, spanish.id)).rejects.toBeInstanceOf(
+      ConflictError,
+    );
   });
 });
 

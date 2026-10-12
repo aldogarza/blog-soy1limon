@@ -47,7 +47,7 @@ export async function listRevisions(
       .select('id, created_at')
       .eq('entity_type', entityType)
       .eq('entity_id', entityId)
-      .order('created_at', { ascending: false }),
+      .order('seq', { ascending: false }),
   );
   return rows.map((row) => ({ id: row.id, createdAt: row.created_at }));
 }

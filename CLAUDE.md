@@ -81,7 +81,7 @@ Internal packages export TypeScript source directly (no build step); apps compil
 - [x] Phase 1 — Data layer (migrations local; pushed to the real project only after owner approval)
 - [x] Phase 2 — Media pipeline
 - [x] Phase 3 — Admin: shell + media
-- [ ] Phase 4 — Admin: posts
+- [x] Phase 4 — Admin: posts
 - [ ] Phase 5 — Public site
 - [ ] Phase 6 — SEO
 - [ ] Phase 7 — Deploy & operations

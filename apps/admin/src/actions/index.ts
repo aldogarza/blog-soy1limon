@@ -1,9 +1,16 @@
 import { ConflictError } from '@soy1limon/db';
-import { ImageInUseError, isSeoNameAvailable } from '@soy1limon/db/admin';
+import { LOCALES, slugify } from '@soy1limon/core';
+import {
+  createTag,
+  ImageInUseError,
+  isPostSlugAvailable,
+  isSeoNameAvailable,
+} from '@soy1limon/db/admin';
 import { UnsupportedImageError } from '@soy1limon/media';
 import { ActionError, defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { imageFormSchema } from '../lib/image-form.ts';
+import { postFormSchema } from '../lib/post-form.ts';
 import {
   cleanupRetired,
   createFromStaging,
@@ -13,6 +20,19 @@ import {
   restoreRevision,
   updateFromForm,
 } from '../lib/server/media-service.ts';
+import {
+  archivePost,
+  checkPost,
+  createDraft,
+  publishPost,
+  PublishValidationError,
+  removePost,
+  renderPreview,
+  restorePostRevision,
+  revisionValues,
+  savePost,
+  unpublishPost,
+} from '../lib/server/post-service.ts';
 import { getDb } from '../lib/server/services.ts';
 
 /** Turns known failures into messages the form can show; everything else is a 500 with its text. */
@@ -30,6 +50,9 @@ function toActionError(error: unknown): ActionError {
       code: 'CONFLICT',
       message: `This image is used by ${posts} post reference(s). Remove it from those posts first.`,
     });
+  }
+  if (error instanceof PublishValidationError) {
+    return new ActionError({ code: 'BAD_REQUEST', message: error.check.errors.join('\n') });
   }
   if (error instanceof ConflictError) {
     return new ActionError({ code: 'CONFLICT', message: 'That name is already taken.' });
@@ -103,6 +126,115 @@ export const server = {
         run(async () => {
           const image = await restoreRevision(revisionId);
           return { id: image.id };
+        }),
+    }),
+  },
+
+  posts: {
+    create: defineAction({
+      accept: 'form',
+      input: z.object({ lang: z.enum(LOCALES), title: z.string().trim().max(200) }),
+      handler: ({ lang, title }) =>
+        run(async () => {
+          const post = await createDraft(lang, title);
+          return { id: post.id };
+        }),
+    }),
+
+    checkSlug: defineAction({
+      input: z.object({ lang: z.enum(LOCALES), slug: z.string(), excludeId: z.uuid() }),
+      handler: ({ lang, slug, excludeId }) =>
+        run(async () => ({ available: await isPostSlugAvailable(getDb(), lang, slug, excludeId) })),
+    }),
+
+    save: defineAction({
+      input: z.object({ id: z.uuid(), values: postFormSchema, manual: z.boolean() }),
+      handler: ({ id, values, manual }) =>
+        run(async () => {
+          const post = await savePost(id, values, { manual });
+          return { updatedAt: post.updatedAt, previousSlugs: post.previousSlugs };
+        }),
+    }),
+
+    preview: defineAction({
+      input: z.object({ values: postFormSchema }),
+      handler: ({ values }) =>
+        run(async () => {
+          const [rendered, check] = await Promise.all([renderPreview(values), checkPost(values)]);
+          return {
+            html: rendered.html,
+            headings: rendered.headings,
+            readingMinutes: rendered.readingMinutes,
+            errors: check.errors,
+            warnings: check.warnings,
+          };
+        }),
+    }),
+
+    publish: defineAction({
+      input: z.object({
+        id: z.uuid(),
+        values: postFormSchema,
+        publishAt: z.iso.datetime({ offset: true }).nullable(),
+      }),
+      handler: ({ id, values, publishAt }) =>
+        run(async () => {
+          const post = await publishPost(id, values, publishAt);
+          return {
+            status: post.status,
+            publishedAt: post.publishedAt,
+            previousSlugs: post.previousSlugs,
+          };
+        }),
+    }),
+
+    unpublish: defineAction({
+      input: z.object({ id: z.uuid() }),
+      handler: ({ id }) => run(async () => ({ status: (await unpublishPost(id)).status })),
+    }),
+
+    archive: defineAction({
+      input: z.object({ id: z.uuid() }),
+      handler: ({ id }) => run(async () => ({ status: (await archivePost(id)).status })),
+    }),
+
+    delete: defineAction({
+      accept: 'form',
+      input: z.object({ id: z.uuid() }),
+      handler: ({ id }) => run(() => removePost(id)),
+    }),
+
+    revision: defineAction({
+      input: z.object({ revisionId: z.uuid() }),
+      handler: ({ revisionId }) => run(async () => (await revisionValues(revisionId)).values),
+    }),
+
+    restoreRevision: defineAction({
+      input: z.object({ revisionId: z.uuid() }),
+      handler: ({ revisionId }) =>
+        run(async () => ({ id: (await restorePostRevision(revisionId)).id })),
+    }),
+  },
+
+  tags: {
+    create: defineAction({
+      input: z.object({
+        en: z.string().trim().max(60),
+        es: z.string().trim().max(60),
+      }),
+      handler: ({ en, es }) =>
+        run(async () => {
+          const slug = slugify(en || es);
+          if (!slug)
+            throw new ActionError({
+              code: 'BAD_REQUEST',
+              message: 'Write the tag name in at least one language.',
+            });
+          const tag = await createTag(getDb(), {
+            slug,
+            labels: { ...(en ? { en } : {}), ...(es ? { es } : {}) },
+          });
+          return { id: tag.id, slug: tag.slug, labels: tag.labels };
         }),
     }),
   },

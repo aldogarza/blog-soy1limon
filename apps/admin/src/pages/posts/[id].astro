@@ -1,0 +1,86 @@
+---
+import { siteConfig } from '@soy1limon/core';
+import { getPost, listPosts, listRevisions, listTags } from '@soy1limon/db/admin';
+import { actions } from 'astro:actions';
+import PostEditor from '../../components/PostEditor.vue';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { displayStatus, valuesFromPost } from '../../lib/post-form.ts';
+import { renderableImages, translationOf } from '../../lib/server/post-service.ts';
+import { getDb, getStorage } from '../../lib/server/services.ts';
+
+const id = Astro.params.id ?? '';
+const db = getDb();
+
+const deleteResult = Astro.getActionResult(actions.posts.delete);
+if (deleteResult && !deleteResult.error) {
+  return Astro.redirect(
+    `/posts?deleted=${encodeURIComponent(Astro.url.searchParams.get('title') ?? '')}`,
+  );
+}
+
+const post = /^[0-9a-f-]{36}$/.test(id) ? await getPost(db, id) : null;
+if (!post) return new Response('Post not found', { status: 404 });
+
+const [tags, images, posts, revisions, counterpart] = await Promise.all([
+  listTags(db),
+  renderableImages(),
+  listPosts(db),
+  listRevisions(db, 'post', id),
+  translationOf(post),
+]);
+const storage = getStorage();
+
+const imageOptions = [...images.values()].map((image) => {
+  const thumb = image.variants[0];
+  return {
+    id: image.id,
+    seoName: image.seoName,
+    alt: image.alt,
+    thumbUrl: thumb ? storage.publicUrl(thumb.key) : '',
+    thumbWidth: thumb?.w ?? 0,
+    thumbHeight: thumb?.h ?? 0,
+  };
+});
+const translationOptions = posts
+  .filter((candidate) => candidate.id !== post.id && candidate.lang !== post.lang)
+  .map((candidate) => ({
+    id: candidate.id,
+    title: candidate.title || candidate.slug,
+    lang: candidate.lang,
+  }));
+---
+
+<AdminLayout title={post.title ? `Edit: ${post.title}` : 'Edit post'}>
+  <PostEditor
+    client:load
+    postId={post.id}
+    initialValues={valuesFromPost(post, counterpart)}
+    status={displayStatus(post)}
+    publishedAt={post.publishedAt}
+    updatedAt={post.updatedAt}
+    previousSlugs={post.previousSlugs}
+    tags={tags.map((tag) => ({ id: tag.id, slug: tag.slug, labels: tag.labels }))}
+    images={imageOptions}
+    translationOptions={translationOptions}
+    revisions={revisions}
+    titleRecommended={siteConfig.seo.titleMaxLength}
+    descriptionRecommended={siteConfig.seo.descriptionMaxLength}
+  />
+
+  <section aria-labelledby="delete-heading">
+    <h2 id="delete-heading">Delete post</h2>
+    <form
+      method="POST"
+      action={`${actions.posts.delete}&title=${encodeURIComponent(post.title || post.slug)}`}
+    >
+      <input type="hidden" name="id" value={post.id} />
+      <p>
+        <input type="checkbox" id="confirm-delete" required />
+        <label for="confirm-delete">
+          I understand this permanently deletes this post and its history.
+        </label>
+      </p>
+      <button type="submit">Delete post</button>
+    </form>
+  </section>
+</AdminLayout>

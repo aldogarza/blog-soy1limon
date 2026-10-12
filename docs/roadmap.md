@@ -79,7 +79,7 @@ blog-soy1limon/
 ```
 
 ### Stack (use latest stable versions at implementation time; verify APIs in official docs before coding)
-Astro (static + SSR with Node adapter, Content Layer custom loader, Actions, i18n routing) · Vue 3 (islands) · TypeScript `strict` + `noUncheckedIndexedAccess` · Zod · `@supabase/supabase-js` + Supabase CLI (migrations, local stack, type gen) · Sharp · `exiftool-vendored` (needs Perl, present on WSL/Ubuntu runners) · `heic-decode` fallback (Sharp prebuilt binaries cannot decode HEVC HEIC) · `file-type` (magic-byte validation) · `@aws-sdk/client-s3` (R2) · unified/remark/rehype + `rehype-sanitize` + Shiki · CodeMirror 6 (markdown editor) · `@astrojs/sitemap` · `@astrojs/rss` · Pagefind · Vitest · Playwright + `@axe-core/playwright` · ESLint (flat config, `eslint-plugin-astro`, `eslint-plugin-vue`) + Prettier (`prettier-plugin-astro`) · lefthook + gitleaks · Tailwind CSS v4 (phase 9 only). **pnpm only — never npm.**
+Astro (static + SSR with Node adapter, Content Layer custom loader, Actions, i18n routing) · Vue 3 (islands) · TypeScript `strict` + `noUncheckedIndexedAccess` · Zod · `@supabase/supabase-js` + Supabase CLI (migrations, local stack, type gen) · Sharp · `exiftool-vendored` (needs Perl, present on WSL/Ubuntu runners) · `heic-decode` fallback (Sharp prebuilt binaries cannot decode HEVC HEIC) · `file-type` (magic-byte validation) · `@aws-sdk/client-s3` (R2) · unified/remark/rehype + `rehype-sanitize` + Shiki · plain textarea + toolbar for Markdown (CodeMirror dropped in Phase 4, CSP) · `@astrojs/sitemap` · `@astrojs/rss` · Pagefind · Vitest · Playwright + `@axe-core/playwright` · ESLint (flat config, `eslint-plugin-astro`, `eslint-plugin-vue`) + Prettier (`prettier-plugin-astro`) · lefthook + gitleaks · Tailwind CSS v4 (phase 9 only). **pnpm only — never npm.**
 
 ---
 
@@ -249,9 +249,9 @@ Rules for the implementing agent:
   - Meta description with a counter and a Google result preview.
   - Tags with create-inline.
   - Optional cover image, optional gallery (picker plus **keyboard reorder with Move up/Move down buttons**, not drag-only).
-  - CodeMirror 6 markdown editor with an "Insert image" dialog.
+  - Markdown editor: a plain `<textarea>` with a formatting toolbar and an "Insert image" dialog (decided in Phase 4 instead of CodeMirror 6, whose injected `<style>` elements conflict with the hash-based CSP; the textarea is also more accessible).
   - **Live preview** rendered server-side with the same pipeline as the public site.
-- Autosave drafts (debounced, plus a localStorage safety copy); a revision on every manual save; history with diff and restore.
+- Autosave drafts only (debounced, plus a localStorage safety copy); published/scheduled posts change only on an explicit "Update"; a revision on every manual save, ordered by an identity column; history with diff and restore.
 - Status actions: Save draft / Publish now / Schedule (future `published_at`) / Unpublish / Archive.
 - Validation before publish: title, description, slug, alt for every referenced image in the post language, valid image references.
 - Rule for hearing accessibility: no audio/video in v1. Any future embed must ship WebVTT captions and a transcript, enforced by the markdown plugin.

@@ -1,0 +1,91 @@
+---
+import { LOCALES } from '@soy1limon/core';
+import { listPosts } from '@soy1limon/db/admin';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { displayStatus, publicPath } from '../../lib/post-form.ts';
+import { getDb } from '../../lib/server/services.ts';
+
+const params = Astro.url.searchParams;
+const status = params.get('status') ?? '';
+const lang = params.get('lang') ?? '';
+const deleted = params.get('deleted');
+
+const posts = (await listPosts(getDb())).map((post) => ({ ...post, shown: displayStatus(post) }));
+const filtered = posts.filter(
+  (post) => (!status || post.shown === status) && (!lang || post.lang === lang),
+);
+const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+---
+
+<AdminLayout title="Posts">
+  {deleted && <p role="status">Deleted the post “{deleted}”.</p>}
+  <p>
+    <a href="/posts/new">New post</a>
+  </p>
+
+  <form method="get" aria-label="Filter posts">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">Any status</option>
+      {['draft', 'scheduled', 'published', 'archived'].map((value) => (
+        <option value={value} selected={value === status}>
+          {value}
+        </option>
+      ))}
+    </select>
+    <label for="lang">Language</label>
+    <select id="lang" name="lang">
+      <option value="">Any language</option>
+      {LOCALES.map((value) => (
+        <option value={value} selected={value === lang}>
+          {value}
+        </option>
+      ))}
+    </select>
+    <button type="submit">Filter</button>
+  </form>
+
+  <p role="status">
+    {filtered.length} of {posts.length} posts
+  </p>
+
+  <table>
+    <caption class="visually-hidden">Posts, most recently edited first</caption>
+    <thead>
+      <tr>
+        <th scope="col">Title</th>
+        <th scope="col">Language</th>
+        <th scope="col">Status</th>
+        <th scope="col">Address</th>
+        <th scope="col">Last edited</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filtered.map((post) => (
+        <tr>
+          <td>
+            <a href={`/posts/${post.id}`}>{post.title || '(untitled)'}</a>
+          </td>
+          <td lang={post.lang}>{post.lang}</td>
+          <td>
+            {post.shown}
+            {post.shown === 'scheduled' && post.publishedAt && (
+              <span class="hint">
+                for{' '}
+                <time datetime={post.publishedAt}>
+                  {dateFormat.format(new Date(post.publishedAt))}
+                </time>
+              </span>
+            )}
+          </td>
+          <td>
+            <code>{publicPath(post.lang, post.slug)}</code>
+          </td>
+          <td>
+            <time datetime={post.updatedAt}>{dateFormat.format(new Date(post.updatedAt))}</time>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</AdminLayout>
