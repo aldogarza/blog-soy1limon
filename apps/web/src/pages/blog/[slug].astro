@@ -7,7 +7,7 @@ import RedirectView from '../../views/RedirectView.astro';
 
 // One page per post, plus a redirect page for every old slug of a renamed post.
 export const getStaticPaths = (async () => {
-  const posts = postsIn(await siteContent(), 'en');
+  const posts = postsIn(await siteContent(), 'es');
   return [
     ...posts.map((post) => ({
       params: { slug: post.slug },
@@ -28,4 +28,4 @@ const { post, redirectTo } = Astro.props as {
 };
 ---
 
-{post ? <PostView post={post} /> : redirectTo && <RedirectView lang="en" to={redirectTo} />}
+{post ? <PostView post={post} /> : redirectTo && <RedirectView lang="es" to={redirectTo} />}

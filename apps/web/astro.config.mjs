@@ -30,7 +30,8 @@ export default defineConfig({
   build: { format: 'directory' },
   i18n: {
     locales: ['en', 'es'],
-    defaultLocale: 'en',
+    // Spanish at the root, English under /en/ (keep in sync with DEFAULT_LOCALE in packages/core).
+    defaultLocale: 'es',
     routing: { prefixDefaultLocale: false },
   },
   // THEME=<name> previews another theme without editing site-config.ts.

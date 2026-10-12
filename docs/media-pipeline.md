@@ -57,6 +57,9 @@ WebP supports EXIF and XMP (not IPTC-IIM), so every field is written to both whe
 | Location               | `GPSLatitude`, `GPSLongitude`, `GPSAltitude` (signed)                         | full, **only if explicitly kept** |
 | (always)               | EXIF `ColorSpace = sRGB`                                                      | compact + full                    |
 
+The embedded alt text is the one in the site's default language (Spanish, `DEFAULT_LOCALE`), or the
+other language when that one is empty. Changing only the other language's alt text keeps the files.
+
 **Profiles.** Variants of 1200 px and wider (the ones people open and download) get the **full**
 set. Smaller variants get the **compact** set: authorship, copyright and license only.
 

@@ -14,16 +14,16 @@ import { renderSitemap, sitemapEntries } from './sitemap.ts';
 const SITE = 'https://example.com';
 
 describe('alternates', () => {
-  it('lists every version plus x-default pointing to English', () => {
-    expect(alternates({ en: '/blog/a/', es: '/es/blog/b/' }, SITE)).toEqual([
-      { hreflang: 'en', href: 'https://example.com/blog/a/' },
-      { hreflang: 'es', href: 'https://example.com/es/blog/b/' },
-      { hreflang: 'x-default', href: 'https://example.com/blog/a/' },
+  it('lists every version plus x-default pointing to Spanish', () => {
+    expect(alternates({ en: '/en/blog/a/', es: '/blog/b/' }, SITE)).toEqual([
+      { hreflang: 'en', href: 'https://example.com/en/blog/a/' },
+      { hreflang: 'es', href: 'https://example.com/blog/b/' },
+      { hreflang: 'x-default', href: 'https://example.com/blog/b/' },
     ]);
   });
 
   it('is empty for a page that exists in one language only', () => {
-    expect(alternates({ es: '/es/blog/b/' }, SITE)).toEqual([]);
+    expect(alternates({ es: '/blog/b/' }, SITE)).toEqual([]);
   });
 });
 
@@ -40,7 +40,7 @@ describe('structured data', () => {
     expect(data).toMatchObject({
       '@type': 'BlogPosting',
       headline: 'Hello, world',
-      url: 'https://example.com/blog/hello-world/',
+      url: 'https://example.com/en/blog/hello-world/',
       inLanguage: 'en',
       datePublished: post.publishedAt,
       dateModified: post.updatedAt,
@@ -79,13 +79,13 @@ describe('structured data', () => {
       breadcrumbJsonLd(
         [
           { name: 'Home', path: '/' },
-          { name: 'Blog', path: '/blog/' },
+          { name: 'Blog', path: '/en/blog/' },
         ],
         SITE,
       ).itemListElement,
     ).toEqual([
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://example.com/' },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://example.com/blog/' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://example.com/en/blog/' },
     ]);
   });
 
@@ -117,12 +117,12 @@ describe('sitemap', () => {
     const content = await buildSiteContent(loadFixtureContent(), '/m');
     const xml = renderSitemap(sitemapEntries(content, '/m', SITE), SITE);
     const locs = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
-    expect(locs).toContain('https://example.com/blog/hello-world/');
-    expect(locs).toContain('https://example.com/es/tags/travel/');
-    expect(locs).not.toContain('https://example.com/blog/hello/');
+    expect(locs).toContain('https://example.com/en/blog/hello-world/');
+    expect(locs).toContain('https://example.com/tags/travel/');
+    expect(locs).not.toContain('https://example.com/en/blog/hello/');
     expect(locs.some((loc) => loc?.includes('/search/'))).toBe(false);
     expect(xml).toContain(
-      '<xhtml:link rel="alternate" hreflang="es" href="https://example.com/es/blog/hola-mundo/"/>',
+      '<xhtml:link rel="alternate" hreflang="es" href="https://example.com/blog/hola-mundo/"/>',
     );
     expect(xml).toContain(
       '<image:loc>https://example.com/m/images/2026/forest-trail-382ebc01-800.webp</image:loc>',

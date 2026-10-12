@@ -123,7 +123,7 @@ test('the keyboard reaches every control, in order, with a visible focus indicat
 });
 
 test('the skip link moves focus to the main content', async ({ page }) => {
-  await page.goto('/blog/hello-world/');
+  await page.goto('/en/blog/hello-world/');
   await page.keyboard.press('Tab');
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();

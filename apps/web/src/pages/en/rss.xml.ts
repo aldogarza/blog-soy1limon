@@ -4,12 +4,12 @@ import type { APIRoute } from 'astro';
 import { postsIn, siteContent } from '../../lib/content.ts';
 
 export const GET: APIRoute = async (context) => {
-  const posts = postsIn(await siteContent(), 'es');
+  const posts = postsIn(await siteContent(), 'en');
   return rss({
-    title: siteConfig.title.es,
-    description: siteConfig.description.es,
-    site: new URL(homePath('es'), context.site).href,
-    customData: '<language>es</language>',
+    title: siteConfig.title.en,
+    description: siteConfig.description.en,
+    site: new URL(homePath('en'), context.site).href,
+    customData: '<language>en</language>',
     items: posts.map((post) => ({
       title: post.title,
       description: post.description,

@@ -5,11 +5,11 @@ import { type SitePost, siteContent, tagsIn } from '../../lib/content.ts';
 import TagView from '../../views/TagView.astro';
 
 export const getStaticPaths = (async () => {
-  const entries = tagsIn(await siteContent(), 'en');
+  const entries = tagsIn(await siteContent(), 'es');
   return entries.map(({ tag, posts }) => ({ params: { tag: tag.slug }, props: { tag, posts } }));
 }) satisfies GetStaticPaths;
 
 const { tag, posts } = Astro.props as { tag: Tag; posts: SitePost[] };
 ---
 
-<TagView lang="en" tag={tag} posts={posts} />
+<TagView lang="es" tag={tag} posts={posts} />

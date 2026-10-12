@@ -20,19 +20,20 @@ pnpm test:e2e:web                       # build from fixtures and test it in Chr
 
 ## URLs
 
-English is the default language and has no prefix; Spanish lives under `/es/`. All paths come
-from `packages/core/src/routes.ts`, shared with the admin.
+Spanish is the default language and has no prefix; English lives under `/en/`. All paths come
+from `packages/core/src/routes.ts` (the prefix rule is `DEFAULT_LOCALE` in
+`packages/core/src/locales.ts`), shared with the admin.
 
-| Page                          | English                        | Spanish                           |
-| ----------------------------- | ------------------------------ | --------------------------------- |
-| Home                          | `/`                            | `/es/`                            |
-| Archive (10 per page)         | `/blog/`, `/blog/page/2/`      | `/es/blog/`, `/es/blog/page/2/`   |
-| Post                          | `/blog/<slug>/`                | `/es/blog/<slug>/`                |
-| Old address of a renamed post | `/blog/<old-slug>/` → redirect | `/es/blog/<old-slug>/` → redirect |
-| Tags / one tag                | `/tags/`, `/tags/<tag>/`       | `/es/tags/`, `/es/tags/<tag>/`    |
-| Search                        | `/search/`                     | `/es/search/`                     |
-| RSS                           | `/rss.xml`                     | `/es/rss.xml`                     |
-| Not found                     | `/404.html` (bilingual)        | —                                 |
+| Page                          | Spanish                                | English                           |
+| ----------------------------- | -------------------------------------- | --------------------------------- |
+| Home                          | `/`                                    | `/en/`                            |
+| Archive (10 per page)         | `/blog/`, `/blog/page/2/`              | `/en/blog/`, `/en/blog/page/2/`   |
+| Post                          | `/blog/<slug>/`                        | `/en/blog/<slug>/`                |
+| Old address of a renamed post | `/blog/<old-slug>/` → redirect         | `/en/blog/<old-slug>/` → redirect |
+| Tags / one tag                | `/tags/`, `/tags/<tag>/`               | `/en/tags/`, `/en/tags/<tag>/`    |
+| Search                        | `/search/`                             | `/en/search/`                     |
+| RSS                           | `/rss.xml`                             | `/en/rss.xml`                     |
+| Not found                     | `/404.html` (bilingual, Spanish first) | —                                 |
 
 A tag page exists in a language only if that language has posts with the tag.
 

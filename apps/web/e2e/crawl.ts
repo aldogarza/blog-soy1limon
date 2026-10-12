@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test';
 
 /** Every internal page reachable from the home pages, discovered by following links. */
 export async function crawl(page: Page): Promise<string[]> {
-  const queue = ['/', '/es/'];
+  const queue = ['/', '/en/'];
   const seen = new Set(queue);
   // for-of over an array also visits items pushed while iterating: a breadth-first crawl.
   for (const path of queue) {

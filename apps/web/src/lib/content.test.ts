@@ -7,17 +7,17 @@ describe('buildSiteContent (fixtures)', () => {
   it('renders every post, newest first, with paths and resolved images', async () => {
     const content = await buildSiteContent(loadFixtureContent(), '/fixtures-media');
     expect(content.posts.map((post) => post.path)).toEqual([
-      '/es/blog/notas-de-viaje/',
-      '/blog/a-weekend-in-the-city/',
-      '/blog/hello-world/',
-      '/es/blog/hola-mundo/',
+      '/blog/notas-de-viaje/',
+      '/en/blog/a-weekend-in-the-city/',
+      '/en/blog/hello-world/',
+      '/blog/hola-mundo/',
     ]);
     const hello = content.posts.find((post) => post.slug === 'hello-world');
     expect(hello?.cover?.seoName).toBe('river-at-dawn');
     expect(hello?.html).toContain('srcset="/fixtures-media/images/2026/forest-trail');
     expect(hello?.translation).toEqual({
       lang: 'es',
-      path: '/es/blog/hola-mundo/',
+      path: '/blog/hola-mundo/',
       title: 'Hola, mundo',
     });
     expect(content.posts.find((post) => post.slug === 'hola-mundo')?.gallery).toHaveLength(2);

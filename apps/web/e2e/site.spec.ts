@@ -12,7 +12,7 @@ test('every page is reachable, accessible, well structured and script-free', asy
   const assets = new Set<string>();
   for (const path of pages) {
     await page.goto(path);
-    const lang = path.startsWith('/es/') ? 'es' : 'en';
+    const lang = path.startsWith('/en/') ? 'en' : 'es';
     await expect(page.locator('html'), path).toHaveAttribute('lang', lang);
     await expect(page.locator('h1'), `one h1 on ${path}`).toHaveCount(1);
 
@@ -146,7 +146,7 @@ test('robots.txt keeps crawlers out of non-production builds and points to the s
 });
 
 test('a post shows its cover, inline image, tags and translation', async ({ page }) => {
-  await page.goto('/blog/hello-world/');
+  await page.goto('/en/blog/hello-world/');
   await expect(page.getByRole('heading', { level: 1, name: 'Hello, world' })).toBeVisible();
   await expect(
     page.getByRole('img', { name: 'A calm blue river under a pale morning sun' }),
@@ -154,18 +154,21 @@ test('a post shows its cover, inline image, tags and translation', async ({ page
   await expect(
     page.getByRole('img', { name: 'A green forest fading into a bright clearing' }),
   ).toHaveAttribute('loading', 'lazy');
-  await expect(page.getByRole('link', { name: 'Notes' })).toHaveAttribute('href', '/tags/notes/');
+  await expect(page.getByRole('link', { name: 'Notes' })).toHaveAttribute(
+    'href',
+    '/en/tags/notes/',
+  );
   const translation = page.getByRole('link', { name: 'Leer en español: Hola, mundo' });
   await expect(translation).toHaveAttribute('hreflang', 'es');
   await translation.click();
-  await expect(page).toHaveURL(/\/es\/blog\/hola-mundo\/$/);
+  await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/blog\/hola-mundo\/$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'es');
 });
 
 test('a gallery links every photo to its largest file, with alt text in the post language', async ({
   page,
 }) => {
-  await page.goto('/es/blog/hola-mundo/');
+  await page.goto('/blog/hola-mundo/');
   const gallery = page.getByRole('region', { name: 'Galería' });
   await expect(gallery.getByRole('listitem')).toHaveCount(2);
   const first = gallery.getByRole('link').first();
@@ -180,7 +183,7 @@ test('a gallery links every photo to its largest file, with alt text in the post
 test('a gallery photo opens in an accessible viewer that keeps and returns focus', async ({
   page,
 }) => {
-  await page.goto('/es/blog/hola-mundo/');
+  await page.goto('/blog/hola-mundo/');
   const gallery = page.getByRole('region', { name: 'Galería' });
   const first = gallery.getByRole('link').first();
   await first.click();
@@ -206,18 +209,18 @@ test('a gallery photo opens in an accessible viewer that keeps and returns focus
 });
 
 test('an old address redirects to the renamed post', async ({ page }) => {
-  await page.goto('/blog/hello/');
+  await page.goto('/en/blog/hello/');
   await expect(page).toHaveURL(/\/blog\/hello-world\/$/);
 });
 
 test('search finds posts in the language of the page only', async ({ page }) => {
-  await page.goto('/search/');
+  await page.goto('/en/search/');
   await page.getByLabel('Search the blog').fill('river');
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(page.getByRole('status')).toHaveText('1 result');
   await expect(page.getByRole('link', { name: 'Hello, world' })).toBeVisible();
 
-  await page.goto('/es/search/?q=compartir');
+  await page.goto('/search/?q=compartir');
   await expect(page.getByRole('status')).toHaveText('1 resultado');
   await expect(page.getByRole('link', { name: 'Hola, mundo' })).toBeVisible();
 });
@@ -225,15 +228,16 @@ test('search finds posts in the language of the page only', async ({ page }) => 
 test('unknown pages get a bilingual 404', async ({ page }) => {
   const response = await page.goto('/does-not-exist/');
   expect(response?.status()).toBe(404);
-  await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
-  await expect(page.getByRole('heading', { level: 2, name: 'Página no encontrada' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Página no encontrada' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Page not found' })).toBeVisible();
 });
 
 test('the RSS feeds list posts of their language', async ({ request }) => {
-  const english = await (await request.get('/rss.xml')).text();
+  const english = await (await request.get('/en/rss.xml')).text();
   expect(english).toContain('<language>en</language>');
-  expect(english).toContain('/blog/hello-world/');
-  expect(english).not.toContain('/es/blog/');
-  const spanish = await (await request.get('/es/rss.xml')).text();
-  expect(spanish).toContain('/es/blog/hola-mundo/');
+  expect(english).toContain('/en/blog/hello-world/');
+  const spanish = await (await request.get('/rss.xml')).text();
+  expect(spanish).toContain('<language>es</language>');
+  expect(spanish).toContain('/blog/hola-mundo/');
+  expect(spanish).not.toContain('/en/');
 });

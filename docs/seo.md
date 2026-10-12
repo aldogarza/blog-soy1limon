@@ -36,7 +36,7 @@ token in the `CLOUDFLARE_WEB_ANALYTICS_TOKEN` repository variable.
 - `<title>` as "Page · soy1limon", a meta description, and an absolute canonical URL (equal to the page URL).
 - `hreflang` links when the page has a real equivalent in the other language: homes, blog index,
   tag index, tags used in both languages, and posts linked as translations.
-  - Every version lists all versions, itself included, plus `x-default` pointing to English.
+  - Every version lists all versions, itself included, plus `x-default` pointing to Spanish (the default language).
   - Pages without an equivalent emit none; the language switch then points to the other home.
 - Open Graph and Twitter cards.
   - Image: a ≥ 1200 px variant of the post's first photo, with its alt text in the page language.

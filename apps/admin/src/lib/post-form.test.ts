@@ -80,9 +80,9 @@ describe('checkPublishable', () => {
 });
 
 describe('helpers', () => {
-  it('builds public paths with the language prefix only for Spanish', () => {
-    expect(publicPath('en', 'hello')).toBe('/blog/hello/');
-    expect(publicPath('es', 'hola')).toBe('/es/blog/hola/');
+  it('builds public paths with the language prefix only for English', () => {
+    expect(publicPath('en', 'hello')).toBe('/en/blog/hello/');
+    expect(publicPath('es', 'hola')).toBe('/blog/hola/');
   });
 
   it('derives the scheduled status from a future date', () => {
