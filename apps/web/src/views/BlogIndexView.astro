@@ -1,9 +1,10 @@
 ---
-import { blogPath, type Locale, otherLocale, siteConfig, ui } from '@soy1limon/core';
+import { blogPath, homePath, type Locale, otherLocale, siteConfig, ui } from '@soy1limon/core';
 import Pagination from '../components/Pagination.astro';
 import PostList from '../components/PostList.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import type { SitePost } from '../lib/content.ts';
+import { breadcrumbJsonLd } from '../lib/seo.ts';
 
 interface Props {
   lang: Locale;
@@ -15,13 +16,21 @@ interface Props {
 const { lang, posts, page, totalPages } = Astro.props;
 const t = ui(lang);
 const title = page > 1 ? `${t.blog} · ${t.page(page, totalPages)}` : t.blog;
+const breadcrumb = breadcrumbJsonLd(
+  [
+    { name: t.home, path: homePath(lang) },
+    { name: t.blog, path: blogPath(lang) },
+  ],
+  Astro.site ?? '',
+);
 ---
 
 <BaseLayout
   lang={lang}
   title={title}
   description={siteConfig.description[lang]}
-  alternatePath={blogPath(otherLocale(lang))}
+  translationPath={page === 1 ? blogPath(otherLocale(lang)) : undefined}
+  seo={{ jsonLd: [breadcrumb] }}
 >
   <h1>{title}</h1>
   <PostList posts={posts} lang={lang} />

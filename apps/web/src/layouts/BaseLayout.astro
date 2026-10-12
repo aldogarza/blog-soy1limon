@@ -1,7 +1,9 @@
 ---
 import { type Locale, siteConfig, ui } from '@soy1limon/core';
+import Analytics from '../components/Analytics.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import SeoHead, { type SeoProps } from '../components/SeoHead.astro';
 import '../styles/base.css';
 
 interface Props {
@@ -9,11 +11,12 @@ interface Props {
   /** Page title without the site name. */
   title: string;
   description: string;
-  /** Same page in the other language, for the language switch. */
-  alternatePath?: string | undefined;
+  /** The same page in the other language (used for hreflang and the language switch). */
+  translationPath?: string | undefined;
+  seo?: SeoProps;
 }
 
-const { lang, title, description, alternatePath } = Astro.props;
+const { lang, title, description, translationPath, seo = {} } = Astro.props;
 const t = ui(lang);
 const fullTitle = title === siteConfig.title[lang] ? title : `${title} · ${siteConfig.title[lang]}`;
 ---
@@ -25,13 +28,21 @@ const fullTitle = title === siteConfig.title[lang] ? title : `${title} · ${site
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <SeoHead
+      lang={lang}
+      title={title}
+      description={description}
+      translationPath={translationPath}
+      {...seo}
+    />
     <slot name="head" />
+    <Analytics />
   </head>
   <body>
     <a class="skip-link" href="#main">
       {t.skipToContent}
     </a>
-    <Header lang={lang} alternatePath={alternatePath} />
+    <Header lang={lang} alternatePath={translationPath} />
     <main id="main" tabindex="-1">
       <slot />
     </main>

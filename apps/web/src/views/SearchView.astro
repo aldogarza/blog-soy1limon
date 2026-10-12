@@ -20,7 +20,8 @@ const messages = {
   lang={lang}
   title={t.search}
   description={siteConfig.description[lang]}
-  alternatePath={searchPath(otherLocale(lang))}
+  translationPath={searchPath(otherLocale(lang))}
+  seo={{ noindex: true }}
 >
   <h1>{t.search}</h1>
   <form role="search" id="search-form" data-messages={JSON.stringify(messages)}>

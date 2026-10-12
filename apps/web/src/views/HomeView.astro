@@ -3,6 +3,7 @@ import { blogPath, homePath, type Locale, otherLocale, siteConfig, ui } from '@s
 import PostList from '../components/PostList.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { postsIn, siteContent } from '../lib/content.ts';
+import { websiteJsonLd } from '../lib/seo.ts';
 
 interface Props {
   lang: Locale;
@@ -17,7 +18,8 @@ const latest = postsIn(await siteContent(), lang).slice(0, 5);
   lang={lang}
   title={siteConfig.title[lang]}
   description={siteConfig.description[lang]}
-  alternatePath={homePath(otherLocale(lang))}
+  translationPath={homePath(otherLocale(lang))}
+  seo={{ jsonLd: [websiteJsonLd(lang, homePath(lang), Astro.site ?? '')] }}
 >
   <h1>{siteConfig.title[lang]}</h1>
   <p>{siteConfig.description[lang]}</p>

@@ -104,3 +104,40 @@ describe('webEnvSchema', () => {
     }
   });
 });
+
+describe('webEnvSchema deploy environment', () => {
+  const supabase = {
+    SITE_URL: 'https://example.com',
+    CONTENT_SOURCE: 'supabase',
+    SUPABASE_URL: 'https://abc.supabase.co',
+    SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_abc',
+    MEDIA_BASE_URL: 'https://img.example.com',
+  };
+
+  it('defaults to development so local builds never count visits', () => {
+    expect(parseEnv(webEnvSchema, { SITE_URL: 'https://example.com' }, 'web').DEPLOY_ENV).toBe(
+      'development',
+    );
+  });
+
+  it('refuses a production build from the sample fixtures', () => {
+    expect(() =>
+      parseEnv(webEnvSchema, { SITE_URL: 'https://example.com', DEPLOY_ENV: 'production' }, 'web'),
+    ).toThrow(/production build must use CONTENT_SOURCE=supabase/);
+  });
+
+  it('accepts a production build from Supabase with an analytics token', () => {
+    const env = parseEnv(
+      webEnvSchema,
+      { ...supabase, DEPLOY_ENV: 'production', CLOUDFLARE_WEB_ANALYTICS_TOKEN: 'a'.repeat(32) },
+      'web',
+    );
+    expect(env.DEPLOY_ENV).toBe('production');
+  });
+
+  it('rejects a malformed analytics token', () => {
+    expect(() =>
+      parseEnv(webEnvSchema, { ...supabase, CLOUDFLARE_WEB_ANALYTICS_TOKEN: 'not-a-token' }, 'web'),
+    ).toThrow(/32-character hex token/);
+  });
+});

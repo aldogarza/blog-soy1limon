@@ -284,7 +284,8 @@ Rules for the implementing agent:
   - `BlogPosting` (headline, description, image[], datePublished, dateModified, author `Person`, inLanguage, mainEntityOfPage).
   - `ImageObject` with `license`, `acquireLicensePage`, `creator`, `creditText` and `copyrightNotice` (Google Images "Licensable").
   - `BreadcrumbList`, plus `WebSite` and `Person` on the home page.
-- Sitemap with i18n alternates, `lastmod` and **image entries**; `robots.txt` pointing to the sitemap.
+- Sitemap with i18n alternates, `lastmod` and **image entries** (generated from content by our own endpoint, decided in Phase 6 instead of `@astrojs/sitemap`, because translated posts have different slugs); `robots.txt` pointing to the sitemap.
+- `DEPLOY_ENV` (development by default): only production builds are indexable and load analytics. Analytics added in Phase 6 at the owner's request: Cloudflare Web Analytics (free, cookieless), with a `?analytics=off` per-browser opt-out for the author's own visits.
 - Search Console verification via a DNS TXT record (documented).
 - Docs: `docs/seo.md`.
 - **Verify:** unit tests on the JSON-LD builders (typed with `schema-dts`); a post-build script asserts on every page:

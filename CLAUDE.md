@@ -29,6 +29,8 @@ in an admin app that only runs on the owner's machine (localhost). Full plan: `d
   against it without the owner's explicit approval. Tests only ever target the local stack.
 - Accessibility is a functional requirement (WCAG 2.2 AA): semantic HTML first, every interactive
   control keyboard-operable, every image has alt text in the page language.
+- Only `DEPLOY_ENV=production` builds (deploy workflow) may be indexed or load analytics; never
+  set it locally or in tests.
 - Comments explain _why_, not _what_. Keep them short.
 - Commit at the end of every phase (owner's standing instruction), after all checks pass.
   Never push unless asked. Commit messages: short, clear, English.
@@ -84,7 +86,7 @@ Internal packages export TypeScript source directly (no build step); apps compil
 - [x] Phase 3 — Admin: shell + media
 - [x] Phase 4 — Admin: posts
 - [x] Phase 5 — Public site
-- [ ] Phase 6 — SEO
+- [x] Phase 6 — SEO
 - [ ] Phase 7 — Deploy & operations
 - [ ] Phase 8 — Quality pass
 - [ ] Phase 9 — Styling

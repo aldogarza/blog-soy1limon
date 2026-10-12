@@ -1,0 +1,31 @@
+---
+import { webEnv } from '../lib/env.ts';
+
+// Cloudflare Web Analytics: cookieless and free. Rendered only in production builds, so local
+// development, previews and tests never send a visit.
+//
+// Visiting any page with ?analytics=off stores an opt-out in this browser (the author's own
+// visits to the real site are then not counted); ?analytics=on removes it.
+const env = webEnv();
+const token = env.DEPLOY_ENV === 'production' ? env.CLOUDFLARE_WEB_ANALYTICS_TOKEN : undefined;
+---
+
+{token && <script is:inline data-token={token}>
+  (() => {
+    const key = 'soy1limon:no-analytics';
+    const token = document.currentScript.dataset.token;
+    try {
+      const choice = new URLSearchParams(location.search).get('analytics');
+      if (choice === 'off') localStorage.setItem(key, '1');
+      if (choice === 'on') localStorage.removeItem(key);
+      if (localStorage.getItem(key)) return;
+    } catch {
+      // Storage blocked: count the visit, nothing else depends on it.
+    }
+    const beacon = document.createElement('script');
+    beacon.defer = true;
+    beacon.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+    beacon.dataset.cfBeacon = JSON.stringify({ token });
+    document.head.append(beacon);
+  })();
+</script>}

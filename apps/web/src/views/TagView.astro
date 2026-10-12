@@ -1,9 +1,18 @@
 ---
-import { type Locale, otherLocale, siteConfig, tagPath, tagsPath, ui } from '@soy1limon/core';
+import {
+  homePath,
+  type Locale,
+  otherLocale,
+  siteConfig,
+  tagPath,
+  tagsPath,
+  ui,
+} from '@soy1limon/core';
 import type { Tag } from '@soy1limon/db';
 import PostList from '../components/PostList.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { type SitePost, siteContent, tagLabel, tagsIn } from '../lib/content.ts';
+import { breadcrumbJsonLd } from '../lib/seo.ts';
 
 interface Props {
   lang: Locale;
@@ -16,13 +25,22 @@ const t = ui(lang);
 const other = otherLocale(lang);
 const hasOther = tagsIn(await siteContent(), other).some((entry) => entry.tag.id === tag.id);
 const title = t.postsTagged(tagLabel(tag, lang));
+const breadcrumb = breadcrumbJsonLd(
+  [
+    { name: t.home, path: homePath(lang) },
+    { name: t.tags, path: tagsPath(lang) },
+    { name: tagLabel(tag, lang), path: tagPath(lang, tag.slug) },
+  ],
+  Astro.site ?? '',
+);
 ---
 
 <BaseLayout
   lang={lang}
   title={title}
   description={siteConfig.description[lang]}
-  alternatePath={hasOther ? tagPath(other, tag.slug) : tagsPath(other)}
+  translationPath={hasOther ? tagPath(other, tag.slug) : undefined}
+  seo={{ jsonLd: [breadcrumb] }}
 >
   <h1>{title}</h1>
   <PostList posts={posts} lang={lang} />

@@ -72,6 +72,7 @@ pnpm test
 - [Media pipeline](docs/media-pipeline.md) — formats, variants, watermark, metadata, storage
 - [Admin](docs/admin.md) — running the local admin, its security model and the upload flow
 - [Public site](docs/site.md) — URLs, how content becomes pages, search and tests
+- [SEO, analytics and environments](docs/seo.md) — meta tags, structured data, sitemap, Search Console, visit counting
 - [Security policy](SECURITY.md)
 
 ## License

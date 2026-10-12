@@ -58,6 +58,7 @@ const httpUrl = (name: string) =>
   z.url({ protocol: /^https?$/, error: `${name} must be an http(s) URL` });
 
 export const STORAGE_DRIVERS = ['r2', 'local-fs'] as const;
+export const DEPLOY_ENVS = ['development', 'production'] as const;
 export const CONTENT_SOURCES = ['supabase', 'fixtures'] as const;
 
 const R2_KEYS = [
@@ -118,7 +119,22 @@ export type AdminEnv = z.output<typeof adminEnvSchema>;
 export const webEnvSchema = z
   .object({
     CONTENT_SOURCE: z.enum(CONTENT_SOURCES).default('fixtures'),
+    /**
+     * Only `production` (set by the deploy workflow) enables analytics and search-engine indexing,
+     * so local builds, previews and tests never count visits or get indexed.
+     */
+    DEPLOY_ENV: z.enum(DEPLOY_ENVS).default('development'),
     SITE_URL: httpUrl('SITE_URL'),
+    /** Cloudflare Web Analytics site token (public, cookieless). Used only in production. */
+    CLOUDFLARE_WEB_ANALYTICS_TOKEN: z
+      .string()
+      .regex(/^[a-f0-9]{32}$/, { error: 'Expected a 32-character hex token' })
+      .optional(),
+    /** Google Search Console meta verification token (optional; DNS verification also works). */
+    GOOGLE_SITE_VERIFICATION: z
+      .string()
+      .regex(/^[\w-]+$/)
+      .optional(),
     /**
      * Where public image variants live (the R2 custom domain in production). Fixture builds default
      * to the sample images shipped in apps/web/public/fixtures-media.
@@ -133,6 +149,13 @@ export const webEnvSchema = z
     SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
   })
   .superRefine((env, ctx) => {
+    if (env.DEPLOY_ENV === 'production' && env.CONTENT_SOURCE !== 'supabase') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['CONTENT_SOURCE'],
+        message: 'A production build must use CONTENT_SOURCE=supabase, never the sample fixtures',
+      });
+    }
     if (env.CONTENT_SOURCE !== 'supabase') return;
     if (!env.MEDIA_BASE_URL) {
       ctx.addIssue({

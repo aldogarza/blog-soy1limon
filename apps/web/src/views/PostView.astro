@@ -1,10 +1,12 @@
 ---
-import { type Locale, tagPath, ui } from '@soy1limon/core';
+import { blogPath, homePath, type Locale, tagPath, ui } from '@soy1limon/core';
 import Gallery from '../components/Gallery.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { type SitePost, tagLabel } from '../lib/content.ts';
+import { type SitePost, siteContent, tagLabel } from '../lib/content.ts';
+import { mediaBaseUrl } from '../lib/env.ts';
 import { formatDate } from '../lib/format.ts';
+import { blogPostingJsonLd, breadcrumbJsonLd, ogImageFor } from '../lib/seo.ts';
 
 interface Props {
   post: SitePost;
@@ -15,13 +17,44 @@ const lang: Locale = post.lang;
 const t = ui(lang);
 const published = formatDate(post.publishedAt, lang);
 const updated = formatDate(post.updatedAt, lang);
+
+// Every photo of the post (cover, gallery, inline), in order, for structured data and the share image.
+const { images } = await siteContent();
+const photos = [
+  ...new Set(
+    [post.coverImageId, ...post.galleryImageIds, ...post.inlineImageIds].filter(
+      (id) => id !== null,
+    ),
+  ),
+]
+  .map((id) => images.get(id))
+  .filter((image) => image !== undefined);
+const site = Astro.site ?? '';
+const tagNames = post.tags.map((tag) => tagLabel(tag, lang));
+const seo = {
+  type: 'article' as const,
+  image: photos[0] ? ogImageFor(photos[0], lang, mediaBaseUrl(), site) : undefined,
+  article: { publishedTime: post.publishedAt, modifiedTime: post.updatedAt, tags: tagNames },
+  jsonLd: [
+    blogPostingJsonLd({ ...post, tags: tagNames, images: photos }, mediaBaseUrl(), site),
+    breadcrumbJsonLd(
+      [
+        { name: t.home, path: homePath(lang) },
+        { name: t.blog, path: blogPath(lang) },
+        { name: post.title, path: post.path },
+      ],
+      site,
+    ),
+  ],
+};
 ---
 
 <BaseLayout
   lang={lang}
   title={post.title}
   description={post.description}
-  alternatePath={post.translation?.path}
+  translationPath={post.translation?.path}
+  seo={seo}
 >
   <article data-pagefind-body>
     <header>

@@ -59,7 +59,8 @@ test('every page is reachable, accessible, well structured and script-free', asy
       }
     }
 
-    const scripts = await page.locator('script').count();
+    // JSON-LD blocks are data, not code.
+    const scripts = await page.locator('script:not([type="application/ld+json"])').count();
     if (!path.endsWith('/search/')) expect(scripts, `no JavaScript on ${path}`).toBe(0);
 
     const results = await new AxeBuilder({ page })
@@ -77,6 +78,87 @@ test('every page is reachable, accessible, well structured and script-free', asy
     const response = await request.get(asset);
     expect(response.status(), `asset ${asset}`).toBe(200);
   }
+});
+
+test('every page has canonical, description, social tags, valid JSON-LD and reciprocal hreflang', async ({
+  page,
+}) => {
+  const pages = await crawl(page);
+  const hreflangs = new Map<string, Map<string, string>>();
+
+  for (const path of pages) {
+    await page.goto(path);
+    const url = new URL(path, page.url()).href;
+    await expect(page.locator('link[rel="canonical"]'), path).toHaveAttribute('href', url);
+    expect(
+      await page.locator('meta[name="description"]').getAttribute('content'),
+      path,
+    ).toBeTruthy();
+    for (const property of ['og:title', 'og:description', 'og:url', 'og:image', 'og:locale']) {
+      expect(
+        await page.locator(`meta[property="${property}"]`).getAttribute('content'),
+        `${property} on ${path}`,
+      ).toBeTruthy();
+    }
+    // Test builds are development builds: never indexable, never counted.
+    await expect(page.locator('meta[name="robots"]'), path).toHaveAttribute(
+      'content',
+      'noindex, nofollow',
+    );
+    expect(await page.content(), path).not.toContain('cloudflareinsights');
+
+    for (const block of await page
+      .locator('script[type="application/ld+json"]')
+      .allTextContents()) {
+      const data = JSON.parse(block) as { '@context'?: string; '@type'?: string };
+      expect(data['@context'], path).toBe('https://schema.org');
+      expect(data['@type'], path).toBeTruthy();
+    }
+
+    const links = await page
+      .locator('link[rel="alternate"][hreflang]')
+      .evaluateAll((elements) =>
+        elements.map((element) => [
+          element.getAttribute('hreflang') ?? '',
+          element.getAttribute('href') ?? '',
+        ]),
+      );
+    hreflangs.set(url, new Map(links as [string, string][]));
+  }
+
+  // If A says B is its Spanish version, B must say A is its English version (and both list themselves).
+  for (const [url, links] of hreflangs) {
+    if (links.size === 0) continue;
+    expect([...links.values()], `self reference on ${url}`).toContain(url);
+    for (const [lang, href] of links) {
+      if (lang === 'x-default' || href === url) continue;
+      expect([...(hreflangs.get(href)?.values() ?? [])], `${href} links back to ${url}`).toContain(
+        url,
+      );
+    }
+  }
+});
+
+test('the sitemap lists exactly the canonical, indexable pages', async ({ page, request }) => {
+  const xml = await (await request.get('/sitemap.xml')).text();
+  const locs = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1] ?? '');
+  expect(locs.length).toBeGreaterThanOrEqual(12);
+  for (const loc of locs) {
+    expect(loc).not.toMatch(/\/search\/|\/blog\/hello\/$|404/);
+    const response = await page.goto(loc);
+    expect(response?.status(), loc).toBe(200);
+    await expect(page.locator('link[rel="canonical"]'), loc).toHaveAttribute('href', loc);
+  }
+  expect(xml).toContain('<image:loc>');
+  expect(xml).toContain('hreflang="x-default"');
+});
+
+test('robots.txt keeps crawlers out of non-production builds and points to the sitemap', async ({
+  request,
+}) => {
+  const robots = await (await request.get('/robots.txt')).text();
+  expect(robots).toContain('Disallow: /');
+  expect(robots).toMatch(/Sitemap: http:\/\/127\.0\.0\.1:4330\/sitemap\.xml/);
 });
 
 test('a post shows its cover, inline image, tags and translation', async ({ page }) => {

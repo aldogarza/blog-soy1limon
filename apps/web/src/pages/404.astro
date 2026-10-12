@@ -7,8 +7,12 @@ const en = ui('en');
 const es = ui('es');
 ---
 
-<BaseLayout lang="en" title={en.notFoundTitle} description={en.notFoundBody}>
-  <meta slot="head" name="robots" content="noindex" />
+<BaseLayout
+  lang="en"
+  title={en.notFoundTitle}
+  description={en.notFoundBody}
+  seo={{ noindex: true }}
+>
   <h1>{en.notFoundTitle}</h1>
   <p>
     {en.notFoundBody} <a href={homePath('en')}>{en.home}</a> ·{' '}
