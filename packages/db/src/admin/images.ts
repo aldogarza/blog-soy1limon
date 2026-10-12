@@ -174,6 +174,20 @@ export async function findImageReferences(db: DbClient, imageId: string): Promis
   };
 }
 
+/** Ids of every image referenced by any post (cover, gallery or inline), for "unused" filters. */
+export async function listUsedImageIds(db: DbClient): Promise<Set<string>> {
+  const [covers, links] = await Promise.all([
+    db.from('posts').select('cover_image_id').not('cover_image_id', 'is', null),
+    db.from('post_images').select('image_id'),
+  ]);
+  const used = new Set<string>();
+  for (const row of unwrap('listUsedImageIds(covers)', covers)) {
+    if (row.cover_image_id) used.add(row.cover_image_id);
+  }
+  for (const row of unwrap('listUsedImageIds(links)', links)) used.add(row.image_id);
+  return used;
+}
+
 /**
  * Deletes the row only when no post uses the image. The foreign keys enforce the same rule;
  * checking first gives the admin a readable explanation instead of a constraint error.

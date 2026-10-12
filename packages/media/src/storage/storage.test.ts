@@ -29,14 +29,14 @@ describe('local-fs storage', () => {
   it('round-trips originals, keeps public and private apart, and deletes', async () => {
     const root = await mkdtemp(join(tmpdir(), 'soy1limon-storage-'));
     dirs.push(root);
-    const storage = createLocalFsStorage({ root, publicBaseUrl: 'http://127.0.0.1:4322/media/' });
+    const storage = createLocalFsStorage({ root, publicBaseUrl: 'http://127.0.0.1:4322/files/' });
 
     await storage.putOriginal('originals/a.jpg', Buffer.from('original'), 'image/jpeg');
     await storage.putPublic('images/2026/a-1-400.webp', Buffer.from('variant'), 'image/webp');
 
     expect((await storage.getOriginal('originals/a.jpg')).toString()).toBe('original');
     expect(storage.publicUrl('images/2026/a-1-400.webp')).toBe(
-      'http://127.0.0.1:4322/media/images/2026/a-1-400.webp',
+      'http://127.0.0.1:4322/files/images/2026/a-1-400.webp',
     );
     await expect(storage.getOriginal('images/2026/a-1-400.webp')).rejects.toThrow();
 

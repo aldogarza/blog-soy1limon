@@ -57,6 +57,8 @@ in an admin app that only runs on the owner's machine (localhost). Full plan: `d
 | `pnpm db:types`                     | Regenerate DB types after a migration (CI checks they are current)  |
 | `pnpm test:integration`             | RLS + query tests; needs the local stack running                    |
 | `pnpm media process <file>`         | Run the image pipeline locally into `media-out/` (uploads nothing)  |
+| `pnpm admin` / `pnpm admin:dev`     | Local admin on http://127.0.0.1:4322 (build+start / dev server)     |
+| `pnpm test:e2e`                     | Admin end-to-end tests (Playwright + axe) on the local stack        |
 
 ## Layout
 
@@ -78,7 +80,7 @@ Internal packages export TypeScript source directly (no build step); apps compil
 - [x] Phase 0 — Foundation
 - [x] Phase 1 — Data layer (migrations local; pushed to the real project only after owner approval)
 - [x] Phase 2 — Media pipeline
-- [ ] Phase 3 — Admin: shell + media
+- [x] Phase 3 — Admin: shell + media
 - [ ] Phase 4 — Admin: posts
 - [ ] Phase 5 — Public site
 - [ ] Phase 6 — SEO

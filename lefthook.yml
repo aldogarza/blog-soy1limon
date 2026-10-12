@@ -12,7 +12,7 @@ pre-commit:
         gitleaks git --pre-commit --staged --redact --no-banner
     lint:
       glob: '*.{js,mjs,cjs,ts,mts,cts,vue,astro}'
-      run: pnpm exec eslint --fix {staged_files}
+      run: pnpm exec eslint --fix --no-warn-ignored {staged_files}
       stage_fixed: true
     format:
       glob: '*.{js,mjs,cjs,ts,mts,cts,vue,astro,json,md,yml,yaml,css}'

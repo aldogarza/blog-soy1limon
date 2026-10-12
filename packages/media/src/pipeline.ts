@@ -11,7 +11,13 @@ import {
 import { openImage } from './decode.ts';
 import { type AcceptedMime, detectImage } from './intake.ts';
 import { contentHash, originalKey, targetWidths, variantKey } from './keys.ts';
-import { type FileMetadata, readFileMetadata } from './metadata/read.ts';
+import {
+  type FileMetadata,
+  findSensitiveTerms,
+  normalizeTags,
+  readFileTags,
+  type SensitiveMatch,
+} from './metadata/read.ts';
 import { type MetadataSuggestion, suggestMetadata } from './metadata/suggest.ts';
 import { profileForWidth, writeMetadata } from './metadata/write.ts';
 import { dominantColor, renderVariant } from './render.ts';
@@ -33,6 +39,8 @@ export interface InspectedImage {
   file: FileMetadata;
   /** Prefilled form values: file metadata merged with the site defaults. */
   suggestion: MetadataSuggestion;
+  /** Tags containing a configured private term (siteConfig.privacy.sensitiveTerms). */
+  sensitiveMatches: SensitiveMatch[];
 }
 
 export interface ProcessOptions {
@@ -65,6 +73,23 @@ async function withTempDir<T>(task: (dir: string) => Promise<T>): Promise<T> {
   }
 }
 
+/** Reads a file's metadata without decoding pixels (fast, even for large HEIC files). */
+export async function readMetadata(
+  input: ImageInput,
+  config: SiteConfig = siteConfig,
+): Promise<{ file: FileMetadata; sensitiveMatches: SensitiveMatch[] }> {
+  const detected = await detectImage(input.buffer, config.media.maxUploadBytes);
+  const tags = await withTempDir(async (dir) => {
+    const path = join(dir, `input.${detected.ext}`);
+    await writeFile(path, input.buffer);
+    return readFileTags(path);
+  });
+  return {
+    file: normalizeTags(tags),
+    sensitiveMatches: findSensitiveTerms(tags, config.privacy.sensitiveTerms),
+  };
+}
+
 /** Validates the file and reads what the upload form needs, without storing anything. */
 export async function inspectImage(
   input: ImageInput,
@@ -72,18 +97,33 @@ export async function inspectImage(
 ): Promise<InspectedImage> {
   const detected = await detectImage(input.buffer, config.media.maxUploadBytes);
   const opened = await openImage(input.buffer, detected.mime, config.media.maxInputPixels);
-  const file = await withTempDir(async (dir) => {
-    const path = join(dir, `input.${detected.ext}`);
-    await writeFile(path, input.buffer);
-    return readFileMetadata(path);
-  });
+  const { file, sensitiveMatches } = await readMetadata(input, config);
   return {
     ...detected,
     width: opened.width,
     height: opened.height,
     file,
     suggestion: suggestMetadata(file, input.filename, config),
+    sensitiveMatches,
   };
+}
+
+/**
+ * Small WebP for the admin form. Browsers cannot show HEIC, so the preview always comes from the
+ * same decoder the pipeline uses. No watermark and no metadata: it never leaves the machine.
+ */
+export async function previewImage(
+  buffer: Buffer,
+  width = 800,
+  config: SiteConfig = siteConfig,
+): Promise<Buffer> {
+  const detected = await detectImage(buffer, config.media.maxUploadBytes);
+  const opened = await openImage(buffer, detected.mime, config.media.maxInputPixels);
+  return opened.pipeline
+    .clone()
+    .resize({ width, withoutEnlargement: true })
+    .webp({ quality: 70 })
+    .toBuffer();
 }
 
 /**

@@ -32,7 +32,7 @@ Location: `/home/aldogarza/claude/blog-soy1limon` (empty, to be created). Host h
 | Full-text search in Postgres (`spanish`) | Static search with Pagefind instead (zero server). |
 
 ### Added (was missing)
-GPS stripping by default · HEIC/HEIF (iPhone) support · RLS + column grants + sign-ups disabled · localhost hardening (Host/Origin checks) · Supabase free-tier pause mitigation · scheduled posts · i18n (`en`/`es`) with `hreflang` · alt text per language · IPTC "alt text accessibility" + image license metadata and structured data (Google Images "Licensable") · image sitemap · slug redirects for changed URLs · fixtures mode so PR CI needs no secrets · secret scanning (gitleaks + GitHub push protection) · captions/transcript rule for any future audio/video · automated axe accessibility tests.
+Per-image control of GPS/device/time (kept by default for travel photos; one switch removes all three) · warning when the author's name appears in metadata · HEIC/HEIF (iPhone) support · RLS + column grants + sign-ups disabled · localhost hardening (Host/Origin checks) · Supabase free-tier pause mitigation · scheduled posts · i18n (`en`/`es`) with `hreflang` · alt text per language · IPTC "alt text accessibility" + image license metadata and structured data (Google Images "Licensable") · image sitemap · slug redirects for changed URLs · fixtures mode so PR CI needs no secrets · secret scanning (gitleaks + GitHub push protection) · captions/transcript rule for any future audio/video · automated axe accessibility tests.
 
 ---
 
@@ -142,7 +142,7 @@ revisions    id uuid pk, entity_type text check (post|image), entity_id uuid,
    - Applied to public variants only; the original stays clean.
 5. **Write metadata** into every variant with exiftool, after Sharp, which strips metadata by default.
    - Orientation is reset to 1.
-   - **GPS is removed by default**; keeping it requires an explicit toggle and shows a warning.
+   - GPS, device and capture time are **kept by default** (decided 2026-10-12: travel photos, possible future photo map); each can be removed, or all three with one switch.
 
    | Form field | Tags written (WebP supports EXIF + XMP) |
    |---|---|
@@ -156,11 +156,11 @@ revisions    id uuid pk, entity_type text check (post|image), entity_id uuid,
    | Date taken | EXIF DateTimeOriginal, XMP-photoshop:DateCreated |
    | Alt text (post language) | XMP-iptc4xmpCore:AltTextAccessibility |
    | Camera/lens/exposure | kept if "Keep camera info" is on (default on) |
-   | GPS | removed unless "Keep location" is on (default off) |
+   | GPS | kept unless "Keep location" is unticked or the single "remove technical data" switch is on |
 
 6. **Storage adapter interface** with two implementations:
    - `r2`: public bucket `media`; keys `images/{yyyy}/{seo_name}-{hash8}-{w}.webp` (hash of the final bytes, so immutable caching is always safe — decided in Phase 2); `Cache-Control: public, max-age=31536000, immutable`; `Content-Type: image/webp`. The original goes to private bucket `originals` as `originals/{id}.{ext}`.
-   - `local-fs`: for dev/tests; `<root>/public` (served by the admin at `/media/*`) and `<root>/private`.
+   - `local-fs`: for dev/tests; `<root>/public` (served by the admin at `/files/*`) and `<root>/private`.
 7. **Operations:**
    - `processImage`, `reprocessImage` (from the original, e.g. watermark change), `updateMetadata` (rewrites tags and re-uploads), `renameImage`, `deleteImage` (refused while referenced).
    - `renameImage` creates new keys and moves the old ones to `retired_keys`. They are only deleted through a manual "Clean up retired files" action, so Google Images and cached pages don't 404.
@@ -210,7 +210,7 @@ Rules for the implementing agent:
 - Docs: `docs/media-pipeline.md` including the mapping table.
 - **Verify (Vitest):**
   - Outputs are WebP at the expected widths with no upscaling, and the orientation is correct.
-  - GPS is absent when read back with exiftool, and every mapped field is present.
+  - GPS is present with the correct sign when kept and absent when removed, and every mapped field is present.
   - Metadata overhead is < 2.5 KB (full profile, variants ≥ 1200 px) and < 1.5 KB (compact profile, smaller variants), using exiftool `-api Compact=All`.
   - The watermark is detectable (pixel diff vs. `--no-watermark`).
   - The lying extension is rejected (the bytes decide the type: a renamed PNG is accepted as PNG, text named `.jpg` is rejected).
@@ -219,7 +219,7 @@ Rules for the implementing agent:
 ### Phase 3 — Admin: shell + media
 - `apps/admin`: Astro `output: 'server'`, Node adapter, Vue islands. `pnpm admin` runs on `127.0.0.1:4322` only.
 - **Localhost hardening:**
-  - Startup guard refuses non-loopback hosts.
+  - Binds to `127.0.0.1`; the middleware also rejects non-loopback client addresses.
   - Middleware rejects requests whose `Host` isn't localhost/127.0.0.1 (DNS-rebinding protection).
   - Astro `security.checkOrigin` on, so other sites in the browser can't make cross-site POSTs to the admin.
 - Mutations via **Astro Actions** with zod input (file uploads via form actions).
@@ -230,7 +230,7 @@ Rules for the implementing agent:
   3. Each field can be edited or removed (checkbox "Remove this field").
   4. SEO file name is auto-suggested from the title (slugified), editable, with live uniqueness check.
   5. Alt text is required, tied to the post language, with guidance and a character counter.
-  6. Watermark toggle and preview; "Keep camera info" and "Keep location" toggles (location shows a warning).
+  6. Watermark toggle; "Keep location / device / capture time" toggles plus one switch that removes all three; warning if the author's name appears in the file's metadata.
   7. **"Apply creator/copyright/license/keywords to remaining images"** to avoid retyping.
   8. Process with per-image progress and a summary.
 - Media library: grid/list, filters (unused, by year), search by name/alt.
@@ -316,7 +316,7 @@ Rules for the implementing agent:
   - `docs/setup.md`: step by step from zero (Supabase project, disable sign-ups, run migrations, R2, domain, tokens, GitHub settings).
   - `docs/operations.md`: backups/restore, key rotation, Supabase paused, storage limits.
   - `docs/adr/` with the key decisions.
-- **Verify:** publish a real post from the admin → workflow runs → the post is live on `<domain>` with images from `img.<domain>`; the downloaded image shows the correct metadata and no GPS; Cloudflare reports cache hits on images.
+- **Verify:** publish a real post from the admin → workflow runs → the post is live on `<domain>` with images from `img.<domain>`; the downloaded image shows the correct metadata (GPS only when kept); Cloudflare reports cache hits on images.
 
 ### Phase 8 — Quality pass
 - Manual checks:
@@ -358,7 +358,7 @@ Rules for the implementing agent:
    - Both language versions exist and are linked by `hreflang`.
    - The scheduled post is absent until its date (the cron build publishes it).
    - Images are WebP from `img.<domain>`, with srcset and alt in the right language.
-4. Download an image → `exiftool` shows the creator/copyright/license/alt and **no GPS**.
+4. Download an image → `exiftool` shows the creator/copyright/license/alt, and GPS only for images where it was kept.
 5. The Rich Results Test validates `BlogPosting` + `ImageObject`; the sitemap contains the posts and images.
 6. axe shows 0 violations and Lighthouse a11y/SEO are 100 on the deployed site.
 7. Repo audit: `gitleaks detect` over the full history is clean; anon-key queries cannot read drafts or originals.

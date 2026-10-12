@@ -27,7 +27,7 @@ describe('adminEnvSchema', () => {
   const base = {
     SUPABASE_URL: 'http://127.0.0.1:54321',
     SUPABASE_SECRET_KEY: 'sb_secret_abc',
-    MEDIA_BASE_URL: 'http://127.0.0.1:4322/media',
+    MEDIA_BASE_URL: 'http://127.0.0.1:4322/files',
   };
 
   it('accepts a minimal local-fs setup and defaults the storage driver', () => {

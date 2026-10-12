@@ -1,0 +1,53 @@
+---
+import '../styles/base.css';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const path = Astro.url.pathname;
+
+const nav = [
+  { href: '/', label: 'Dashboard' },
+  { href: '/media', label: 'Media library' },
+  { href: '/media/upload', label: 'Upload images' },
+];
+
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · soy1limon admin</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      Skip to main content
+    </a>
+    <header>
+      <p>
+        <strong>soy1limon admin</strong> <span class="hint">Local only · never deployed</span>
+      </p>
+      <nav aria-label="Main">
+        <ul>
+          {nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </header>
+    <main id="main" tabindex="-1">
+      <h1>{title}</h1>
+      <slot />
+    </main>
+  </body>
+</html>

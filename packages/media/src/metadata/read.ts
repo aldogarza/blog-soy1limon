@@ -135,6 +135,46 @@ export function removeUndefined<T extends object>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
+export interface SensitiveMatch {
+  tag: string;
+  value: string;
+}
+
+// File-system details describe our temp copy, not the photo.
+const IGNORED_TAGS = new Set(['SourceFile', 'FileName', 'Directory', 'errors', 'warnings']);
+
+function strings(value: unknown): string[] {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(strings);
+  if (typeof value === 'object' && value !== null) return Object.values(value).flatMap(strings);
+  return [];
+}
+
+/**
+ * Finds configured private words (e.g. the author's name) anywhere in the file's metadata,
+ * including tags we never copy, so the admin can warn before anything is published.
+ */
+export function findSensitiveTerms(tags: Tags, terms: readonly string[]): SensitiveMatch[] {
+  const needles = terms.map((term) => term.toLocaleLowerCase()).filter(Boolean);
+  if (needles.length === 0) return [];
+  const matches: SensitiveMatch[] = [];
+  for (const [tag, value] of Object.entries(tags as unknown as RawTags)) {
+    if (IGNORED_TAGS.has(tag)) continue;
+    for (const text of strings(value)) {
+      const lower = text.toLocaleLowerCase();
+      if (needles.some((needle) => lower.includes(needle))) {
+        matches.push({ tag, value: text });
+        break;
+      }
+    }
+  }
+  return matches;
+}
+
+export async function readFileTags(path: string): Promise<Tags> {
+  return getExiftool().read(path);
+}
+
 export async function readFileMetadata(path: string): Promise<FileMetadata> {
-  return normalizeTags(await getExiftool().read(path));
+  return normalizeTags(await readFileTags(path));
 }

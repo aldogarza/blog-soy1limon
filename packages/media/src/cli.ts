@@ -17,7 +17,7 @@ Options:
   --seo-name <name>   File name base, e.g. "sunset-over-monterrey" (default: suggested from the file)
   --alt <text>        Alt text to embed
   --no-watermark      Skip the watermark
-  --keep-location     Keep GPS data (removed by default)
+  --no-location       Remove GPS data (kept by default, see siteConfig.imageDefaults)
   -h, --help          Show this help
 `;
 
@@ -33,7 +33,7 @@ export async function run(argv: string[]): Promise<number> {
       'seo-name': { type: 'string' },
       alt: { type: 'string' },
       'no-watermark': { type: 'boolean', default: false },
-      'keep-location': { type: 'boolean', default: false },
+      'no-location': { type: 'boolean', default: false },
       help: { type: 'boolean', short: 'h', default: false },
     },
   });
@@ -55,9 +55,7 @@ export async function run(argv: string[]): Promise<number> {
     throw new Error(`--seo-name must be lowercase words separated by hyphens, got "${seoName}"`);
 
   const metadata = { ...inspected.suggestion.metadata };
-  if (values['keep-location'] && inspected.file.metadata.location) {
-    metadata.location = inspected.file.metadata.location;
-  }
+  if (values['no-location']) delete metadata.location;
 
   const storage = createLocalFsStorage({
     root: outDir,

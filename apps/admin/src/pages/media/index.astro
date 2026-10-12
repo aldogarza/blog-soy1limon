@@ -1,0 +1,103 @@
+---
+import { listImages, listUsedImageIds } from '@soy1limon/db/admin';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getDb, getStorage } from '../../lib/server/services.ts';
+import { formatBytes } from '../../lib/stats.ts';
+
+const params = Astro.url.searchParams;
+const query = (params.get('q') ?? '').trim().toLowerCase();
+const usage = params.get('usage') ?? 'all';
+const year = params.get('year') ?? '';
+const deleted = params.get('deleted');
+
+const db = getDb();
+const storage = getStorage();
+const [images, used] = await Promise.all([listImages(db), listUsedImageIds(db)]);
+const years = [...new Set(images.map((image) => image.createdAt.slice(0, 4)))].sort().reverse();
+
+const filtered = images.filter((image) => {
+  if (usage === 'used' && !used.has(image.id)) return false;
+  if (usage === 'unused' && used.has(image.id)) return false;
+  if (year && !image.createdAt.startsWith(year)) return false;
+  if (!query) return true;
+  const haystack = [image.seoName, image.alt.en, image.alt.es, image.metadata.title]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(query);
+});
+---
+
+<AdminLayout title="Media library">
+  {deleted && <p role="status">Deleted “{deleted}”.</p>}
+
+  <form method="get" role="search" aria-label="Filter images">
+    <label for="q">Search by name or alt text</label>
+    <input id="q" name="q" type="search" value={query} />
+    <label for="usage">Usage</label>
+    <select id="usage" name="usage">
+      <option value="all" selected={usage === 'all'}>
+        All images
+      </option>
+      <option value="used" selected={usage === 'used'}>
+        Used in posts
+      </option>
+      <option value="unused" selected={usage === 'unused'}>
+        Not used yet
+      </option>
+    </select>
+    <label for="year">Uploaded in</label>
+    <select id="year" name="year">
+      <option value="">Any year</option>
+      {years.map((y) => (
+        <option value={y} selected={y === year}>
+          {y}
+        </option>
+      ))}
+    </select>
+    <button type="submit">Filter</button>
+  </form>
+
+  <p role="status">
+    {filtered.length} of {images.length} images
+  </p>
+
+  {filtered.length === 0 ? (
+    <p>
+      No images match. <a href="/media/upload">Upload images</a>
+    </p>
+  ) : (
+    <ul class="grid">
+      {filtered.map((image) => {
+        const thumb = image.variants[0];
+        const alt = image.alt.en ?? image.alt.es ?? '';
+        return (
+          <li>
+            <figure>
+              {thumb ? (
+                <img
+                  src={storage.publicUrl(thumb.key)}
+                  alt={alt}
+                  width={thumb.w}
+                  height={thumb.h}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <p>No preview ({image.status})</p>
+              )}
+              <figcaption>
+                <a href={`/media/${image.id}`}>{image.seoName}</a>
+                <span class="hint">
+                  {used.has(image.id) ? 'Used' : 'Unused'} ·{' '}
+                  {formatBytes(image.variants.reduce((sum, v) => sum + v.bytes, 0))} public
+                  {!alt && ' · missing alt text'}
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</AdminLayout>

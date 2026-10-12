@@ -6,6 +6,7 @@ import {
   findImageReferences,
   ImageInUseError,
   isSeoNameAvailable,
+  listUsedImageIds,
   updateImage,
 } from './admin/images.ts';
 import {
@@ -164,6 +165,16 @@ describe('tags and images of a post', () => {
 
     await updatePost(db, post.id, { coverImageId: null });
     await expect(deleteImage(db, image.id)).resolves.toBeUndefined();
+  });
+
+  it('lists images used as cover, gallery or inline', async () => {
+    const [cover, gallery, unused] = [await newImage(), await newImage(), await newImage()];
+    const post = await newPost({ coverImageId: cover.id });
+    await syncPostImages(db, post.id, { gallery: [gallery.id], inline: [] });
+    const used = await listUsedImageIds(db);
+    expect(used.has(cover.id)).toBe(true);
+    expect(used.has(gallery.id)).toBe(true);
+    expect(used.has(unused.id)).toBe(false);
   });
 
   it('validates the SEO name and its uniqueness', async () => {

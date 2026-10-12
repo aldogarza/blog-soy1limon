@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference -- ambient module typing must travel with this file for apps that type-check its source
+/// <reference path="./types/heic-decode.d.ts" />
 import decodeHeic from 'heic-decode';
 import sharp, { type Sharp } from 'sharp';
 import type { AcceptedMime } from './intake.ts';

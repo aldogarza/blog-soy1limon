@@ -1,0 +1,55 @@
+---
+import { listImages, listPosts } from '@soy1limon/db/admin';
+import AdminLayout from '../layouts/AdminLayout.astro';
+import { getDb } from '../lib/server/services.ts';
+import { formatBytes, R2_FREE_BYTES, storageUsage } from '../lib/stats.ts';
+
+const db = getDb();
+const [posts, images] = await Promise.all([listPosts(db), listImages(db)]);
+const now = Date.now();
+const counts = {
+  drafts: posts.filter((post) => post.status === 'draft').length,
+  published: posts.filter(
+    (post) =>
+      post.status === 'published' && post.publishedAt && Date.parse(post.publishedAt) <= now,
+  ).length,
+  scheduled: posts.filter(
+    (post) => post.status === 'published' && post.publishedAt && Date.parse(post.publishedAt) > now,
+  ).length,
+};
+const usage = storageUsage(images);
+const percent = Math.min(100, usage.freeTierShare * 100);
+---
+
+<AdminLayout title="Dashboard">
+  <section aria-labelledby="posts-heading">
+    <h2 id="posts-heading">Posts</h2>
+    <dl>
+      <dt>Drafts</dt>
+      <dd>{counts.drafts}</dd>
+      <dt>Published</dt>
+      <dd>{counts.published}</dd>
+      <dt>Scheduled</dt>
+      <dd>{counts.scheduled}</dd>
+    </dl>
+  </section>
+
+  <section aria-labelledby="storage-heading">
+    <h2 id="storage-heading">Image storage</h2>
+    <p>
+      {images.length} images use {formatBytes(usage.total)}({formatBytes(usage.originals)}{' '}
+      originals, {formatBytes(usage.variants)} public variants).
+    </p>
+    <label for="storage-meter">Share of the free R2 tier ({formatBytes(R2_FREE_BYTES)})</label>
+    <meter id="storage-meter" min="0" max="100" low="70" high="90" optimum="0" value={percent}>
+      {percent.toFixed(1)}%
+    </meter>
+    <p class="hint">
+      {percent.toFixed(2)}% used. Retired files waiting for clean-up are not counted.
+    </p>
+  </section>
+
+  <p>
+    <a href="/media/upload">Upload images</a>
+  </p>
+</AdminLayout>

@@ -28,7 +28,10 @@
     "db:types": "supabase gen types typescript --local --schema public > packages/db/src/database.types.ts && prettier --write packages/db/src/database.types.ts",
     "db:push": "supabase db push --linked",
     "db:backup": "bash scripts/db-backup.sh",
-    "media": "node packages/media/src/cli.ts"
+    "media": "node packages/media/src/cli.ts",
+    "test:e2e": "pnpm --filter @soy1limon/admin test:e2e",
+    "admin": "pnpm --filter @soy1limon/admin build && pnpm --filter @soy1limon/admin start",
+    "admin:dev": "pnpm --filter @soy1limon/admin dev"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

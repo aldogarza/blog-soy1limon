@@ -70,6 +70,7 @@ pnpm test
 - [Setup](docs/setup.md) — local environment, Supabase, and later cloud services
 - [Content model](docs/content-model.md) — tables, rules, and who can read what
 - [Media pipeline](docs/media-pipeline.md) — formats, variants, watermark, metadata, storage
+- [Admin](docs/admin.md) — running the local admin, its security model and the upload flow
 - [Security policy](SECURITY.md)
 
 ## License

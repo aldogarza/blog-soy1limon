@@ -62,6 +62,14 @@ export const siteConfigSchema = z.object({
     maxUploadBytes: z.number().int().positive(),
     maxInputPixels: z.number().int().positive(),
   }),
+  privacy: z.object({
+    /**
+     * Words that should never leak through photo metadata (e.g. the author's full name in a
+     * device owner field). The admin warns when an uploaded file contains any of them.
+     * Location, device model and timestamps are NOT treated as sensitive: keeping them is a choice.
+     */
+    sensitiveTerms: z.array(z.string().min(2)),
+  }),
   seo: z.object({
     titleMaxLength: z.number().int().positive(),
     descriptionMaxLength: z.number().int().positive(),
@@ -93,7 +101,8 @@ export const siteConfig = {
     creditText: 'Aldo / soy1limon',
     licenseUrl: null,
     keepCameraInfo: true,
-    keepLocation: false,
+    // Photos are mostly travel and public places; locations may later feed a map of the photos.
+    keepLocation: true,
   },
   watermark: {
     enabledByDefault: true,
@@ -108,9 +117,12 @@ export const siteConfig = {
     widths: [400, 800, 1200, 1600, 2000],
     webpQuality: 80,
     webpEffort: 5,
-    maxUploadBytes: 100 * 1024 * 1024,
+    maxUploadBytes: 200 * 1024 * 1024,
     // Sharp's default limit (16383 x 16383); protects against decompression bombs.
     maxInputPixels: 268_402_689,
+  },
+  privacy: {
+    sensitiveTerms: ['Aldo'],
   },
   seo: {
     titleMaxLength: 60,

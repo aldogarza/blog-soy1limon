@@ -1,0 +1,17 @@
+---
+import { siteConfig } from '@soy1limon/core';
+import UploadWizard from '../../components/UploadWizard.vue';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Upload images">
+  <p>
+    Choose one or more photos. Each one gets its own form, prefilled with what the file already
+    contains. Nothing is published until you process the images.
+  </p>
+  <UploadWizard
+    client:load
+    altRecommendedLength={siteConfig.seo.altTextRecommendedMaxLength}
+    maxUploadMb={Math.round(siteConfig.media.maxUploadBytes / 1024 / 1024)}
+  />
+</AdminLayout>

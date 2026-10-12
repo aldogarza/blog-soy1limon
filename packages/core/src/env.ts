@@ -78,6 +78,8 @@ export const adminEnvSchema = z
     }),
     STORAGE_DRIVER: z.enum(STORAGE_DRIVERS).default('local-fs'),
     MEDIA_BASE_URL: httpUrl('MEDIA_BASE_URL'),
+    /** Folder for local-fs storage and upload staging; defaults to `.media-local` at the repo root. */
+    LOCAL_MEDIA_ROOT: z.string().optional(),
     R2_ACCOUNT_ID: z.string().optional(),
     R2_ACCESS_KEY_ID: z.string().optional(),
     R2_SECRET_ACCESS_KEY: z.string().optional(),

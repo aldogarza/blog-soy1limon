@@ -1,0 +1,205 @@
+---
+import { siteConfig } from '@soy1limon/core';
+import { findImageReferences, getImage, listPosts, listRevisions } from '@soy1limon/db/admin';
+import { actions } from 'astro:actions';
+import ImageEditor from '../../components/ImageEditor.vue';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { valuesFromRecord } from '../../lib/image-form.ts';
+import { technicalFromOriginal } from '../../lib/server/media-service.ts';
+import { getDb, getStorage } from '../../lib/server/services.ts';
+import { formatBytes } from '../../lib/stats.ts';
+
+const id = Astro.params.id ?? '';
+const db = getDb();
+const storage = getStorage();
+
+const deleteResult = Astro.getActionResult(actions.media.delete);
+if (deleteResult && !deleteResult.error) {
+  return Astro.redirect(
+    `/media?deleted=${encodeURIComponent(Astro.url.searchParams.get('name') ?? id)}`,
+  );
+}
+const cleanupResult = Astro.getActionResult(actions.media.cleanupRetired);
+const restoreResult = Astro.getActionResult(actions.media.restoreRevision);
+const saved = Astro.url.searchParams.has('saved');
+
+const image = /^[0-9a-f-]{36}$/.test(id) ? await getImage(db, id) : null;
+if (!image) {
+  return new Response('Image not found', { status: 404 });
+}
+
+const [references, revisions, posts, technical] = await Promise.all([
+  findImageReferences(db, id),
+  listRevisions(db, 'image', id),
+  listPosts(db),
+  technicalFromOriginal(image, storage),
+]);
+const postTitle = new Map(
+  posts.map((post) => [post.id, `${post.title || post.slug} (${post.lang})`]),
+);
+const usedBy = [
+  ...references.coverOf.map((postId) => ({ postId, role: 'cover' })),
+  ...references.gallery.map((postId) => ({ postId, role: 'gallery' })),
+  ...references.inline.map((postId) => ({ postId, role: 'inline' })),
+];
+const largest = image.variants.at(-1);
+const alt = image.alt[siteConfig.defaultLocale] ?? image.alt.en ?? image.alt.es ?? '';
+const actionMessage =
+  cleanupResult?.error?.message ?? restoreResult?.error?.message ?? deleteResult?.error?.message;
+---
+
+<AdminLayout title={`Image: ${image.seoName}`}>
+  {saved && <p role="status">Changes saved and new files generated.</p>}
+  {cleanupResult?.data && (
+    <p role="status">Deleted {cleanupResult.data.deleted} retired file(s).</p>
+  )}
+  {restoreResult?.data && <p role="status">Revision restored.</p>}
+  {actionMessage && (
+    <p role="alert" class="error">
+      {actionMessage}
+    </p>
+  )}
+
+  {largest && (
+    <figure>
+      <img
+        src={storage.publicUrl(largest.key)}
+        alt={alt}
+        width={largest.w}
+        height={largest.h}
+        class="detail-preview"
+      />
+      <figcaption>
+        {image.width} × {image.height} px · original “{image.originalFilename}” (
+        {formatBytes(image.originalBytes)}, {image.originalMime})
+      </figcaption>
+    </figure>
+  )}
+
+  <section aria-labelledby="edit-heading">
+    <h2 id="edit-heading">Edit</h2>
+    <p class="hint">
+      Saving renders new files from the original. Old file names keep working until you clean them
+      up.
+    </p>
+    <ImageEditor
+      client:load
+      imageId={image.id}
+      initialValues={valuesFromRecord(image)}
+      technical={technical}
+      previewUrl={largest ? storage.publicUrl(largest.key) : undefined}
+      altRecommendedLength={siteConfig.seo.altTextRecommendedMaxLength}
+    />
+  </section>
+
+  <section aria-labelledby="usage-heading">
+    <h2 id="usage-heading">Used in</h2>
+    {usedBy.length === 0 ? (
+      <p>No post uses this image yet.</p>
+    ) : (
+      <ul>
+        {usedBy.map((use) => (
+          <li>
+            {postTitle.get(use.postId) ?? use.postId} — {use.role}
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+
+  <section aria-labelledby="variants-heading">
+    <h2 id="variants-heading">Public files</h2>
+    <table>
+      <caption class="visually-hidden">Generated WebP variants</caption>
+      <thead>
+        <tr>
+          <th scope="col">Size</th>
+          <th scope="col">Weight</th>
+          <th scope="col">File</th>
+        </tr>
+      </thead>
+      <tbody>
+        {image.variants.map((variant) => (
+          <tr>
+            <td>
+              {variant.w} × {variant.h}
+            </td>
+            <td>{formatBytes(variant.bytes)}</td>
+            <td>
+              <a href={storage.publicUrl(variant.key)}>{variant.key}</a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    {image.retiredKeys.length > 0 && (
+      <form method="POST" action={actions.media.cleanupRetired}>
+        <input type="hidden" name="id" value={image.id} />
+        <p>
+          {image.retiredKeys.length} older file(s) from previous versions are still online so
+          existing links keep working.
+        </p>
+        <button type="submit">Delete {image.retiredKeys.length} retired file(s)</button>
+      </form>
+    )}
+  </section>
+
+  <section aria-labelledby="embedded-heading">
+    <h2 id="embedded-heading">Metadata embedded in the files</h2>
+    <dl>
+      {Object.entries(image.metadata).map(([key, value]) => (
+        <>
+          <dt>{key}</dt>
+          <dd>{typeof value === 'object' ? JSON.stringify(value) : String(value)}</dd>
+        </>
+      ))}
+    </dl>
+  </section>
+
+  <section aria-labelledby="history-heading">
+    <h2 id="history-heading">History</h2>
+    {revisions.length === 0 ? (
+      <p>No saved versions yet.</p>
+    ) : (
+      <ol>
+        {revisions.map((revision, index) => (
+          <li>
+            <time datetime={revision.createdAt}>
+              {new Date(revision.createdAt).toLocaleString('en-GB')}
+            </time>
+            {index === 0 ? (
+              ' (current)'
+            ) : (
+              <form method="POST" action={actions.media.restoreRevision} class="inline-form">
+                <input type="hidden" name="revisionId" value={revision.id} />
+                <button type="submit">Restore this version</button>
+              </form>
+            )}
+          </li>
+        ))}
+      </ol>
+    )}
+  </section>
+
+  <section aria-labelledby="delete-heading">
+    <h2 id="delete-heading">Delete</h2>
+    {usedBy.length > 0 ? (
+      <p>This image cannot be deleted while posts use it.</p>
+    ) : (
+      <form
+        method="POST"
+        action={`${actions.media.delete}&name=${encodeURIComponent(image.seoName)}`}
+      >
+        <input type="hidden" name="id" value={image.id} />
+        <p>
+          <input type="checkbox" id="confirm-delete" name="confirm" required />
+          <label for="confirm-delete">
+            I understand this permanently deletes the original and every public file.
+          </label>
+        </p>
+        <button type="submit">Delete image</button>
+      </form>
+    )}
+  </section>
+</AdminLayout>

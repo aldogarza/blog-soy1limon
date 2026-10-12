@@ -9,3 +9,11 @@ allowBuilds:
 
 # Supply-chain guard: only install versions published at least 24 hours ago.
 minimumReleaseAge: 1440
+
+# @napi-rs/wasm-runtime declares @emnapi/* as peers, but the WebAssembly-only @astrojs/astro2tsx
+# (used by `astro check`) ends up with them unlinked. Declaring them as real dependencies fixes it.
+packageExtensions:
+  '@napi-rs/wasm-runtime':
+    dependencies:
+      '@emnapi/core': '^1.11.1'
+      '@emnapi/runtime': '^1.11.1'

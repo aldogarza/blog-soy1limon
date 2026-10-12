@@ -16,14 +16,14 @@ flowchart LR
 ## Steps
 
 1. **Intake** (`intake.ts`): the type is decided by the file's bytes, never by its name or the browser.
-   - Accepted: JPEG, PNG, WebP, AVIF, TIFF, GIF (first frame) and HEIC/HEIF. Maximum 100 MB, plus Sharp's pixel limit against decompression bombs.
+   - Accepted: JPEG, PNG, WebP, AVIF, TIFF, GIF (first frame) and HEIC/HEIF. Maximum 200 MB, plus Sharp's pixel limit against decompression bombs.
    - A text file named `photo.jpg` is rejected. A PNG renamed to `.jpg` is accepted **as a PNG**: renaming happens innocently all the time, and the content decides.
 2. **Decode** (`decode.ts`): Sharp opens the image and applies the EXIF orientation.
    - iPhone HEIC uses HEVC, which Sharp's prebuilt binaries cannot decode (patent licensing). Those files fall back to `heic-decode` (libheif compiled to WebAssembly).
 3. **Inspect** (`pipeline.ts → inspectImage`): exiftool reads EXIF, IPTC and XMP, and `normalizeTags` maps them to one shape (`EmbeddedMetadata`), preferring XMP, then IPTC, then EXIF. `suggestMetadata` prefills the form:
    - Values found in the file win.
    - Site defaults (`packages/core/src/site-config.ts`) fill the gaps. `{year}` in the copyright becomes the capture year.
-   - Camera info is kept and location is dropped, unless the defaults say otherwise.
+   - Camera info and location are kept by default (`imageDefaults.keepCameraInfo` / `keepLocation`).
    - The SEO name is suggested from the title, or else the file name.
 4. **Variants** (`render.ts`): the configured widths `[400, 800, 1200, 1600, 2000]`, with three rules:
    - Never upscale.
@@ -70,8 +70,9 @@ set. Smaller variants get the **compact** set: authorship, copyright and license
 
 Tests enforce budgets of 2.5 KB (full) and 1.5 KB (compact).
 
-**GPS.** A file's location is shown in the form but **removed by default**. Keeping it is an explicit
-choice per image.
+**GPS.** The photos are mostly travel and public places, and the locations may later feed a photo
+map. A file's location is therefore **kept by default**. It can be removed per image, or together
+with device and capture time through a single switch.
 
 Coordinates are written as signed decimals. exiftool-vendored derives the hemisphere references from
 the sign. Writing absolute values plus `West`/`South` gets silently flipped, and a test covers this.
@@ -114,7 +115,7 @@ personal photos in the repo):
 - Orientation 6 is applied.
 - No upscaling. The panorama gets every width; the 300 px image gets one variant.
 - Output is real WebP under the expected keys.
-- GPS is removed by default and kept with the correct sign on request.
+- GPS is kept with the correct sign, and removed when the metadata leaves it out.
 - Each variant gets the right profile, within the metadata size budget.
 - The watermark is visible only in its corner (pixel diff).
 - Transparency is preserved.

@@ -20,7 +20,7 @@ function baseName(filename: string): string {
 
 /**
  * Prefills the upload form: what the file already says wins, site defaults fill the gaps.
- * Camera info and location follow the site defaults (location is off unless explicitly enabled).
+ * Camera info and location are kept or dropped according to the site defaults.
  */
 export function suggestMetadata(
   file: FileMetadata,

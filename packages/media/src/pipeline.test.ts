@@ -8,7 +8,7 @@ import { run as runCli } from './cli.ts';
 import { closeExiftool, getExiftool } from './exiftool.ts';
 import { UnsupportedImageError } from './intake.ts';
 import { profileForWidth } from './metadata/write.ts';
-import { inspectImage, processImage, reprocessImage } from './pipeline.ts';
+import { inspectImage, previewImage, processImage, reprocessImage } from './pipeline.ts';
 import { renderVariant } from './render.ts';
 import { createLocalFsStorage } from './storage/local-fs.ts';
 import type { MediaStorage } from './storage/types.ts';
@@ -20,7 +20,7 @@ let root: string;
 beforeAll(async () => {
   fx = await createFixtures();
   root = join(fx.dir, 'storage');
-  storage = createLocalFsStorage({ root, publicBaseUrl: 'http://127.0.0.1:4322/media' });
+  storage = createLocalFsStorage({ root, publicBaseUrl: 'http://127.0.0.1:4322/files' });
 });
 
 afterAll(async () => {
@@ -55,13 +55,13 @@ async function processFixture(
 }
 
 describe('inspectImage', () => {
-  it('prefills the form from the file and reports GPS without suggesting to keep it', async () => {
+  it('prefills the form from the file, including the location (kept by default)', async () => {
     const inspected = await inspectImage({ buffer: fx.phoneJpeg, filename: 'IMG_1234.jpg' });
     expect(inspected).toMatchObject({ mime: 'image/jpeg', width: 1600, height: 2400 });
     expect(inspected.file.metadata.location?.latitude).toBeCloseTo(25.6866, 3);
     expect(inspected.file.metadata.location?.longitude).toBeCloseTo(-100.3161, 3);
     expect(inspected.suggestion.seoName).toBe('atardecer-en-monterrey');
-    expect(inspected.suggestion.metadata.location).toBeUndefined();
+    expect(inspected.suggestion.metadata.location).toEqual(inspected.file.metadata.location);
     expect(inspected.suggestion.metadata.camera).toMatchObject({
       make: 'Apple',
       model: 'iPhone 15',
@@ -73,6 +73,15 @@ describe('inspectImage', () => {
     await expect(
       inspectImage({ buffer: fx.textAsJpeg, filename: 'photo.jpg' }),
     ).rejects.toBeInstanceOf(UnsupportedImageError);
+  });
+});
+
+describe('previewImage', () => {
+  it('renders a small oriented WebP without metadata', async () => {
+    const preview = await previewImage(fx.phoneJpeg, 400);
+    const meta = await sharp(preview).metadata();
+    expect([meta.format, meta.width, meta.height]).toEqual(['webp', 400, 600]);
+    expect(meta.exif).toBeUndefined();
   });
 });
 
@@ -102,19 +111,18 @@ describe('processImage', () => {
     expect(await storage.getOriginal(result.original.key)).toEqual(fx.phoneJpeg);
   });
 
-  it('removes GPS from every variant by default', async () => {
-    const result = await processFixture(fx.phoneJpeg);
+  it('removes GPS from every variant when the location is not part of the metadata', async () => {
+    const inspected = await inspectImage({ buffer: fx.phoneJpeg, filename: 'IMG_1234.jpg' });
+    const { location: _location, ...withoutLocation } = inspected.suggestion.metadata;
+    const result = await processFixture(fx.phoneJpeg, { metadata: withoutLocation });
     for (const variant of result.variants) {
       const tags = await readTags(variant.key);
       expect(Object.keys(tags).filter((key) => key.startsWith('GPS'))).toEqual([]);
     }
   });
 
-  it('keeps GPS only when the location is explicitly part of the metadata', async () => {
-    const inspected = await inspectImage({ buffer: fx.phoneJpeg, filename: 'IMG_1234.jpg' });
-    const result = await processFixture(fx.phoneJpeg, {
-      metadata: { ...inspected.suggestion.metadata, location: inspected.file.metadata.location },
-    });
+  it('keeps GPS with the correct sign when the location is part of the metadata', async () => {
+    const result = await processFixture(fx.phoneJpeg);
     const largest = result.variants.at(-1);
     const tags = await getExiftool().read(publicFile(largest?.key ?? ''));
     expect(tags.GPSLatitude).toBeCloseTo(25.6866, 3);
@@ -294,7 +302,7 @@ describe('cli', () => {
       variants: { file: string }[];
     };
     expect(summary.gpsInFile).toBe(true);
-    expect(summary.gpsInOutput).toBe(false);
+    expect(summary.gpsInOutput).toBe(true);
     expect(summary.variants).toHaveLength(4);
     await expect(readFile(summary.variants[0]?.file ?? '')).resolves.toBeInstanceOf(Buffer);
   });

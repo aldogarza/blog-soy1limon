@@ -1,7 +1,7 @@
 import { siteConfig } from '@soy1limon/core';
 import { ExifDateTime, type Tags } from 'exiftool-vendored';
 import { describe, expect, it } from 'vitest';
-import { normalizeTags } from './read.ts';
+import { findSensitiveTerms, normalizeTags } from './read.ts';
 import { suggestMetadata } from './suggest.ts';
 import { buildWriteTags, profileForWidth } from './write.ts';
 
@@ -90,13 +90,15 @@ describe('suggestMetadata', () => {
     expect(suggestion.seoName).toBe('mi-foto');
   });
 
-  it('drops the location unless the site is configured to keep it', () => {
-    const suggestion = suggestMetadata(
-      { metadata: { location: { latitude: 1, longitude: 2 } } },
-      'photo.jpg',
-      siteConfig,
-    );
-    expect(suggestion.metadata.location).toBeUndefined();
+  it('keeps or drops the location according to the site defaults', () => {
+    const file = { metadata: { location: { latitude: 1, longitude: 2 } } };
+    const keep = { imageDefaults: { ...siteConfig.imageDefaults, keepLocation: true } };
+    const drop = { imageDefaults: { ...siteConfig.imageDefaults, keepLocation: false } };
+    expect(suggestMetadata(file, 'photo.jpg', keep).metadata.location).toEqual({
+      latitude: 1,
+      longitude: 2,
+    });
+    expect(suggestMetadata(file, 'photo.jpg', drop).metadata.location).toBeUndefined();
   });
 
   it('falls back to the file name for the SEO name', () => {
@@ -147,5 +149,28 @@ describe('buildWriteTags', () => {
   it('uses the full profile from 1200 px', () => {
     expect(profileForWidth(800)).toBe('compact');
     expect(profileForWidth(1200)).toBe('full');
+  });
+});
+
+describe('findSensitiveTerms', () => {
+  it('finds a private term in any tag, case-insensitively, including nested values', () => {
+    const matches = findSensitiveTerms(
+      tags({ HostComputer: "aldo's iPhone", Keywords: ['beach', 'ALDO'], Make: 'Apple' }),
+      ['Aldo'],
+    );
+    expect(matches).toEqual([
+      { tag: 'HostComputer', value: "aldo's iPhone" },
+      { tag: 'Keywords', value: 'ALDO' },
+    ]);
+  });
+
+  it('ignores file-system tags of the temporary copy', () => {
+    expect(
+      findSensitiveTerms(tags({ SourceFile: '/tmp/aldo/x.jpg', FileName: 'aldo.jpg' }), ['aldo']),
+    ).toEqual([]);
+  });
+
+  it('returns nothing without configured terms', () => {
+    expect(findSensitiveTerms(tags({ Artist: 'Aldo' }), [])).toEqual([]);
   });
 });

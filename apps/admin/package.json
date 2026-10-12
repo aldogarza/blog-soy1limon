@@ -1,0 +1,34 @@
+{
+  "name": "@soy1limon/admin",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-only admin: upload and describe images, write posts. Never deployed.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "start": "node dist/server/entry.mjs",
+    "typecheck": "astro check && vue-tsc --noEmit",
+    "test:e2e": "astro build && playwright test"
+  },
+  "dependencies": {
+    "@astrojs/node": "^11.1.7",
+    "@astrojs/vue": "^7.0.3",
+    "@soy1limon/core": "workspace:*",
+    "@soy1limon/db": "workspace:*",
+    "@soy1limon/media": "workspace:*",
+    "astro": "^7.3.8",
+    "exiftool-vendored": "^39.0.1",
+    "heic-decode": "^2.1.0",
+    "sharp": "^0.35.5",
+    "vue": "^3.5.43",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0",
+    "typescript": "~6.0.3",
+    "vue-tsc": "^3.3.13"
+  }
+}
