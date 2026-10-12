@@ -11,6 +11,9 @@
     Roboto,
     sans-serif;
   line-height: 1.5;
+  /* Explicit system colours: without them, tools like axe assume a white page in dark mode. */
+  background-color: Canvas;
+  color: CanvasText;
 }
 
 body {
@@ -20,7 +23,9 @@ body {
 }
 
 /* Always-visible keyboard focus (WCAG 2.4.7 / 2.4.11). */
-:focus-visible {
+:focus-visible,
+/* The calendar button inside a date input takes focus without matching :focus-visible. */
+input[type='datetime-local']:focus-within {
   outline: 3px solid Highlight;
   outline-offset: 2px;
 }
@@ -195,4 +200,9 @@ select {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
 }

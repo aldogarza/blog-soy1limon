@@ -87,3 +87,7 @@ It creates one index per `<html lang>`, so English search only finds English pos
 - Every referenced image file exists.
 - Covers, inline images, galleries, translations, the old-address redirect, per-language search,
   the 404 page and both RSS feeds behave as described above.
+
+`e2e/quality.spec.ts` adds the automated part of the quality pass (dark mode, 320 px reflow, text
+spacing, keyboard, reduced motion, internal links and fragments), and `e2e/lighthouse.spec.ts`
+enforces the Lighthouse budgets. Details in [accessibility](accessibility.md).

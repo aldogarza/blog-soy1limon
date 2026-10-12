@@ -2,6 +2,7 @@
 import { listImages, listPosts } from '@soy1limon/db/admin';
 import { actions } from 'astro:actions';
 import AdminLayout from '../layouts/AdminLayout.astro';
+import TableScroll from '../components/TableScroll.astro';
 import { deployParam, eventLabel, messageFromParam, runLabel } from '../lib/deploy.ts';
 import { deployOverview } from '../lib/server/deploy-service.ts';
 import { getDb } from '../lib/server/services.ts';
@@ -61,31 +62,33 @@ const percent = Math.min(100, usage.freeTierShare * 100);
         {deploys.runs.length === 0 ? (
           <p>No deploys yet.</p>
         ) : (
-          <table>
-            <caption>Latest deploys</caption>
-            <thead>
-              <tr>
-                <th scope="col">Started</th>
-                <th scope="col">Trigger</th>
-                <th scope="col">Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deploys.runs.map((run) => (
+          <TableScroll label="Latest deploys">
+            <table>
+              <caption>Latest deploys</caption>
+              <thead>
                 <tr>
-                  <td>
-                    <time datetime={run.createdAt}>
-                      {dateFormat.format(new Date(run.createdAt))}
-                    </time>
-                  </td>
-                  <td>{eventLabel(run.event)}</td>
-                  <td>
-                    <a href={run.url}>{runLabel(run)}</a>
-                  </td>
+                  <th scope="col">Started</th>
+                  <th scope="col">Trigger</th>
+                  <th scope="col">Result</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {deploys.runs.map((run) => (
+                  <tr>
+                    <td>
+                      <time datetime={run.createdAt}>
+                        {dateFormat.format(new Date(run.createdAt))}
+                      </time>
+                    </td>
+                    <td>{eventLabel(run.event)}</td>
+                    <td>
+                      <a href={run.url}>{runLabel(run)}</a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableScroll>
         )}
         <p>
           <a href="/">Refresh the status</a>

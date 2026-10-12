@@ -1,0 +1,13 @@
+---
+// Wide data tables scroll on their own instead of the page (WCAG 1.4.10 at 320 px). The region is
+// focusable so keyboard users can scroll it with the arrow keys.
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="table-scroll" role="region" aria-label={label} tabindex="0">
+  <slot />
+</div>

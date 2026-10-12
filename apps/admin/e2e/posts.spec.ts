@@ -1,64 +1,22 @@
 import { rm } from 'node:fs/promises';
-import type { LocalizedText } from '@soy1limon/core';
-import {
-  createImage,
-  getPost,
-  listPosts,
-  listTags,
-  listTranslations,
-  updateImage,
-} from '@soy1limon/db/admin';
-import { closeExiftool, createLocalFsStorage, processImage } from '@soy1limon/media';
+import { getPost, listPosts, listTags, listTranslations } from '@soy1limon/db/admin';
+import { closeExiftool } from '@soy1limon/media';
 import { expect, type Page, test } from '@playwright/test';
-import sharp from 'sharp';
-import { adminDb, exiftool, expectNoA11yViolations } from './helpers.ts';
+import { adminDb, exiftool, expectNoA11yViolations, seedImage } from './helpers.ts';
 
 const run = crypto.randomUUID().slice(0, 6);
 const created = { images: [] as string[], tags: [] as string[] };
 const img = { a: '', b: '', c: '' };
 
-/** Processes a solid-colour image straight through the pipeline (faster than the upload UI). */
-async function seedImage(seoName: string, colour: string, alt: LocalizedText): Promise<string> {
-  const id = crypto.randomUUID();
-  const buffer = await sharp({
-    create: { width: 1200, height: 800, channels: 3, background: colour },
-  })
-    .jpeg()
-    .toBuffer();
-  const storage = createLocalFsStorage({
-    root: process.env.E2E_MEDIA_ROOT ?? '',
-    publicBaseUrl: 'http://127.0.0.1:4323/files',
-  });
-  const db = adminDb();
-  await createImage(db, {
-    id,
-    seoName,
-    originalKey: `originals/${id}.jpg`,
-    originalFilename: `${seoName}.jpg`,
-    originalMime: 'image/jpeg',
-    originalBytes: buffer.byteLength,
-    alt,
-  });
-  const result = await processImage(
-    { buffer, filename: `${seoName}.jpg` },
-    { id, seoName, metadata: {}, watermark: false },
-    storage,
-  );
-  await updateImage(db, id, {
-    status: 'ready',
-    width: result.width,
-    height: result.height,
-    dominantColor: result.dominantColor,
-    variants: result.variants,
-  });
-  created.images.push(id);
-  return id;
-}
-
 test.beforeAll(async () => {
-  img.a = await seedImage(`e2e-${run}-river`, '#1e90ff', { en: 'A blue river', es: 'Un río azul' });
-  img.b = await seedImage(`e2e-${run}-only-spanish`, '#8b4513', { es: 'Solo en español' });
-  img.c = await seedImage(`e2e-${run}-forest`, '#228b22', {
+  img.a = await seedImage(created.images, `e2e-${run}-river`, '#1e90ff', {
+    en: 'A blue river',
+    es: 'Un río azul',
+  });
+  img.b = await seedImage(created.images, `e2e-${run}-only-spanish`, '#8b4513', {
+    es: 'Solo en español',
+  });
+  img.c = await seedImage(created.images, `e2e-${run}-forest`, '#228b22', {
     en: 'A green forest',
     es: 'Un bosque verde',
   });

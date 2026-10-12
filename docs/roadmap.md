@@ -329,6 +329,7 @@ Rules for the implementing agent:
   - Lighthouse CI on the fixtures build with budgets (a11y 100, SEO 100, performance ≥ 95).
   - A link checker on the built site.
 - Fix everything found; update `docs/accessibility.md` with the checklist and the known limitations.
+- _(Implemented: the reflow, zoom, reduced-motion and keyboard checks are automated in `e2e/quality.spec.ts` of both apps, plus dark-mode axe and text spacing. Lighthouse runs inside the Playwright suite with the `lighthouse` package instead of Lighthouse CI (no extra server or upload). The link checker covers internal links, fragments and files; external links are only required to be HTTPS. The NVDA pass stays manual: see the checklist in `docs/accessibility.md`.)_
 
 ### Phase 9 — Styling (last)
 - Tailwind CSS v4 in `apps/web` and `apps/admin`, with shared design tokens in `packages/core` (CSS variables).

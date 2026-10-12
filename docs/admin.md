@@ -138,7 +138,8 @@ The admin follows the same WCAG 2.2 AA rules as the public site.
 - Focus moves to the heading of each step, and status messages use live regions.
 - Destructive actions use plain HTML forms that work without JavaScript.
 
-The end-to-end tests run axe on every page.
+The end-to-end tests run axe on every page, and `e2e/quality.spec.ts` checks dark mode, 320 px
+reflow and keyboard focus. Checklist and known limitations: [accessibility](accessibility.md).
 
 ## Tests
 

@@ -11,6 +11,9 @@
     Roboto,
     sans-serif;
   line-height: 1.6;
+  /* Explicit system colours: without them, tools like axe assume a white page in dark mode. */
+  background-color: Canvas;
+  color: CanvasText;
 }
 
 body {
