@@ -89,6 +89,6 @@ Internal packages export TypeScript source directly (no build step); apps compil
 - [x] Phase 4 — Admin: posts
 - [x] Phase 5 — Public site
 - [x] Phase 6 — SEO
-- [ ] Phase 7 — Deploy & operations (code and docs done; live verification after the first push)
+- [x] Phase 7 — Deploy & operations
 - [ ] Phase 8 — Quality pass
 - [ ] Phase 9 — Styling
