@@ -24,7 +24,7 @@ const messages = {
   seo={{ noindex: true }}
 >
   <h1>{t.search}</h1>
-  <form role="search" id="search-form" data-messages={JSON.stringify(messages)}>
+  <form class="search-form" role="search" id="search-form" data-messages={JSON.stringify(messages)}>
     <label for="search-input">{t.searchLabel}</label>
     <input id="search-input" name="q" type="search" autocomplete="off" />
     <button type="submit">{t.searchButton}</button>
@@ -34,8 +34,8 @@ const messages = {
       {t.searchNeedsJs} <a href={blogPath(lang)}>{t.allPosts}</a>
     </p>
   </noscript>
-  <p id="search-status" role="status" aria-live="polite"></p>
-  <ol id="search-results"></ol>
+  <p id="search-status" class="search-status" role="status"></p>
+  <ol id="search-results" class="search-results"></ol>
 </BaseLayout>
 
 <script>

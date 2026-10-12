@@ -332,8 +332,9 @@ Rules for the implementing agent:
 - _(Implemented: the reflow, zoom, reduced-motion and keyboard checks are automated in `e2e/quality.spec.ts` of both apps, plus dark-mode axe and text spacing. Lighthouse runs inside the Playwright suite with the `lighthouse` package instead of Lighthouse CI (no extra server or upload). The link checker covers internal links, fragments and files; external links are only required to be HTTPS. The NVDA pass stays manual: see the checklist in `docs/accessibility.md`.)_
 
 ### Phase 9 — Styling (last)
+- _(Changed before starting: styles are interchangeable themes in `packages/themes` over the unchanged semantic markup, see [ADR 0006](adr/0006-themes-over-semantic-html.md) and [themes](themes.md). The first theme is **iStyle**; its tokens already exist. Tailwind is optional inside a theme, never as classes in the markup.)_
 - Tailwind CSS v4 in `apps/web` and `apps/admin`, with shared design tokens in `packages/core` (CSS variables).
-- iOS-inspired look:
+- iOS-inspired look (the **iStyle** theme):
   - System font stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", …`), so no font downloads.
   - Light and dark via `prefers-color-scheme`, translucent headers, generous spacing, rounded cards.
   - "Grouped list" forms in the admin (iOS Settings style), segmented controls, sheets/modals built on `<dialog>`.

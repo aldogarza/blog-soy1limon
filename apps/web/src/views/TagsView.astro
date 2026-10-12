@@ -22,10 +22,14 @@ const entries = tagsIn(await siteContent(), lang);
   {entries.length === 0 ? (
     <p>{t.noPosts}</p>
   ) : (
-    <ul>
+    <ul class="tag-index">
       {entries.map(({ tag, posts }) => (
         <li>
-          <a href={tagPath(lang, tag.slug)}>{tagLabel(tag, lang)}</a> ({posts.length})
+          <a href={tagPath(lang, tag.slug)}>{tagLabel(tag, lang)}</a>{' '}
+          <span class="tag-count">
+            ({posts.length}
+            <span class="visually-hidden"> {t.postCount(posts.length)}</span>)
+          </span>
         </li>
       ))}
     </ul>

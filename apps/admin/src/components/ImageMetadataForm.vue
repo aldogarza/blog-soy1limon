@@ -91,7 +91,9 @@ const location = computed(() => {
       :id="id('seoName')"
       v-model="values.seoName"
       label="SEO file name"
+      required
       hint="Lowercase words separated by hyphens. It becomes part of every image address, which helps search engines."
+      :described-by="`${id('seoName')}-status`"
       :error="errors.seoName"
     />
     <p :id="`${id('seoName')}-status`" class="hint" aria-live="polite">{{ nameStatus }}</p>

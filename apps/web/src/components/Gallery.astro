@@ -16,9 +16,9 @@ const base = mediaBaseUrl();
 const sizes = '(min-width: 48rem) 16rem, 100vw';
 ---
 
-<section aria-labelledby="gallery-heading">
+<section class="gallery" aria-labelledby="gallery-heading">
   <h2 id="gallery-heading">{t.gallery}</h2>
-  <ul class="gallery">
+  <ul>
     {images.map((image) => {
       const largest = image.variants.at(-1);
       const caption = image.caption[lang];

@@ -1,0 +1,63 @@
+/*
+ * Shared by every theme of the admin. Same layers as foundation/site.css:
+ * foundation (functional), theme, a11y (guarantees no theme can override).
+ */
+@layer foundation, theme, a11y;
+
+@layer foundation {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Wide data tables scroll inside their region instead of widening the page (WCAG 1.4.10). */
+  .table-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .skip-link {
+    position: absolute;
+    inset-inline-start: 1rem;
+    top: -10rem;
+    z-index: 100;
+  }
+  .skip-link:focus {
+    top: 1rem;
+  }
+}
+
+@layer a11y {
+  /* Always-visible keyboard focus (WCAG 2.4.7 / 2.4.11). */
+  :focus-visible,
+  /* The calendar button inside a date input takes focus without matching :focus-visible. */
+  input[type='datetime-local']:focus-within {
+    outline: var(--focus-ring-width, 3px) solid var(--focus-ring-color, Highlight);
+    outline-offset: var(--focus-ring-offset, 2px);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

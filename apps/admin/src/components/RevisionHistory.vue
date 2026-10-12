@@ -19,6 +19,7 @@ interface Comparison {
 const comparison = ref<Comparison | null>(null);
 const message = ref('');
 const format = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'medium' });
+const when = (revision: { createdAt: string }) => format.format(new Date(revision.createdAt));
 
 async function compare(revisionId: string) {
   const { data, error } = await actions.posts.revision({ revisionId });
@@ -59,24 +60,26 @@ async function restore(revisionId: string) {
     </p>
     <ol v-else>
       <li v-for="(revision, index) in revisions" :key="revision.id">
-        <time :datetime="revision.createdAt">{{
-          format.format(new Date(revision.createdAt))
-        }}</time>
+        <time :datetime="revision.createdAt">{{ when(revision) }}</time>
         <span v-if="index === 0"> (latest)</span>
-        <button type="button" @click="compare(revision.id)">Compare with the editor</button>
+        <button type="button" @click="compare(revision.id)">
+          Compare with the editor<span class="visually-hidden"
+            >: version of {{ when(revision) }}</span
+          >
+        </button>
         <button v-if="index > 0" type="button" @click="restore(revision.id)">
-          Restore this version
+          Restore this version<span class="visually-hidden"> of {{ when(revision) }}</span>
         </button>
       </li>
     </ol>
-    <p aria-live="polite" role="status">{{ message }}</p>
+    <p role="status">{{ message }}</p>
 
     <div v-if="comparison" class="comparison">
       <h3>Changes since that version</h3>
       <dl v-if="comparison.fields.length > 0">
         <template v-for="field in comparison.fields" :key="field.label">
           <dt>{{ field.label }}</dt>
-          <dd>
+          <dd :lang="current.lang">
             <del><span class="visually-hidden">Removed: </span>{{ field.before }}</del>
             → <ins><span class="visually-hidden">Added: </span>{{ field.after }}</ins>
           </dd>
@@ -85,6 +88,7 @@ async function restore(revisionId: string) {
       <h4>Body</h4>
       <pre
         class="diff"
+        :lang="current.lang"
       ><template v-for="(part, i) in comparison.parts" :key="i"><ins v-if="part.added"><span class="visually-hidden">Added: </span>{{ part.value }}</ins><del v-else-if="part.removed"><span class="visually-hidden">Removed: </span>{{ part.value }}</del><span v-else>{{ part.value }}</span></template></pre>
     </div>
   </section>

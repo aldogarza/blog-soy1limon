@@ -21,11 +21,11 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
   <ul class="post-list">
     {posts.map((post) => (
       <li>
-        <article>
+        <article class="post-card">
           <Heading>
             <a href={post.path}>{post.title}</a>
           </Heading>
-          <p>
+          <p class="post-meta">
             <time datetime={post.publishedAt}>{formatDate(post.publishedAt, lang)}</time> ·{' '}
             {t.readingTime(post.readingMinutes)}
           </p>

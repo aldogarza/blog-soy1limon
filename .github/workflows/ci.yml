@@ -70,9 +70,16 @@ jobs:
       - run: pnpm test:integration
 
   admin-e2e:
-    name: Admin end-to-end (Playwright + axe)
+    name: Admin end-to-end, ${{ matrix.theme }} theme (Playwright + axe)
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    # Every theme must pass the same accessibility and quality checks (docs/themes.md).
+    strategy:
+      fail-fast: false
+      matrix:
+        theme: [plain, istyle]
+    env:
+      THEME: ${{ matrix.theme }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -99,9 +106,15 @@ jobs:
       - run: pnpm test:e2e:admin
 
   web-e2e:
-    name: Public site end-to-end (fixtures build + Playwright + axe)
+    name: Public site end-to-end, ${{ matrix.theme }} theme (fixtures build + Playwright + axe)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        theme: [plain, istyle]
+    env:
+      THEME: ${{ matrix.theme }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

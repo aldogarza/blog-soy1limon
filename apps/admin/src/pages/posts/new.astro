@@ -8,11 +8,6 @@ if (result?.data) return Astro.redirect(`/posts/${result.data.id}`);
 ---
 
 <AdminLayout title="New post">
-  {result?.error && (
-    <p role="alert" class="error">
-      {result.error.message}
-    </p>
-  )}
   <form method="POST" action={actions.posts.create}>
     <fieldset>
       <legend>Language of the post</legend>
@@ -29,7 +24,19 @@ if (result?.data) return Astro.redirect(`/posts/${result.data.id}`);
     <span id="title-hint" class="hint">
       You can change it later. The address is suggested from it.
     </span>
-    <input id="title" name="title" type="text" aria-describedby="title-hint" required />
+    <input
+      id="title"
+      name="title"
+      type="text"
+      required
+      aria-invalid={result?.error ? 'true' : undefined}
+      aria-describedby={result?.error ? 'title-hint title-error' : 'title-hint'}
+    />
+    {result?.error && (
+      <p id="title-error" class="error">
+        {result.error.message}
+      </p>
+    )}
     <p>
       <button type="submit">Create draft</button>
     </p>

@@ -2,6 +2,8 @@
 import { existsSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { siteConfig } from '@soy1limon/core/site-config';
+import { themes } from '@soy1limon/themes';
 import { defineConfig } from 'astro/config';
 
 // Variables already set (CI, tests) win over the .env file.
@@ -31,6 +33,10 @@ export default defineConfig({
     defaultLocale: 'en',
     routing: { prefixDefaultLocale: false },
   },
-  integrations: [dropFixtureMedia()],
+  // THEME=<name> previews another theme without editing site-config.ts.
+  integrations: [
+    themes({ target: 'site', configured: siteConfig.theme, override: process.env.THEME }),
+    dropFixtureMedia(),
+  ],
   devToolbar: { enabled: false },
 });

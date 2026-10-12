@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, useId } from 'vue';
 
 export interface ImageOption {
   id: string;
@@ -24,7 +24,8 @@ const emit = defineEmits<{ select: [ids: string[]] }>();
 const dialog = ref<HTMLDialogElement | null>(null);
 const query = ref('');
 const chosen = ref<string[]>([]);
-const uid = `picker-${Math.random().toString(36).slice(2, 8)}`;
+// useId() is stable between the server render and hydration; Math.random() was not.
+const uid = `picker-${useId()}`;
 
 const visible = computed(() => {
   const q = query.value.trim().toLowerCase();
@@ -87,14 +88,15 @@ defineExpose({ open });
                 loading="lazy"
               />
               <span>{{ image.seoName }}</span>
-              <span class="hint">{{
-                image.alt[lang] || `No alt text in ${lang === 'en' ? 'English' : 'Spanish'} yet`
-              }}</span>
+              <span v-if="image.alt[lang]" class="hint" :lang="lang">{{ image.alt[lang] }}</span>
+              <span v-else class="hint"
+                >No alt text in {{ lang === 'en' ? 'English' : 'Spanish' }} yet</span
+              >
             </label>
           </li>
         </ul>
       </fieldset>
-      <p class="step-nav">
+      <p class="actions">
         <button type="submit" :disabled="chosen.length === 0">{{ confirmLabel }}</button>
         <button type="button" @click="dialog?.close()">Cancel</button>
       </p>

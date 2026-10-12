@@ -37,16 +37,17 @@ const [references, revisions, posts, technical] = await Promise.all([
   listPosts(db),
   technicalFromOriginal(image, storage),
 ]);
-const postTitle = new Map(
-  posts.map((post) => [post.id, `${post.title || post.slug} (${post.lang})`]),
-);
+const postById = new Map(posts.map((post) => [post.id, post]));
 const usedBy = [
   ...references.coverOf.map((postId) => ({ postId, role: 'cover' })),
   ...references.gallery.map((postId) => ({ postId, role: 'gallery' })),
   ...references.inline.map((postId) => ({ postId, role: 'inline' })),
 ];
 const largest = image.variants.at(-1);
-const alt = image.alt[siteConfig.defaultLocale] ?? image.alt.en ?? image.alt.es ?? '';
+const altLang = [siteConfig.defaultLocale, 'en' as const, 'es' as const].find(
+  (locale) => image.alt[locale],
+);
+const alt = altLang ? (image.alt[altLang] ?? '') : '';
 const actionMessage =
   cleanupResult?.error?.message ?? restoreResult?.error?.message ?? deleteResult?.error?.message;
 ---
@@ -58,17 +59,14 @@ const actionMessage =
   )}
   {restoreResult?.data && <p role="status">Revision restored.</p>}
   {deployMessage && <p role="status">{deployMessage}</p>}
-  {actionMessage && (
-    <p role="alert" class="error">
-      {actionMessage}
-    </p>
-  )}
+  {actionMessage && <p class="error">{actionMessage}</p>}
 
   {largest && (
     <figure>
       <img
         src={storage.publicUrl(largest.key)}
         alt={alt}
+        lang={altLang}
         width={largest.w}
         height={largest.h}
         class="detail-preview"
@@ -104,7 +102,10 @@ const actionMessage =
       <ul>
         {usedBy.map((use) => (
           <li>
-            {postTitle.get(use.postId) ?? use.postId} — {use.role}
+            <a href={`/posts/${use.postId}`} lang={postById.get(use.postId)?.lang}>
+              {postById.get(use.postId)?.title || postById.get(use.postId)?.slug || use.postId}
+            </a>{' '}
+            — {use.role}
           </li>
         ))}
       </ul>
@@ -113,9 +114,11 @@ const actionMessage =
 
   <section aria-labelledby="variants-heading">
     <h2 id="variants-heading">Public files</h2>
-    <TableScroll label="Generated WebP variants">
+    <TableScroll labelledby="variants-caption">
       <table>
-        <caption class="visually-hidden">Generated WebP variants</caption>
+        <caption id="variants-caption" class="visually-hidden">
+          Generated WebP variants
+        </caption>
         <thead>
           <tr>
             <th scope="col">Size</th>
@@ -155,6 +158,7 @@ const actionMessage =
 
   <section aria-labelledby="embedded-heading">
     <h2 id="embedded-heading">Metadata embedded in the files</h2>
+    {Object.keys(image.metadata).length === 0 && <p>None.</p>}
     <dl>
       {Object.entries(image.metadata).map(([key, value]) => (
         <>
@@ -181,7 +185,12 @@ const actionMessage =
             ) : (
               <form method="POST" action={actions.media.restoreRevision} class="inline-form">
                 <input type="hidden" name="revisionId" value={revision.id} />
-                <button type="submit">Restore this version</button>
+                <button type="submit">
+                  Restore this version
+                  <span class="visually-hidden">
+                    of {new Date(revision.createdAt).toLocaleString('en-GB')}
+                  </span>
+                </button>
               </form>
             )}
           </li>

@@ -177,7 +177,7 @@ async function retryRemaining() {
 </script>
 
 <template>
-  <p class="visually-hidden" aria-live="polite" role="status">{{ live }}</p>
+  <p class="visually-hidden" role="status">{{ live }}</p>
 
   <section
     v-if="phase === 'select' || (phase === 'describe' && describable.length === 0)"
@@ -272,12 +272,13 @@ async function retryRemaining() {
         </button>
       </p>
 
-      <nav aria-label="Images" class="step-nav">
+      <!-- Actions on the form, not site navigation: a labelled group, not <nav>. -->
+      <div role="group" aria-label="Image actions" class="actions">
         <button type="button" :disabled="index === 0" @click="go(index - 1)">Previous image</button>
         <button v-if="index < describable.length - 1" type="submit">Next image</button>
         <button v-else type="submit">Process {{ describable.length }} image(s)</button>
         <button type="button" @click="removeCurrent">Remove this image</button>
-      </nav>
+      </div>
     </form>
   </section>
 
@@ -306,7 +307,7 @@ async function retryRemaining() {
       </li>
     </ul>
     <div v-if="describable.length > 0">
-      <p role="alert">{{ describable.length }} image(s) could not be processed:</p>
+      <p class="error">{{ describable.length }} image(s) could not be processed:</p>
       <ul>
         <li v-for="item in describable" :key="item.key">{{ item.filename }}: {{ item.message }}</li>
       </ul>

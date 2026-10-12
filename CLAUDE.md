@@ -41,8 +41,10 @@ in an admin app that only runs on the owner's machine (localhost). Full plan: `d
 
 - Work **one roadmap phase at a time** (`docs/roadmap.md`). At the end of a phase: run all checks,
   update the related docs, update "Current status" below, commit, and stop for review.
-- Styling (Tailwind, iOS look) is deliberately the **last** phase. Before it, ship semantic,
-  accessible, unstyled HTML.
+- Styling is deliberately the **last** phase. Before it, ship semantic, accessible, unstyled HTML.
+- Styles live only in `packages/themes` (docs/themes.md). Templates never get presentational
+  classes; a theme styles elements, ARIA states and the documented hooks. Every theme must pass the
+  e2e suite (`THEME=<name> pnpm test:e2e`).
 - Verify library APIs against current official docs before using them; versions move fast.
   Turborepo ships version-matched docs in `node_modules/turbo/docs/`.
 
@@ -74,6 +76,7 @@ packages/core   Shared schemas, config, pure helpers
 packages/db     Supabase clients, queries, fixtures   — phase 1+
 packages/media  Image pipeline + CLI                  — phase 2+
 packages/markdown  Shared Markdown pipeline           — phase 4+
+packages/themes Interchangeable CSS themes (plain, istyle) — see docs/themes.md
 supabase/       Migrations and local stack config     — phase 1+
 docs/           Roadmap, setup, operations, ADRs (docs/adr)
 ```

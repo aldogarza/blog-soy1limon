@@ -16,6 +16,7 @@
     "@soy1limon/core": "workspace:*",
     "@soy1limon/db": "workspace:*",
     "@soy1limon/markdown": "workspace:*",
+    "@soy1limon/themes": "workspace:*",
     "astro": "^7.3.8"
   },
   "devDependencies": {

@@ -40,6 +40,11 @@ export interface RenderOptions {
   lang: Locale;
   images: ReadonlyMap<string, ImageForRender>;
   mediaBaseUrl: string;
+  /**
+   * Level of the highest body heading. 2 on the public post page (the title is the h1); the admin
+   * preview uses 3 because it sits under its own "Preview" h2.
+   */
+  topHeadingLevel?: 2 | 3;
 }
 
 export interface Heading {
@@ -102,13 +107,14 @@ function remarkReportHtml() {
 
 /** The post title is the page's only h1: body headings start at h2 whatever the author typed. */
 function rehypeDemoteHeadings() {
-  return (tree: HastRoot) => {
+  return (tree: HastRoot, file: VFile) => {
+    const top = data(file).options.topHeadingLevel ?? 2;
     let minDepth = 7;
     visit(tree, 'element', (node) => {
       const match = /^h([1-6])$/.exec(node.tagName);
       if (match) minDepth = Math.min(minDepth, Number(match[1]));
     });
-    const offset = minDepth === 1 ? 1 : 0;
+    const offset = Math.max(0, top - minDepth);
     if (offset === 0) return;
     visit(tree, 'element', (node) => {
       const match = /^h([1-6])$/.exec(node.tagName);

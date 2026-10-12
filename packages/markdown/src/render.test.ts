@@ -88,6 +88,16 @@ describe('renderMarkdown', () => {
     expect(result.html).toContain('<h2 id="already-fine">');
   });
 
+  it('can start one level lower, for a preview under its own h2', async () => {
+    const result = await renderMarkdown('# Intro\n\n## Details', {
+      ...base,
+      lang: 'en',
+      topHeadingLevel: 3,
+    });
+    expect(result.html).toContain('<h3 id="intro">Intro</h3>');
+    expect(result.html).toContain('<h4 id="details">Details</h4>');
+  });
+
   it('removes raw HTML, scripts and javascript: links', async () => {
     const result = await renderMarkdown(
       '<script>alert(1)</script>\n\n<iframe src="https://evil.example"></iframe>\n\n[click](javascript:alert(1)) <img src=x onerror=alert(1)>',

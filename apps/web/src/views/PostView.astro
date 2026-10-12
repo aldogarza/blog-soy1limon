@@ -56,10 +56,10 @@ const seo = {
   translationPath={post.translation?.path}
   seo={seo}
 >
-  <article data-pagefind-body>
-    <header>
+  <article class="post" data-pagefind-body>
+    <header class="post-header">
       <h1>{post.title}</h1>
-      <p>
+      <p class="post-meta">
         {t.publishedOn} <time datetime={post.publishedAt}>{published}</time>
         {updated !== published && (
           <>
@@ -71,20 +71,21 @@ const seo = {
         {t.readingTime(post.readingMinutes)}
       </p>
       {post.tags.length > 0 && (
-        <p>
-          {t.taggedWith}:{' '}
-          {post.tags.map((tag, index) => (
-            <>
-              {index > 0 && ', '}
-              <a href={tagPath(lang, tag.slug)} rel="tag">
-                {tagLabel(tag, lang)}
-              </a>
-            </>
-          ))}
-        </p>
+        <div class="post-tags">
+          <span id="post-tags-label">{t.taggedWith}:</span>
+          <ul aria-labelledby="post-tags-label">
+            {post.tags.map((tag) => (
+              <li>
+                <a href={tagPath(lang, tag.slug)} rel="tag">
+                  {tagLabel(tag, lang)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       {post.translation && (
-        <p>
+        <p class="post-translation">
           <a
             href={post.translation.path}
             hreflang={post.translation.lang}
@@ -97,13 +98,15 @@ const seo = {
     </header>
 
     {post.cover && (
-      <figure>
+      <figure class="post-cover">
         <ResponsiveImage image={post.cover} lang={lang} priority />
         {post.cover.caption[lang] && <figcaption>{post.cover.caption[lang]}</figcaption>}
       </figure>
     )}
 
-    <Fragment set:html={post.html} />
+    <div class="post-body">
+      <Fragment set:html={post.html} />
+    </div>
 
     {post.gallery.length > 0 && <Gallery images={post.gallery} lang={lang} />}
   </article>

@@ -1,7 +1,6 @@
 ---
-import '../styles/base.css';
-
 interface Props {
+  /** Page title for <title> and, unless the page fills the "heading" slot, the h1. */
   title: string;
 }
 
@@ -16,7 +15,13 @@ const nav = [
   { href: '/media/upload', label: 'Upload images' },
 ];
 
-const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href);
+// Exact page, or "true" for the section the page belongs to (e.g. a post being edited).
+const current = (href: string) =>
+  path === href
+    ? 'page'
+    : href !== '/' && path.startsWith(`${href}/`) && !nav.some((item) => item.href === path)
+      ? 'true'
+      : undefined;
 ---
 
 <!doctype html>
@@ -31,15 +36,15 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
     <a class="skip-link" href="#main">
       Skip to main content
     </a>
-    <header>
-      <p>
+    <header class="admin-header">
+      <p class="admin-brand">
         <strong>soy1limon admin</strong> <span class="hint">Local only · never deployed</span>
       </p>
-      <nav aria-label="Main">
+      <nav class="admin-nav" aria-label="Main">
         <ul>
           {nav.map((item) => (
             <li>
-              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              <a href={item.href} aria-current={current(item.href)}>
                 {item.label}
               </a>
             </li>
@@ -48,7 +53,9 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
       </nav>
     </header>
     <main id="main" tabindex="-1">
-      <h1>{title}</h1>
+      <h1>
+        <slot name="heading">{title}</slot>
+      </h1>
       <slot />
     </main>
   </body>

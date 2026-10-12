@@ -83,7 +83,10 @@ test('upload three images, describe them one by one, and process them', async ({
   await expect(page.getByLabel('Creator')).toHaveValue('E2E Creator');
   await page.getByLabel('SEO file name').fill(names.second);
   await page.getByRole('button', { name: 'Next image' }).click();
-  const summary = page.getByRole('alert').filter({ hasText: 'There is 1 problem' });
+  // No role="alert": moving focus to the summary is what makes screen readers read it.
+  const summary = page.locator('.error-summary', {
+    has: page.getByRole('heading', { name: 'There is 1 problem' }),
+  });
   await expect(summary).toBeFocused();
   await summary.getByRole('link', { name: 'Describe the image in at least one language.' }).click();
   await expect(page.getByLabel('Alt text (English)')).toBeFocused();

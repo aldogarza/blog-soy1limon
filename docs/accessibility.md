@@ -20,7 +20,7 @@ requirement: a change that breaks one of the checks below is a bug, not a stylin
 - Admin forms: labels and hints tied to every input, `aria-invalid` plus an error summary that
   takes focus, live regions for progress and status, and focus moved to each upload step's heading.
 
-## Automated checks (run in CI on every push)
+## Automated checks (run in CI on every push, once per theme)
 
 | Check                                                              | Where                                            | WCAG                  |
 | ------------------------------------------------------------------ | ------------------------------------------------ | --------------------- |
@@ -90,9 +90,13 @@ and after any big change to the layout.
 
 ## Findings log
 
-| Date       | Found                                                                                       | Fix                                                       |
-| ---------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 2026-10-12 | Dark mode: pages had no explicit background, so tools (and some readers) assumed white      | `background-color: Canvas; color: CanvasText` on the root |
-| 2026-10-12 | Admin: the calendar button inside the schedule field took focus without a visible ring      | Outline on `input[type='datetime-local']:focus-within`    |
-| 2026-10-12 | Admin: the posts, variants and deploys tables made the whole page scroll sideways at 320 px | Tables scroll inside a labelled, focusable region         |
-| 2026-10-12 | Live site Lighthouse (mobile): 100 in performance, accessibility, best practices and SEO    | —                                                         |
+| Date       | Found                                                                                       | Fix                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| 2026-10-12 | Dark mode: pages had no explicit background, so tools (and some readers) assumed white      | `background-color: Canvas; color: CanvasText` on the root                                 |
+| 2026-10-12 | Admin: the calendar button inside the schedule field took focus without a visible ring      | Outline on `input[type='datetime-local']:focus-within`                                    |
+| 2026-10-12 | Admin: the posts, variants and deploys tables made the whole page scroll sideways at 320 px | Tables scroll inside a labelled, focusable region                                         |
+| 2026-10-12 | Semantic review: tags as a comma string, unlabelled tag counts, missing space in the footer | Tags are a labelled list; counts say "posts"; `<small>` copyright                         |
+| 2026-10-12 | Admin: error summary and save state re-announced while typing; static `role="alert"`        | Autosave validates silently; one live region per editor; no alerts on page load           |
+| 2026-10-12 | Admin: errors and live status not tied to their fields; Spanish text without `lang`         | `aria-describedby` for slug, name, body and schedule; `lang` on titles, alt text, options |
+| 2026-10-12 | Admin: preview headings joined the editor outline; Enter in "new tag" saved the post        | Preview starts at `h3`; Enter creates the tag                                             |
+| 2026-10-12 | Live site Lighthouse (mobile): 100 in performance, accessibility, best practices and SEO    | —                                                                                         |

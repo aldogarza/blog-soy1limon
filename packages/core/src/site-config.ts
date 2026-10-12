@@ -75,6 +75,11 @@ export const siteConfigSchema = z.object({
     /** IANA zone used to display dates, so a build running in UTC does not shift the day. */
     timeZone: z.string().min(1),
   }),
+  /**
+   * Visual theme of the public site and the admin: a folder in packages/themes/src. Checked against
+   * the theme registry when the apps build; `THEME=<name>` overrides it for a local preview.
+   */
+  theme: z.string().regex(/^[a-z0-9-]+$/),
   seo: z.object({
     titleMaxLength: z.number().int().positive(),
     descriptionMaxLength: z.number().int().positive(),
@@ -133,6 +138,7 @@ export const siteConfig = {
     postsPerPage: 10,
     timeZone: 'America/Monterrey',
   },
+  theme: 'plain',
   seo: {
     titleMaxLength: 60,
     descriptionMaxLength: 160,

@@ -53,9 +53,11 @@ const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeS
     {filtered.length} of {posts.length} posts
   </p>
 
-  <TableScroll label="Posts, most recently edited first">
+  <TableScroll labelledby="posts-caption">
     <table>
-      <caption class="visually-hidden">Posts, most recently edited first</caption>
+      <caption id="posts-caption" class="visually-hidden">
+        Posts, most recently edited first
+      </caption>
       <thead>
         <tr>
           <th scope="col">Title</th>
@@ -69,9 +71,11 @@ const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeS
         {filtered.map((post) => (
           <tr>
             <td>
-              <a href={`/posts/${post.id}`}>{post.title || '(untitled)'}</a>
+              <a href={`/posts/${post.id}`} lang={post.title ? post.lang : undefined}>
+                {post.title || '(untitled)'}
+              </a>
             </td>
-            <td lang={post.lang}>{post.lang}</td>
+            <td>{post.lang === 'en' ? 'English' : 'Spanish'}</td>
             <td>
               {post.shown}
               {post.shown === 'scheduled' && post.publishedAt && (

@@ -42,11 +42,7 @@ const percent = Math.min(100, usage.freeTierShare * 100);
     {rebuildMessage && <p role="status">{rebuildMessage}</p>}
     {deploys.configured ? (
       <>
-        {deploys.error && (
-          <p role="alert" class="error">
-            {deploys.error}
-          </p>
-        )}
+        {deploys.error && <p class="error">{deploys.error}</p>}
         {deploys.schedule?.reenabled && (
           <p role="status">
             GitHub had paused the daily build after 60 days without activity in the repository. It
@@ -54,7 +50,7 @@ const percent = Math.min(100, usage.freeTierShare * 100);
           </p>
         )}
         {deploys.schedule && deploys.schedule.state !== 'active' && (
-          <p role="alert" class="error">
+          <p class="error">
             The deploy workflow is {deploys.schedule.state.replaceAll('_', ' ')}: scheduled posts
             will not go live. <a href={deploys.schedule.url}>Enable it on GitHub</a>.
           </p>
@@ -62,9 +58,9 @@ const percent = Math.min(100, usage.freeTierShare * 100);
         {deploys.runs.length === 0 ? (
           <p>No deploys yet.</p>
         ) : (
-          <TableScroll label="Latest deploys">
+          <TableScroll labelledby="deploys-caption">
             <table>
-              <caption>Latest deploys</caption>
+              <caption id="deploys-caption">Latest deploys</caption>
               <thead>
                 <tr>
                   <th scope="col">Started</th>
@@ -124,7 +120,7 @@ const percent = Math.min(100, usage.freeTierShare * 100);
   <section aria-labelledby="storage-heading">
     <h2 id="storage-heading">Image storage</h2>
     <p>
-      {images.length} images use {formatBytes(usage.total)}({formatBytes(usage.originals)}{' '}
+      {images.length} images use {formatBytes(usage.total)} ({formatBytes(usage.originals)}{' '}
       originals, {formatBytes(usage.variants)} public variants).
     </p>
     <label for="storage-meter">Share of the free R2 tier ({formatBytes(R2_FREE_BYTES)})</label>

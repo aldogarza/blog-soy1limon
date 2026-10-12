@@ -1,0 +1,20 @@
+{
+  "name": "@soy1limon/themes",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interchangeable visual themes for the public site and the admin (CSS over semantic HTML).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "astro": "^7.3.8"
+  },
+  "devDependencies": {
+    "@soy1limon/core": "workspace:*",
+    "astro": "^7.3.8"
+  }
+}

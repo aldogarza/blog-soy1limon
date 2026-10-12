@@ -1,0 +1,30 @@
+/*
+ * iStyle (admin): iOS-inspired look with translucent glass bars, grouped lists and rounded cards.
+ * Work in progress: the tokens are final, the component styles arrive in the styling phase.
+ */
+@import '../foundation/admin.css';
+@import './tokens.css' layer(theme);
+
+@layer theme {
+  :root {
+    font-family: var(--is-font);
+    line-height: 1.5;
+    background-color: var(--is-bg);
+    color: var(--is-label);
+  }
+
+  body {
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 0 var(--is-space) 4rem;
+  }
+
+  a {
+    color: var(--is-accent);
+  }
+
+  code,
+  pre {
+    font-family: var(--is-font-mono);
+  }
+}

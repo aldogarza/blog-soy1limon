@@ -12,7 +12,7 @@ const t = ui(lang);
 ---
 
 {totalPages > 1 && (
-  <nav aria-label={t.pagination}>
+  <nav class="pagination" aria-label={t.pagination}>
     <p>{t.page(page, totalPages)}</p>
     <ul>
       {page > 1 && (

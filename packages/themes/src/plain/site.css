@@ -1,0 +1,76 @@
+/*
+ * Plain: readable, accessible and unstyled on purpose, using the browser's system colours.
+ * It doubles as the reference for the markup contract in docs/themes.md.
+ */
+@import '../foundation/site.css';
+
+@layer theme {
+  :root {
+    color-scheme: light dark;
+    font-family:
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
+    line-height: 1.6;
+    /* Explicit system colours: without them, tools like axe assume a white page in dark mode. */
+    background-color: Canvas;
+    color: CanvasText;
+  }
+
+  body {
+    margin: 0 auto;
+    max-width: 48rem;
+    padding: 0 1rem 4rem;
+  }
+
+  figure {
+    margin-inline: 0;
+  }
+
+  .site-nav ul,
+  .post-tags ul,
+  .pagination ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .post-tags ul {
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .post-list,
+  .gallery ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .gallery ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 1rem;
+  }
+
+  pre {
+    padding: 1rem;
+  }
+
+  /* Shiki: light colours inline, dark colours from CSS variables. */
+  @media (prefers-color-scheme: dark) {
+    .shiki,
+    .shiki span {
+      color: var(--shiki-dark) !important;
+      background-color: var(--shiki-dark-bg) !important;
+    }
+  }
+}

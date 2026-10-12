@@ -50,7 +50,12 @@ async function save() {
 
 <template>
   <form novalidate @submit.prevent="save">
-    <ErrorSummary :errors="errors" :field-id="fieldId" :focus-signal="focusSummary" />
+    <ErrorSummary
+      :errors="errors"
+      :field-id="fieldId"
+      :focus-signal="focusSummary"
+      :heading-level="3"
+    />
     <ImageMetadataForm
       v-model="values"
       id-prefix="edit"
@@ -59,7 +64,7 @@ async function save() {
       :alt-recommended-length="altRecommendedLength"
       :exclude-id="imageId"
     />
-    <p aria-live="polite" role="status">{{ message }}</p>
+    <p role="status">{{ message }}</p>
     <button type="submit" :disabled="saving">{{ saving ? 'Saving…' : 'Save changes' }}</button>
   </form>
 </template>

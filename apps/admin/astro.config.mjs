@@ -2,6 +2,8 @@
 import node from '@astrojs/node';
 import vue from '@astrojs/vue';
 import { existsSync } from 'node:fs';
+import { siteConfig } from '@soy1limon/core/site-config';
+import { themes } from '@soy1limon/themes';
 import { defineConfig } from 'astro/config';
 
 // The admin is a local tool: it binds to loopback only and is never deployed.
@@ -15,7 +17,11 @@ const mediaOrigin = process.env.MEDIA_BASE_URL ? new URL(process.env.MEDIA_BASE_
 export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
-  integrations: [vue()],
+  // THEME=<name> previews another theme without editing site-config.ts.
+  integrations: [
+    vue(),
+    themes({ target: 'admin', configured: siteConfig.theme, override: process.env.THEME }),
+  ],
   server: { host: HOST, port: PORT },
   devToolbar: { enabled: false },
   vite: {

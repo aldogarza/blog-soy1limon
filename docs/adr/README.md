@@ -11,3 +11,4 @@ replacement instead of being deleted.
 | [0003](0003-local-only-admin.md)            | Admin runs only on the author's machine           |
 | [0004](0004-images-on-r2.md)                | Images processed locally, served from R2          |
 | [0005](0005-deploy-triggers.md)             | Deploys triggered by the admin plus a daily build |
+| [0006](0006-themes-over-semantic-html.md)   | Interchangeable themes over semantic HTML         |

@@ -12,6 +12,9 @@ const props = withDefaults(
     /** Shows "n / max recommended" under the field (not enforced). */
     recommendedLength?: number;
     lang?: string;
+    required?: boolean;
+    /** Ids of other elements that describe the field, e.g. a live availability message. */
+    describedBy?: string;
   }>(),
   {
     hint: undefined,
@@ -20,6 +23,8 @@ const props = withDefaults(
     type: 'text',
     recommendedLength: undefined,
     lang: undefined,
+    required: false,
+    describedBy: undefined,
   },
 );
 
@@ -32,6 +37,7 @@ const describedBy = computed(
   () =>
     [
       props.hint && hintId.value,
+      props.describedBy,
       props.recommendedLength && counterId.value,
       props.error && errorId.value,
     ]
@@ -43,6 +49,8 @@ const describedBy = computed(
 <template>
   <div class="field">
     <label :for="id">{{ label }}</label>
+    <!-- Visual marker only: the required attribute already tells assistive technology. -->
+    <span v-if="required" class="required" aria-hidden="true"> (required)</span>
     <span v-if="hint" :id="hintId" class="hint">{{ hint }}</span>
     <textarea
       v-if="multiline"
@@ -50,6 +58,7 @@ const describedBy = computed(
       v-model="model"
       rows="3"
       :lang="lang"
+      :required="required"
       :aria-invalid="error ? 'true' : undefined"
       :aria-describedby="describedBy"
     />
@@ -59,6 +68,7 @@ const describedBy = computed(
       v-model="model"
       :type="type"
       :lang="lang"
+      :required="required"
       :aria-invalid="error ? 'true' : undefined"
       :aria-describedby="describedBy"
       autocomplete="off"

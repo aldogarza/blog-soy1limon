@@ -54,6 +54,11 @@ const translationOptions = posts
 ---
 
 <AdminLayout title={post.title ? `Edit: ${post.title}` : 'Edit post'}>
+  {post.title && (
+    <Fragment slot="heading">
+      Edit: <span lang={post.lang}>{post.title}</span>
+    </Fragment>
+  )}
   {deployMessage && <p role="status">{deployMessage}</p>}
   <PostEditor
     client:load

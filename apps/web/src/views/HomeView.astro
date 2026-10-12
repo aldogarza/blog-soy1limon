@@ -22,7 +22,7 @@ const latest = postsIn(await siteContent(), lang).slice(0, 5);
   seo={{ jsonLd: [websiteJsonLd(lang, homePath(lang), Astro.site ?? '')] }}
 >
   <h1>{siteConfig.title[lang]}</h1>
-  <p>{siteConfig.description[lang]}</p>
+  <p class="page-intro">{siteConfig.description[lang]}</p>
   <section aria-labelledby="latest-heading">
     <h2 id="latest-heading">{t.latestPosts}</h2>
     <PostList posts={latest} lang={lang} headingLevel={3} />

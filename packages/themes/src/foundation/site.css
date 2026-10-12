@@ -1,0 +1,63 @@
+/*
+ * Shared by every theme of the public site. Declares the cascade layers:
+ *   foundation  functional rules any theme needs (helpers, reflow safety)
+ *   theme       everything a theme adds
+ *   a11y        accessibility guarantees; declared last, so no theme can override them
+ * A theme customises the guarantees through the --focus-ring-* custom properties only.
+ */
+@layer foundation, theme, a11y;
+
+@layer foundation {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Long code lines scroll inside the block instead of widening the page (WCAG 1.4.10). */
+  pre {
+    overflow-x: auto;
+  }
+
+  .skip-link {
+    position: absolute;
+    inset-inline-start: 1rem;
+    top: -10rem;
+    z-index: 100;
+  }
+  .skip-link:focus {
+    top: 1rem;
+  }
+}
+
+@layer a11y {
+  /* Always-visible keyboard focus (WCAG 2.4.7 / 2.4.11). */
+  :focus-visible {
+    outline: var(--focus-ring-width, 3px) solid var(--focus-ring-color, Highlight);
+    outline-offset: var(--focus-ring-offset, 2px);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

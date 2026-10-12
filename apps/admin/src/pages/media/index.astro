@@ -71,6 +71,7 @@ const filtered = images.filter((image) => {
       {filtered.map((image) => {
         const thumb = image.variants[0];
         const alt = image.alt.en ?? image.alt.es ?? '';
+        const altLang = image.alt.en ? 'en' : image.alt.es ? 'es' : undefined;
         return (
           <li>
             <figure>
@@ -78,6 +79,7 @@ const filtered = images.filter((image) => {
                 <img
                   src={storage.publicUrl(thumb.key)}
                   alt={alt}
+                  lang={altLang}
                   width={thumb.w}
                   height={thumb.h}
                   loading="lazy"

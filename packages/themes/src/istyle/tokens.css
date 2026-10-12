@@ -1,0 +1,41 @@
+/*
+ * iStyle design tokens, shared by the site and the admin. Inspired by the iOS system palette, but
+ * every text colour is adjusted to reach WCAG AA contrast (iOS systemBlue #007aff on white is only
+ * 4.0:1, so links use a darker blue).
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces: grouped background behind cards, like iOS Settings. */
+  --is-bg: light-dark(#f2f2f7, #000000);
+  --is-surface: light-dark(#ffffff, #1c1c1e);
+  --is-surface-raised: light-dark(#ffffff, #2c2c2e);
+  /* Translucent "glass" material for bars and sheets (used with backdrop-filter). */
+  --is-glass: light-dark(rgb(255 255 255 / 0.72), rgb(30 30 30 / 0.72));
+  --is-glass-blur: 20px;
+  --is-separator: light-dark(rgb(60 60 67 / 0.29), rgb(84 84 88 / 0.6));
+
+  /* Text */
+  --is-label: light-dark(#000000, #ffffff);
+  --is-label-secondary: light-dark(#6c6c70, #aeaeb2);
+  --is-accent: light-dark(#0062cc, #4da3ff);
+  --is-danger: light-dark(#c4161c, #ff6961);
+  --is-warning: light-dark(#a05a00, #ffb340);
+
+  /* Shape and rhythm */
+  --is-radius-sm: 8px;
+  --is-radius: 12px;
+  --is-radius-lg: 20px;
+  --is-space: 1rem;
+  --is-shadow: 0 1px 3px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.06);
+
+  /* System font stack: San Francisco on Apple devices, no font download anywhere. */
+  --is-font:
+    -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --is-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Accessibility guarantees (foundation a11y layer) read these. */
+  --focus-ring-color: var(--is-accent);
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+}

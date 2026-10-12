@@ -71,6 +71,8 @@ export async function renderPreview(
     lang: values.lang,
     images: images ?? (await renderableImages()),
     mediaBaseUrl: adminEnv().MEDIA_BASE_URL,
+    // The preview sits under the editor's "Preview" h2.
+    topHeadingLevel: 3,
   });
 }
 

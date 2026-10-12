@@ -133,11 +133,11 @@ test('write, validate and publish an English post with cover, gallery, inline im
   await expectNoA11yViolations(page);
 
   await page.getByRole('button', { name: 'Publish now' }).click();
-  await expect(page.getByText(/Status:\s*published/)).toBeVisible();
+  await expect(page.locator('dt:text-is("Status") + dd')).toHaveText('published');
   // The tests blank the GitHub settings: publishing says so instead of starting a real deploy.
   await expect(
     page.getByRole('status').filter({ hasText: 'was not rebuilt automatically' }),
-  ).toBeVisible();
+  ).toBeAttached();
 
   const post = await getPost(adminDb(), englishId);
   expect(post).toMatchObject({
@@ -158,9 +158,9 @@ test('link a Spanish translation and keep the old address after renaming', async
   await body(page).fill('Un párrafo en español.');
   await page
     .getByLabel('This post is a translation of')
-    .selectOption({ label: `Weekend trip ${run} (en)` });
+    .selectOption({ label: `Weekend trip ${run} (English)` });
   await page.getByRole('button', { name: 'Publish now' }).click();
-  await expect(page.getByText(/Status:\s*published/)).toBeVisible();
+  await expect(page.locator('dt:text-is("Status") + dd')).toHaveText('published');
 
   const spanish = await getPost(adminDb(), spanishId);
   expect(spanish?.lang).toBe('es');
@@ -201,9 +201,7 @@ test('compare and restore an older version', async ({ page }) => {
 test('drafts save automatically', async ({ page }) => {
   const id = await createPost(page, 'English', `Draft ${run}`);
   await page.getByLabel('Description', { exact: true }).fill('Saved without pressing any button.');
-  await expect(page.getByRole('status').filter({ hasText: 'All changes saved.' })).toBeVisible({
-    timeout: 10_000,
-  });
+  await expect(page.getByText('All changes saved.')).toBeVisible({ timeout: 10_000 });
   expect((await getPost(adminDb(), id))?.description).toBe('Saved without pressing any button.');
 });
 

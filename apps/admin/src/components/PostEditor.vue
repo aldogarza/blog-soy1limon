@@ -106,18 +106,24 @@ async function refreshPreview() {
 // ---------------------------------------------------------------------------
 let autosaveTimer: ReturnType<typeof setTimeout> | undefined;
 
-function validate(): PostFormValues | null {
+function validate(report = true): PostFormValues | null {
   const parsed = postFormSchema.safeParse(values.value);
   if (parsed.success) {
     errors.value = {};
     return parsed.data;
   }
-  errors.value = fieldErrors(parsed.error);
+  // Autosave checks silently: problems appear only when the author saves or publishes.
+  if (report) errors.value = fieldErrors(parsed.error);
   return null;
 }
 
+/** One live region for the outcome of an action, so each event is announced once. */
+function announce(...parts: (string | null | undefined)[]) {
+  live.value = parts.filter(Boolean).join(' ');
+}
+
 async function save(manual: boolean) {
-  const parsed = validate();
+  const parsed = validate(manual);
   if (!parsed) {
     if (manual) focusSummary.value += 1;
     return;
@@ -135,8 +141,8 @@ async function save(manual: boolean) {
   previousSlugs.value = data.previousSlugs;
   saveState.value = 'saved';
   localStorage.removeItem(storageKey);
-  live.value = manual ? 'Saved.' : 'Draft saved automatically.';
   if (manual) deployMessage.value = triggerMessage(data.deploy) ?? '';
+  announce(manual ? 'Saved.' : 'Draft saved automatically.', manual ? deployMessage.value : null);
 }
 
 watch(
@@ -228,19 +234,26 @@ async function publish(publishAt: string | null) {
   previousSlugs.value = data.previousSlugs;
   status.value =
     data.publishedAt && Date.parse(data.publishedAt) > Date.now() ? 'scheduled' : 'published';
-  live.value = status.value === 'scheduled' ? 'Post scheduled.' : 'Post published.';
   deployMessage.value =
     triggerMessage(data.deploy) ??
     (status.value === 'scheduled'
       ? 'It appears on the public site with the first daily build after that time.'
       : '');
+  announce(
+    status.value === 'scheduled' ? 'Post scheduled.' : 'Post published.',
+    deployMessage.value,
+  );
 }
+
+const scheduleError = ref('');
 
 function schedule() {
   if (!scheduleAt.value) {
-    serverErrors.value = ['Choose a date and time to schedule the post.'];
+    scheduleError.value = 'Choose a date and time to schedule the post.';
+    document.getElementById('schedule-at')?.focus();
     return;
   }
+  scheduleError.value = '';
   // datetime-local has no zone: interpret it in the author's local time zone.
   void publish(new Date(scheduleAt.value).toISOString());
 }
@@ -253,8 +266,11 @@ async function changeStatus(action: 'unpublish' | 'archive') {
   }
   status.value = data.status === 'archived' ? 'archived' : 'draft';
   if (action === 'unpublish') publishedAt.value = null;
-  live.value = action === 'unpublish' ? 'Post unpublished; it is a draft again.' : 'Post archived.';
   deployMessage.value = triggerMessage(data.deploy) ?? '';
+  announce(
+    action === 'unpublish' ? 'Post unpublished; it is a draft again.' : 'Post archived.',
+    deployMessage.value,
+  );
 }
 
 const publishedLabel = computed(() =>
@@ -411,9 +427,9 @@ const saveLabel = computed(
 </script>
 
 <template>
-  <p class="visually-hidden" role="status" aria-live="polite">{{ live }}</p>
+  <p class="visually-hidden" role="status">{{ live }}</p>
 
-  <div v-if="restoreOffer" class="warning" role="region" aria-labelledby="restore-heading">
+  <section v-if="restoreOffer" class="warning" aria-labelledby="restore-heading">
     <h2 id="restore-heading">Unsaved changes found</h2>
     <p>
       This browser kept changes from
@@ -424,7 +440,7 @@ const saveLabel = computed(
     </p>
     <button type="button" @click="acceptRestore">Restore them</button>
     <button type="button" @click="discardRestore">Discard them</button>
-  </div>
+  </section>
 
   <form novalidate @submit.prevent="save(true)">
     <ErrorSummary :errors="errors" :field-id="fieldId" :focus-signal="focusSummary" />
@@ -440,6 +456,7 @@ const saveLabel = computed(
         :id="fieldId('title')"
         v-model="values.title"
         label="Title"
+        required
         :lang="values.lang"
         :recommended-length="titleRecommended"
         :error="errors.title"
@@ -448,12 +465,21 @@ const saveLabel = computed(
         :id="fieldId('slug')"
         v-model="values.slug"
         label="Address (slug)"
+        required
         :hint="`Public address: ${path}`"
+        :described-by="
+          [
+            `${fieldId('slug')}-status`,
+            previousSlugs.length > 0 ? `${fieldId('slug')}-previous` : '',
+          ]
+            .filter(Boolean)
+            .join(' ')
+        "
         :error="errors.slug"
         @update:model-value="slugFollowsTitle = false"
       />
-      <p class="hint" aria-live="polite">{{ slugStatus }}</p>
-      <p v-if="previousSlugs.length > 0" class="hint">
+      <p :id="`${fieldId('slug')}-status`" class="hint" aria-live="polite">{{ slugStatus }}</p>
+      <p v-if="previousSlugs.length > 0" :id="`${fieldId('slug')}-previous`" class="hint">
         Old addresses that still redirect here: {{ previousSlugs.join(', ') }}
       </p>
     </section>
@@ -470,8 +496,8 @@ const saveLabel = computed(
         :recommended-length="descriptionRecommended"
         :error="errors.description"
       />
-      <figure class="serp" aria-labelledby="serp-caption">
-        <figcaption id="serp-caption" class="hint">How the post may look in Google</figcaption>
+      <figure class="serp">
+        <figcaption class="hint">How the post may look in Google</figcaption>
         <p class="serp-path">… {{ path }}</p>
         <p class="serp-title" :lang="values.lang">{{ serpTitle }}</p>
         <p class="serp-description" :lang="values.lang">{{ serpDescription }}</p>
@@ -480,7 +506,7 @@ const saveLabel = computed(
 
     <section aria-labelledby="body-heading">
       <h2 id="body-heading">Body</h2>
-      <div role="group" aria-label="Formatting" class="step-nav">
+      <div role="group" aria-label="Formatting" class="toolbar">
         <button
           v-for="tool in toolbar"
           :key="tool.label"
@@ -503,11 +529,17 @@ const saveLabel = computed(
         rows="20"
         :lang="values.lang"
         spellcheck="true"
-        :aria-describedby="`${fieldId('bodyMd')}-hint`"
+        :aria-describedby="
+          errors.bodyMd
+            ? `${fieldId('bodyMd')}-hint ${fieldId('bodyMd')}-error`
+            : `${fieldId('bodyMd')}-hint`
+        "
         :aria-invalid="errors.bodyMd ? 'true' : undefined"
         @keydown="onBodyKeydown"
       />
-      <p v-if="errors.bodyMd" class="error">{{ errors.bodyMd }}</p>
+      <p v-if="errors.bodyMd" :id="`${fieldId('bodyMd')}-error`" class="error">
+        {{ errors.bodyMd }}
+      </p>
     </section>
 
     <section aria-labelledby="images-heading">
@@ -520,12 +552,13 @@ const saveLabel = computed(
         <img
           :src="imageById.get(values.coverImageId)?.thumbUrl"
           :alt="imageById.get(values.coverImageId)?.alt[values.lang] ?? ''"
+          :lang="values.lang"
           :width="imageById.get(values.coverImageId)?.thumbWidth"
           :height="imageById.get(values.coverImageId)?.thumbHeight"
         />
         <figcaption>{{ imageById.get(values.coverImageId)?.seoName }}</figcaption>
       </figure>
-      <p class="step-nav">
+      <p class="actions">
         <button type="button" @click="coverPicker?.open()">
           {{ values.coverImageId ? 'Change cover' : 'Choose cover' }}
         </button>
@@ -572,19 +605,34 @@ const saveLabel = computed(
         <ul class="plain">
           <li v-for="tag in tags" :key="tag.id">
             <input :id="`tag-${tag.id}`" v-model="values.tagIds" type="checkbox" :value="tag.id" />
-            <label :for="`tag-${tag.id}`">{{
-              tag.labels[values.lang] ?? tag.labels.en ?? tag.labels.es ?? tag.slug
-            }}</label>
+            <label
+              :for="`tag-${tag.id}`"
+              :lang="tag.labels[values.lang] ? values.lang : tag.labels.en ? 'en' : undefined"
+              >{{ tag.labels[values.lang] ?? tag.labels.en ?? tag.labels.es ?? tag.slug }}</label
+            >
           </li>
         </ul>
         <details>
           <summary>Create a tag</summary>
           <label for="new-tag-en">Name in English</label>
-          <input id="new-tag-en" v-model="newTag.en" type="text" lang="en" />
+          <!-- Enter creates the tag instead of submitting (and saving) the whole post. -->
+          <input
+            id="new-tag-en"
+            v-model="newTag.en"
+            type="text"
+            lang="en"
+            @keydown.enter.prevent="createTag"
+          />
           <label for="new-tag-es">Name in Spanish</label>
-          <input id="new-tag-es" v-model="newTag.es" type="text" lang="es" />
+          <input
+            id="new-tag-es"
+            v-model="newTag.es"
+            type="text"
+            lang="es"
+            @keydown.enter.prevent="createTag"
+          />
           <button type="button" @click="createTag">Create and select</button>
-          <p aria-live="polite">{{ tagMessage }}</p>
+          <p role="status">{{ tagMessage }}</p>
         </details>
       </fieldset>
 
@@ -598,8 +646,13 @@ const saveLabel = computed(
         :aria-describedby="`${fieldId('translationOf')}-hint`"
       >
         <option :value="null">No translation</option>
-        <option v-for="option in translationOptions" :key="option.id" :value="option.id">
-          {{ option.title }} ({{ option.lang }})
+        <option
+          v-for="option in translationOptions"
+          :key="option.id"
+          :value="option.id"
+          :lang="option.lang"
+        >
+          {{ option.title }} ({{ option.lang === 'en' ? 'English' : 'Español' }})
         </option>
       </select>
     </section>
@@ -626,22 +679,26 @@ const saveLabel = computed(
 
     <section aria-labelledby="publish-heading">
       <h2 id="publish-heading">Publishing</h2>
-      <p>
-        Status: <strong>{{ status }}</strong>
+      <dl>
+        <dt>Status</dt>
+        <dd>{{ status }}</dd>
         <template v-if="publishedAt && status !== 'draft'">
-          — {{ status === 'scheduled' ? 'goes live on' : 'since' }}
-          <time :datetime="publishedAt">{{ publishedLabel }}</time>
+          <dt>{{ status === 'scheduled' ? 'Goes live on' : 'Online since' }}</dt>
+          <dd>
+            <time :datetime="publishedAt">{{ publishedLabel }}</time>
+          </dd>
         </template>
-      </p>
-      <p role="status">{{ saveLabel }}</p>
-      <p role="status">{{ deployMessage }}</p>
+      </dl>
+      <!-- Plain text: changes on every keystroke, so it is not a live region (announce() is). -->
+      <p class="save-state">{{ saveLabel }}</p>
+      <p v-if="deployMessage">{{ deployMessage }}</p>
       <div v-if="serverErrors.length > 0" role="alert" class="error-summary">
         <ul>
           <li v-for="message in serverErrors" :key="message">{{ message }}</li>
         </ul>
       </div>
 
-      <div class="step-nav">
+      <div class="actions">
         <template v-if="status === 'draft' || status === 'archived'">
           <button type="submit">Save {{ status === 'draft' ? 'draft' : '' }}</button>
           <button type="button" @click="publish(null)">Publish now</button>
@@ -660,7 +717,15 @@ const saveLabel = computed(
       <fieldset v-if="status !== 'published'">
         <legend>Schedule</legend>
         <label for="schedule-at">Publish automatically on (your local time)</label>
-        <input id="schedule-at" v-model="scheduleAt" type="datetime-local" />
+        <input
+          id="schedule-at"
+          v-model="scheduleAt"
+          type="datetime-local"
+          :aria-invalid="scheduleError ? 'true' : undefined"
+          :aria-describedby="scheduleError ? 'schedule-at-error' : undefined"
+          @keydown.enter.prevent="schedule"
+        />
+        <p v-if="scheduleError" id="schedule-at-error" class="error">{{ scheduleError }}</p>
         <button type="button" @click="schedule">Schedule</button>
       </fieldset>
     </section>

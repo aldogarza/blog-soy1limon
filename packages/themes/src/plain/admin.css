@@ -1,0 +1,164 @@
+/*
+ * Plain admin: readable and accessible with system colours. Status colours are tokens so a
+ * theme can change them in one place.
+ */
+@import '../foundation/admin.css';
+
+@layer theme {
+  :root {
+    color-scheme: light dark;
+    --color-danger: light-dark(#b00020, #ff8a80);
+    --color-warning: light-dark(#b26a00, #ffb74d);
+    font-family:
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
+    line-height: 1.5;
+    /* Explicit system colours: without them, tools like axe assume a white page in dark mode. */
+    background-color: Canvas;
+    color: CanvasText;
+  }
+
+  body {
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 0 1rem 4rem;
+  }
+
+  .admin-nav ul,
+  .grid {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .grid > li {
+    width: 12rem;
+  }
+
+  fieldset {
+    margin-block: 1rem;
+  }
+
+  label,
+  legend {
+    font-weight: 600;
+  }
+
+  input[type='text'],
+  input[type='url'],
+  input[type='search'],
+  textarea,
+  select {
+    display: block;
+    width: 100%;
+    max-width: 40rem;
+    font: inherit;
+  }
+
+  .hint {
+    display: block;
+    font-size: 0.9em;
+  }
+
+  .error {
+    color: var(--color-danger);
+    font-weight: 600;
+  }
+
+  .plain {
+    list-style: none;
+    padding: 0;
+  }
+
+  .drop-zone {
+    border: 2px dashed GrayText;
+    padding: 1.5rem;
+  }
+  .drop-zone.dragging {
+    border-color: Highlight;
+  }
+
+  .upload-preview {
+    max-height: 50vh;
+    width: auto;
+  }
+
+  .actions,
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-block: 1.5rem;
+  }
+
+  .error-summary {
+    border: 3px solid var(--color-danger);
+    padding: 0.5rem 1rem;
+  }
+
+  .serp {
+    border: 1px solid GrayText;
+    padding: 0.75rem;
+    max-width: 40rem;
+    margin-inline: 0;
+  }
+  .serp p {
+    margin: 0.15rem 0;
+  }
+  .serp-title {
+    font-size: 1.15rem;
+  }
+
+  .preview {
+    border: 1px solid GrayText;
+    padding: 1rem;
+  }
+  .preview img {
+    height: auto;
+  }
+
+  .gallery-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block: 0.5rem;
+  }
+  .gallery-thumb {
+    width: 6rem;
+  }
+
+  .picker {
+    max-width: min(60rem, 95vw);
+  }
+  .picker .grid label img {
+    display: block;
+  }
+
+  .diff {
+    white-space: pre-wrap;
+  }
+
+  .detail-preview {
+    max-height: 60vh;
+    width: auto;
+  }
+
+  .inline-form {
+    display: inline;
+  }
+
+  .warning {
+    border-inline-start: 4px solid var(--color-warning);
+    padding-inline-start: 0.75rem;
+  }
+
+  [aria-invalid='true'] {
+    border: 2px solid var(--color-danger);
+  }
+}
