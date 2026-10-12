@@ -33,3 +33,6 @@ Thumbs.db
 
 # Output of `pnpm media process`
 media-out/
+
+# Personal to-do notes (never published)
+TODO.md
