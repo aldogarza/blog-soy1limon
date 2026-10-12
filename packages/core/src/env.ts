@@ -119,11 +119,28 @@ export const webEnvSchema = z
   .object({
     CONTENT_SOURCE: z.enum(CONTENT_SOURCES).default('fixtures'),
     SITE_URL: httpUrl('SITE_URL'),
+    /**
+     * Where public image variants live (the R2 custom domain in production). Fixture builds default
+     * to the sample images shipped in apps/web/public/fixtures-media.
+     */
+    MEDIA_BASE_URL: z
+      .string()
+      .refine((value) => value.startsWith('/') || /^https?:\/\//.test(value), {
+        error: 'MEDIA_BASE_URL must be an http(s) URL or a site-relative path',
+      })
+      .optional(),
     SUPABASE_URL: httpUrl('SUPABASE_URL').optional(),
     SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.CONTENT_SOURCE !== 'supabase') return;
+    if (!env.MEDIA_BASE_URL) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['MEDIA_BASE_URL'],
+        message: 'MEDIA_BASE_URL is required when CONTENT_SOURCE=supabase',
+      });
+    }
     if (!env.SUPABASE_URL) {
       ctx.addIssue({
         code: 'custom',

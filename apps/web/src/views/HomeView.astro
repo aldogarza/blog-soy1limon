@@ -1,0 +1,31 @@
+---
+import { blogPath, homePath, type Locale, otherLocale, siteConfig, ui } from '@soy1limon/core';
+import PostList from '../components/PostList.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { postsIn, siteContent } from '../lib/content.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = ui(lang);
+const latest = postsIn(await siteContent(), lang).slice(0, 5);
+---
+
+<BaseLayout
+  lang={lang}
+  title={siteConfig.title[lang]}
+  description={siteConfig.description[lang]}
+  alternatePath={homePath(otherLocale(lang))}
+>
+  <h1>{siteConfig.title[lang]}</h1>
+  <p>{siteConfig.description[lang]}</p>
+  <section aria-labelledby="latest-heading">
+    <h2 id="latest-heading">{t.latestPosts}</h2>
+    <PostList posts={latest} lang={lang} headingLevel={3} />
+    <p>
+      <a href={blogPath(lang)}>{t.allPosts}</a>
+    </p>
+  </section>
+</BaseLayout>

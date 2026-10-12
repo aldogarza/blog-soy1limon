@@ -71,6 +71,7 @@ pnpm test
 - [Content model](docs/content-model.md) — tables, rules, and who can read what
 - [Media pipeline](docs/media-pipeline.md) — formats, variants, watermark, metadata, storage
 - [Admin](docs/admin.md) — running the local admin, its security model and the upload flow
+- [Public site](docs/site.md) — URLs, how content becomes pages, search and tests
 - [Security policy](SECURITY.md)
 
 ## License

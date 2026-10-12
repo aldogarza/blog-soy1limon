@@ -259,7 +259,7 @@ Rules for the implementing agent:
 
 ### Phase 5 — Public site (functional)
 - `apps/web`: Astro static.
-  - Content Layer **custom loader** reading published content via `packages/db` (Supabase or fixtures), using the shared markdown pipeline.
+  - A cached build-time content module (`src/lib/content.ts`, decided in Phase 5 instead of a Content Layer loader) reading published content via `packages/db` (Supabase or fixtures) and rendering it with the shared markdown pipeline; the build fails on content problems.
   - i18n routing with `en` as the default without prefix and `es` under `/es/`.
   - UI strings come from `packages/core/i18n`.
 - Routes per locale:

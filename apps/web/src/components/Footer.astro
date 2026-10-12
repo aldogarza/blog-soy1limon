@@ -1,0 +1,17 @@
+---
+import { type Locale, rssPath, siteConfig, ui } from '@soy1limon/core';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = ui(lang);
+---
+
+<footer>
+  <p>
+    {t.copyright(new Date().getFullYear(), siteConfig.author.name)} ·
+    <a href={rssPath(lang)}>{t.rss}</a>
+  </p>
+</footer>

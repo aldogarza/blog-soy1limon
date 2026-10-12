@@ -1,0 +1,34 @@
+---
+import { blogPath, type Locale, ui } from '@soy1limon/core';
+
+interface Props {
+  lang: Locale;
+  page: number;
+  totalPages: number;
+}
+
+const { lang, page, totalPages } = Astro.props;
+const t = ui(lang);
+---
+
+{totalPages > 1 && (
+  <nav aria-label={t.pagination}>
+    <p>{t.page(page, totalPages)}</p>
+    <ul>
+      {page > 1 && (
+        <li>
+          <a href={blogPath(lang, page - 1)} rel="prev">
+            {t.newer}
+          </a>
+        </li>
+      )}
+      {page < totalPages && (
+        <li>
+          <a href={blogPath(lang, page + 1)} rel="next">
+            {t.older}
+          </a>
+        </li>
+      )}
+    </ul>
+  </nav>
+)}

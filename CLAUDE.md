@@ -44,21 +44,22 @@ in an admin app that only runs on the owner's machine (localhost). Full plan: `d
 
 ## Commands
 
-| Command                             | What it does                                                        |
-| ----------------------------------- | ------------------------------------------------------------------- |
-| `pnpm install`                      | Install deps and git hooks (lefthook)                               |
-| `pnpm lint` / `pnpm lint:fix`       | ESLint over the whole repo                                          |
-| `pnpm format` / `pnpm format:check` | Prettier                                                            |
-| `pnpm typecheck`                    | `tsc` in every package (Turborepo) + root config files              |
-| `pnpm test`                         | Vitest across all packages (projects defined in `vitest.config.ts`) |
-| `pnpm build` / `pnpm dev`           | Turborepo build / dev for all apps                                  |
-| `pnpm secrets:scan`                 | gitleaks over the full git history                                  |
-| `pnpm db:start` / `pnpm db:reset`   | Local Supabase stack / rebuild it from migrations + seed            |
-| `pnpm db:types`                     | Regenerate DB types after a migration (CI checks they are current)  |
-| `pnpm test:integration`             | RLS + query tests; needs the local stack running                    |
-| `pnpm media process <file>`         | Run the image pipeline locally into `media-out/` (uploads nothing)  |
-| `pnpm admin` / `pnpm admin:dev`     | Local admin on http://127.0.0.1:4322 (build+start / dev server)     |
-| `pnpm test:e2e`                     | Admin end-to-end tests (Playwright + axe) on the local stack        |
+| Command                             | What it does                                                         |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `pnpm install`                      | Install deps and git hooks (lefthook)                                |
+| `pnpm lint` / `pnpm lint:fix`       | ESLint over the whole repo                                           |
+| `pnpm format` / `pnpm format:check` | Prettier                                                             |
+| `pnpm typecheck`                    | `tsc` in every package (Turborepo) + root config files               |
+| `pnpm test`                         | Vitest across all packages (projects defined in `vitest.config.ts`)  |
+| `pnpm build` / `pnpm dev`           | Turborepo build / dev for all apps                                   |
+| `pnpm secrets:scan`                 | gitleaks over the full git history                                   |
+| `pnpm db:start` / `pnpm db:reset`   | Local Supabase stack / rebuild it from migrations + seed             |
+| `pnpm db:types`                     | Regenerate DB types after a migration (CI checks they are current)   |
+| `pnpm test:integration`             | RLS + query tests; needs the local stack running                     |
+| `pnpm media process <file>`         | Run the image pipeline locally into `media-out/` (uploads nothing)   |
+| `pnpm admin` / `pnpm admin:dev`     | Local admin on http://127.0.0.1:4322 (build+start / dev server)      |
+| `pnpm test:e2e`                     | Admin (local stack) and public site (fixtures) e2e, Playwright + axe |
+| `pnpm web`                          | Public site dev server on http://localhost:4321                      |
 
 ## Layout
 
@@ -82,7 +83,7 @@ Internal packages export TypeScript source directly (no build step); apps compil
 - [x] Phase 2 — Media pipeline
 - [x] Phase 3 — Admin: shell + media
 - [x] Phase 4 — Admin: posts
-- [ ] Phase 5 — Public site
+- [x] Phase 5 — Public site
 - [ ] Phase 6 — SEO
 - [ ] Phase 7 — Deploy & operations
 - [ ] Phase 8 — Quality pass

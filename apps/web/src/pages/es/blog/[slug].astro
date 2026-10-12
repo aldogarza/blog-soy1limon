@@ -1,0 +1,31 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { postPath } from '@soy1limon/core';
+import { postsIn, type SitePost, siteContent } from '../../../lib/content.ts';
+import PostView from '../../../views/PostView.astro';
+import RedirectView from '../../../views/RedirectView.astro';
+
+// One page per post, plus a redirect page for every old slug of a renamed post.
+export const getStaticPaths = (async () => {
+  const posts = postsIn(await siteContent(), 'es');
+  return [
+    ...posts.map((post) => ({
+      params: { slug: post.slug },
+      props: { post, redirectTo: undefined },
+    })),
+    ...posts.flatMap((post) =>
+      post.previousSlugs.map((slug) => ({
+        params: { slug },
+        props: { post: undefined, redirectTo: postPath(post.lang, post.slug) },
+      })),
+    ),
+  ];
+}) satisfies GetStaticPaths;
+
+const { post, redirectTo } = Astro.props as {
+  post: SitePost | undefined;
+  redirectTo: string | undefined;
+};
+---
+
+{post ? <PostView post={post} /> : redirectTo && <RedirectView lang="es" to={redirectTo} />}

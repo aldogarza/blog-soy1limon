@@ -6,15 +6,15 @@
       "slug": "hello-world",
       "title": "Hello, world",
       "description": "The first post of this blog: what it is about and how it is built.",
-      "bodyMd": "This blog is written in English and Spanish.\n\n## Why\n\nTo share photos and notes.",
+      "bodyMd": "This blog is written in English and Spanish, mostly about trips and photos.\n\n## Why\n\nTo share places worth visiting, with the photos to prove it.\n\n![](image:00000000-0000-4000-8000-000000000202)\n\n## How it is built\n\n- A static site, so pages load fast and cost nothing to host.\n- Images in several sizes, so phones download less.\n\n```ts\nconst site = { pages: 'static', cost: 0 };\n```\n",
       "publishedAt": "2026-10-01T16:00:00.000000+00:00",
-      "updatedAt": "2026-10-01T16:00:00.000000+00:00",
+      "updatedAt": "2026-10-03T18:30:00.000000+00:00",
       "translationKey": "00000000-0000-4000-8000-0000000000a1",
-      "previousSlugs": [],
-      "coverImageId": null,
+      "previousSlugs": ["hello"],
+      "coverImageId": "00000000-0000-4000-8000-000000000201",
       "tagIds": ["00000000-0000-4000-8000-000000000103"],
       "galleryImageIds": [],
-      "inlineImageIds": []
+      "inlineImageIds": ["00000000-0000-4000-8000-000000000202"]
     },
     {
       "id": "00000000-0000-4000-8000-000000000002",
@@ -22,13 +22,48 @@
       "slug": "hola-mundo",
       "title": "Hola, mundo",
       "description": "La primera entrada de este blog: de qué trata y cómo está hecho.",
-      "bodyMd": "Este blog está escrito en inglés y español.\n\n## Por qué\n\nPara compartir fotos y notas.",
+      "bodyMd": "Este blog está escrito en inglés y español, sobre todo de viajes y fotos.\n\n## Por qué\n\nPara compartir lugares que vale la pena visitar, con las fotos como prueba.\n\n## Cómo está hecho\n\nUn sitio estático: rápido y sin costo de hospedaje.\n",
       "publishedAt": "2026-10-01T16:00:00.000000+00:00",
       "updatedAt": "2026-10-01T16:00:00.000000+00:00",
       "translationKey": "00000000-0000-4000-8000-0000000000a1",
       "previousSlugs": [],
+      "coverImageId": "00000000-0000-4000-8000-000000000201",
+      "tagIds": ["00000000-0000-4000-8000-000000000103", "00000000-0000-4000-8000-000000000102"],
+      "galleryImageIds": [
+        "00000000-0000-4000-8000-000000000202",
+        "00000000-0000-4000-8000-000000000203"
+      ],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000005",
+      "lang": "en",
+      "slug": "a-weekend-in-the-city",
+      "title": "A weekend in the city",
+      "description": "Notes from two days walking around downtown, without a single photo.",
+      "bodyMd": "Some posts are just words.\n\n## Day one\n\nWalked everywhere.\n\n## Day two\n\nWalked some more.\n",
+      "publishedAt": "2026-10-05T15:00:00.000000+00:00",
+      "updatedAt": "2026-10-05T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
       "coverImageId": null,
-      "tagIds": ["00000000-0000-4000-8000-000000000103"],
+      "tagIds": ["00000000-0000-4000-8000-000000000102"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000006",
+      "lang": "es",
+      "slug": "notas-de-viaje",
+      "title": "Notas de viaje",
+      "description": "Una lista corta de cosas que aprendí viajando con poco equipaje.",
+      "bodyMd": "1. Menos es más.\n2. Siempre lleva agua.\n3. Las mejores fotos llegan sin planearlas.\n",
+      "publishedAt": "2026-10-06T15:00:00.000000+00:00",
+      "updatedAt": "2026-10-06T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000102"],
       "galleryImageIds": [],
       "inlineImageIds": []
     }
@@ -50,5 +85,60 @@
       "labels": { "en": "Notes", "es": "Notas" }
     }
   ],
-  "images": []
+  "images": [
+    {
+      "id": "00000000-0000-4000-8000-000000000201",
+      "seoName": "river-at-dawn",
+      "width": 800,
+      "height": 533,
+      "dominantColor": "#0f4c81",
+      "variants": [
+        { "w": 400, "h": 267, "bytes": 1018, "key": "images/2026/river-at-dawn-32eb47ac-400.webp" },
+        { "w": 800, "h": 533, "bytes": 2404, "key": "images/2026/river-at-dawn-86ec97ff-800.webp" }
+      ],
+      "metadata": { "creator": "Aldo", "copyrightNotice": "© 2026 Aldo. All rights reserved." },
+      "alt": {
+        "en": "A calm blue river under a pale morning sun",
+        "es": "Un río azul y tranquilo bajo el sol de la mañana"
+      },
+      "caption": { "en": "The river at dawn", "es": "El río al amanecer" },
+      "updatedAt": "2026-10-01T16:00:00.000000+00:00"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000202",
+      "seoName": "forest-trail",
+      "width": 800,
+      "height": 533,
+      "dominantColor": "#1b4332",
+      "variants": [
+        { "w": 400, "h": 267, "bytes": 968, "key": "images/2026/forest-trail-d89c97d9-400.webp" },
+        { "w": 800, "h": 533, "bytes": 2166, "key": "images/2026/forest-trail-382ebc01-800.webp" }
+      ],
+      "metadata": { "creator": "Aldo" },
+      "alt": {
+        "en": "A green forest fading into a bright clearing",
+        "es": "Un bosque verde que se abre a un claro luminoso"
+      },
+      "caption": { "es": "Sendero en el bosque" },
+      "updatedAt": "2026-10-01T16:00:00.000000+00:00"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000203",
+      "seoName": "city-at-night",
+      "width": 800,
+      "height": 533,
+      "dominantColor": "#14213d",
+      "variants": [
+        { "w": 400, "h": 267, "bytes": 1276, "key": "images/2026/city-at-night-14f41a5e-400.webp" },
+        { "w": 800, "h": 533, "bytes": 3590, "key": "images/2026/city-at-night-93f06b82-800.webp" }
+      ],
+      "metadata": { "creator": "Aldo" },
+      "alt": {
+        "en": "Night sky turning orange over the city",
+        "es": "Cielo nocturno que se vuelve naranja sobre la ciudad"
+      },
+      "caption": {},
+      "updatedAt": "2026-10-01T16:00:00.000000+00:00"
+    }
+  ]
 }

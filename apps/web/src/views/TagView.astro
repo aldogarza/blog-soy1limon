@@ -1,0 +1,29 @@
+---
+import { type Locale, otherLocale, siteConfig, tagPath, tagsPath, ui } from '@soy1limon/core';
+import type { Tag } from '@soy1limon/db';
+import PostList from '../components/PostList.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { type SitePost, siteContent, tagLabel, tagsIn } from '../lib/content.ts';
+
+interface Props {
+  lang: Locale;
+  tag: Tag;
+  posts: SitePost[];
+}
+
+const { lang, tag, posts } = Astro.props;
+const t = ui(lang);
+const other = otherLocale(lang);
+const hasOther = tagsIn(await siteContent(), other).some((entry) => entry.tag.id === tag.id);
+const title = t.postsTagged(tagLabel(tag, lang));
+---
+
+<BaseLayout
+  lang={lang}
+  title={title}
+  description={siteConfig.description[lang]}
+  alternatePath={hasOther ? tagPath(other, tag.slug) : tagsPath(other)}
+>
+  <h1>{title}</h1>
+  <PostList posts={posts} lang={lang} />
+</BaseLayout>

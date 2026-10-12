@@ -1,0 +1,50 @@
+---
+import {
+  blogPath,
+  homePath,
+  type Locale,
+  otherLocale,
+  searchPath,
+  siteConfig,
+  tagsPath,
+  ui,
+} from '@soy1limon/core';
+
+interface Props {
+  lang: Locale;
+  alternatePath?: string | undefined;
+}
+
+const { lang, alternatePath } = Astro.props;
+const t = ui(lang);
+const other = otherLocale(lang);
+const path = Astro.url.pathname;
+const items = [
+  { href: homePath(lang), label: t.home },
+  { href: blogPath(lang), label: t.blog },
+  { href: tagsPath(lang), label: t.tags },
+  { href: searchPath(lang), label: t.search },
+];
+---
+
+<header>
+  <p>
+    <a href={homePath(lang)}>{siteConfig.title[lang]}</a>
+  </p>
+  <nav aria-label={t.mainNavigation}>
+    <ul>
+      {items.map((item) => (
+        <li>
+          <a href={item.href} aria-current={path === item.href ? 'page' : undefined}>
+            {item.label}
+          </a>
+        </li>
+      ))}
+      <li>
+        <a href={alternatePath ?? homePath(other)} hreflang={other} lang={other}>
+          {t.otherLanguageSwitch}
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>

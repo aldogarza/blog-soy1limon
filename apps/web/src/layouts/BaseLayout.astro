@@ -1,0 +1,40 @@
+---
+import { type Locale, siteConfig, ui } from '@soy1limon/core';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import '../styles/base.css';
+
+interface Props {
+  lang: Locale;
+  /** Page title without the site name. */
+  title: string;
+  description: string;
+  /** Same page in the other language, for the language switch. */
+  alternatePath?: string | undefined;
+}
+
+const { lang, title, description, alternatePath } = Astro.props;
+const t = ui(lang);
+const fullTitle = title === siteConfig.title[lang] ? title : `${title} · ${siteConfig.title[lang]}`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      {t.skipToContent}
+    </a>
+    <Header lang={lang} alternatePath={alternatePath} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>

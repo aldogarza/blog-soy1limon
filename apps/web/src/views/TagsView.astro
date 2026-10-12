@@ -1,0 +1,33 @@
+---
+import { type Locale, otherLocale, siteConfig, tagPath, tagsPath, ui } from '@soy1limon/core';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteContent, tagLabel, tagsIn } from '../lib/content.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = ui(lang);
+const entries = tagsIn(await siteContent(), lang);
+---
+
+<BaseLayout
+  lang={lang}
+  title={t.tags}
+  description={siteConfig.description[lang]}
+  alternatePath={tagsPath(otherLocale(lang))}
+>
+  <h1>{t.tags}</h1>
+  {entries.length === 0 ? (
+    <p>{t.noPosts}</p>
+  ) : (
+    <ul>
+      {entries.map(({ tag, posts }) => (
+        <li>
+          <a href={tagPath(lang, tag.slug)}>{tagLabel(tag, lang)}</a> ({posts.length})
+        </li>
+      ))}
+    </ul>
+  )}
+</BaseLayout>

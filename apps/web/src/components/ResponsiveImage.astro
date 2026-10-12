@@ -1,0 +1,35 @@
+---
+import {
+  buildSrcset,
+  CONTENT_IMAGE_SIZES,
+  type Locale,
+  mediaUrl,
+  pickVariant,
+} from '@soy1limon/core';
+import type { PublicImage } from '@soy1limon/db';
+import { mediaBaseUrl } from '../lib/env.ts';
+
+interface Props {
+  image: PublicImage;
+  lang: Locale;
+  /** Above the fold (e.g. the cover): load immediately and with high priority. */
+  priority?: boolean;
+  sizes?: string;
+}
+
+const { image, lang, priority = false, sizes = CONTENT_IMAGE_SIZES } = Astro.props;
+const base = mediaBaseUrl();
+const fallback = pickVariant(image.variants, 800);
+---
+
+<img
+  src={fallback ? mediaUrl(base, fallback.key) : undefined}
+  srcset={buildSrcset(image.variants, base)}
+  sizes={sizes}
+  alt={image.alt[lang] ?? ''}
+  width={image.width}
+  height={image.height}
+  loading={priority ? 'eager' : 'lazy'}
+  fetchpriority={priority ? 'high' : undefined}
+  decoding="async"
+/>

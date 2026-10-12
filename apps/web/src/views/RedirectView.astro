@@ -1,0 +1,33 @@
+---
+import { type Locale, ui } from '@soy1limon/core';
+
+interface Props {
+  lang: Locale;
+  to: string;
+}
+
+// GitHub Pages cannot send HTTP redirects: an instant meta refresh plus a canonical link tells
+// browsers and search engines where the post moved.
+const { lang, to } = Astro.props;
+const t = ui(lang);
+const target = new URL(to, Astro.site).href;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.redirecting} {to}</title>
+    <meta http-equiv="refresh" content={`0; url=${to}`} />
+    <link rel="canonical" href={target} />
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <main>
+      <p>
+        {t.redirecting} <a href={to}>{target}</a>.
+      </p>
+    </main>
+  </body>
+</html>

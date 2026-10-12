@@ -1,0 +1,38 @@
+---
+import { type Locale, mediaUrl, ui } from '@soy1limon/core';
+import type { PublicImage } from '@soy1limon/db';
+import { mediaBaseUrl } from '../lib/env.ts';
+import ResponsiveImage from './ResponsiveImage.astro';
+
+interface Props {
+  images: PublicImage[];
+  lang: Locale;
+}
+
+const { images, lang } = Astro.props;
+const t = ui(lang);
+const base = mediaBaseUrl();
+// Grid of ~12rem cells: phones get one column, wider screens several.
+const sizes = '(min-width: 48rem) 16rem, 100vw';
+---
+
+<section aria-labelledby="gallery-heading">
+  <h2 id="gallery-heading">{t.gallery}</h2>
+  <ul class="gallery">
+    {images.map((image) => {
+      const largest = image.variants.at(-1);
+      const caption = image.caption[lang];
+      return (
+        <li>
+          <figure>
+            <a href={largest ? mediaUrl(base, largest.key) : undefined}>
+              <ResponsiveImage image={image} lang={lang} sizes={sizes} />
+              <span class="visually-hidden"> ({t.openFullSize})</span>
+            </a>
+            {caption && <figcaption>{caption}</figcaption>}
+          </figure>
+        </li>
+      );
+    })}
+  </ul>
+</section>

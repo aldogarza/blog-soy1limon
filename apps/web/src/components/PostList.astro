@@ -1,0 +1,37 @@
+---
+import { type Locale, ui } from '@soy1limon/core';
+import { formatDate } from '../lib/format.ts';
+import type { SitePost } from '../lib/content.ts';
+
+interface Props {
+  posts: SitePost[];
+  lang: Locale;
+  /** Heading level of each post title, so the outline stays correct on every page. */
+  headingLevel?: 2 | 3;
+}
+
+const { posts, lang, headingLevel = 2 } = Astro.props;
+const t = ui(lang);
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+{posts.length === 0 ? (
+  <p>{t.noPosts}</p>
+) : (
+  <ul class="post-list">
+    {posts.map((post) => (
+      <li>
+        <article>
+          <Heading>
+            <a href={post.path}>{post.title}</a>
+          </Heading>
+          <p>
+            <time datetime={post.publishedAt}>{formatDate(post.publishedAt, lang)}</time> ·{' '}
+            {t.readingTime(post.readingMinutes)}
+          </p>
+          <p>{post.description}</p>
+        </article>
+      </li>
+    ))}
+  </ul>
+)}

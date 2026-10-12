@@ -70,6 +70,11 @@ export const siteConfigSchema = z.object({
      */
     sensitiveTerms: z.array(z.string().min(2)),
   }),
+  blog: z.object({
+    postsPerPage: z.number().int().positive(),
+    /** IANA zone used to display dates, so a build running in UTC does not shift the day. */
+    timeZone: z.string().min(1),
+  }),
   seo: z.object({
     titleMaxLength: z.number().int().positive(),
     descriptionMaxLength: z.number().int().positive(),
@@ -123,6 +128,10 @@ export const siteConfig = {
   },
   privacy: {
     sensitiveTerms: ['Aldo'],
+  },
+  blog: {
+    postsPerPage: 10,
+    timeZone: 'America/Monterrey',
   },
   seo: {
     titleMaxLength: 60,

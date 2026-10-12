@@ -1,0 +1,28 @@
+{
+  "name": "@soy1limon/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Public static site, deployed to GitHub Pages.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@soy1limon/core": "workspace:*",
+    "@soy1limon/db": "workspace:*",
+    "@soy1limon/markdown": "workspace:*",
+    "astro": "^7.3.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0",
+    "pagefind": "^1.5.2",
+    "typescript": "~6.0.3"
+  }
+}

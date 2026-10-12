@@ -1,0 +1,9 @@
+{
+  "extends": ["astro/tsconfigs/strict", "../../tsconfig.base.json"],
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
+  },
+  "include": [".astro/types.d.ts", "src", "e2e", "*.config.ts", "*.config.mjs"],
+  "exclude": ["dist"]
+}

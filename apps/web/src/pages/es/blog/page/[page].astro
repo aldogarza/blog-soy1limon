@@ -1,0 +1,18 @@
+---
+import { siteConfig } from '@soy1limon/core';
+import type { GetStaticPaths } from 'astro';
+import { postsIn, siteContent } from '../../../../lib/content.ts';
+import { type Page, paginate } from '../../../../lib/paginate.ts';
+import type { SitePost } from '../../../../lib/content.ts';
+import BlogIndexView from '../../../../views/BlogIndexView.astro';
+
+// Page 1 is /blog/ itself; this route only emits pages 2 and later.
+export const getStaticPaths = (async () => {
+  const pages = paginate(postsIn(await siteContent(), 'es'), siteConfig.blog.postsPerPage);
+  return pages.slice(1).map((page) => ({ params: { page: String(page.page) }, props: { page } }));
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<SitePost> };
+---
+
+<BlogIndexView lang="es" posts={page.items} page={page.page} totalPages={page.totalPages} />

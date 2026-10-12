@@ -29,9 +29,12 @@
     "db:push": "supabase db push --linked",
     "db:backup": "bash scripts/db-backup.sh",
     "media": "node packages/media/src/cli.ts",
-    "test:e2e": "pnpm --filter @soy1limon/admin test:e2e",
+    "test:e2e": "pnpm test:e2e:admin && pnpm test:e2e:web",
     "admin": "pnpm --filter @soy1limon/admin build && pnpm --filter @soy1limon/admin start",
-    "admin:dev": "pnpm --filter @soy1limon/admin dev"
+    "admin:dev": "pnpm --filter @soy1limon/admin dev",
+    "test:e2e:admin": "pnpm --filter @soy1limon/admin test:e2e",
+    "test:e2e:web": "pnpm --filter @soy1limon/web test:e2e",
+    "web": "pnpm --filter @soy1limon/web dev"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

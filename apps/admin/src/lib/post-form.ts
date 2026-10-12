@@ -1,7 +1,7 @@
 import {
-  DEFAULT_LOCALE,
   type Locale,
   LOCALES,
+  postPath,
   SLUG_MAX_LENGTH,
   SLUG_PATTERN,
   siteConfig,
@@ -36,10 +36,8 @@ export type PostFormValues = z.infer<typeof postFormSchema>;
 export const TITLE_RECOMMENDED = siteConfig.seo.titleMaxLength;
 export const DESCRIPTION_RECOMMENDED = siteConfig.seo.descriptionMaxLength;
 
-/** Public path of a post; the default language has no prefix. */
-export function publicPath(lang: Locale, slug: string): string {
-  return lang === DEFAULT_LOCALE ? `/blog/${slug}/` : `/${lang}/blog/${slug}/`;
-}
+/** Public path of a post (shared with the public site through packages/core). */
+export const publicPath = (lang: Locale, slug: string): string => postPath(lang, slug);
 
 export function valuesFromPost(
   post: {

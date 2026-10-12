@@ -1,0 +1,29 @@
+---
+import { blogPath, type Locale, otherLocale, siteConfig, ui } from '@soy1limon/core';
+import Pagination from '../components/Pagination.astro';
+import PostList from '../components/PostList.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { SitePost } from '../lib/content.ts';
+
+interface Props {
+  lang: Locale;
+  posts: SitePost[];
+  page: number;
+  totalPages: number;
+}
+
+const { lang, posts, page, totalPages } = Astro.props;
+const t = ui(lang);
+const title = page > 1 ? `${t.blog} · ${t.page(page, totalPages)}` : t.blog;
+---
+
+<BaseLayout
+  lang={lang}
+  title={title}
+  description={siteConfig.description[lang]}
+  alternatePath={blogPath(otherLocale(lang))}
+>
+  <h1>{title}</h1>
+  <PostList posts={posts} lang={lang} />
+  <Pagination lang={lang} page={page} totalPages={totalPages} />
+</BaseLayout>

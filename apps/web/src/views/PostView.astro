@@ -1,0 +1,77 @@
+---
+import { type Locale, tagPath, ui } from '@soy1limon/core';
+import Gallery from '../components/Gallery.astro';
+import ResponsiveImage from '../components/ResponsiveImage.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { type SitePost, tagLabel } from '../lib/content.ts';
+import { formatDate } from '../lib/format.ts';
+
+interface Props {
+  post: SitePost;
+}
+
+const { post } = Astro.props;
+const lang: Locale = post.lang;
+const t = ui(lang);
+const published = formatDate(post.publishedAt, lang);
+const updated = formatDate(post.updatedAt, lang);
+---
+
+<BaseLayout
+  lang={lang}
+  title={post.title}
+  description={post.description}
+  alternatePath={post.translation?.path}
+>
+  <article data-pagefind-body>
+    <header>
+      <h1>{post.title}</h1>
+      <p>
+        {t.publishedOn} <time datetime={post.publishedAt}>{published}</time>
+        {updated !== published && (
+          <>
+            {' · '}
+            {t.updatedOn} <time datetime={post.updatedAt}>{updated}</time>
+          </>
+        )}
+        {' · '}
+        {t.readingTime(post.readingMinutes)}
+      </p>
+      {post.tags.length > 0 && (
+        <p>
+          {t.taggedWith}:{' '}
+          {post.tags.map((tag, index) => (
+            <>
+              {index > 0 && ', '}
+              <a href={tagPath(lang, tag.slug)} rel="tag">
+                {tagLabel(tag, lang)}
+              </a>
+            </>
+          ))}
+        </p>
+      )}
+      {post.translation && (
+        <p>
+          <a
+            href={post.translation.path}
+            hreflang={post.translation.lang}
+            lang={post.translation.lang}
+          >
+            {t.readInOtherLanguage}: {post.translation.title}
+          </a>
+        </p>
+      )}
+    </header>
+
+    {post.cover && (
+      <figure>
+        <ResponsiveImage image={post.cover} lang={lang} priority />
+        {post.cover.caption[lang] && <figcaption>{post.cover.caption[lang]}</figcaption>}
+      </figure>
+    )}
+
+    <Fragment set:html={post.html} />
+
+    {post.gallery.length > 0 && <Gallery images={post.gallery} lang={lang} />}
+  </article>
+</BaseLayout>

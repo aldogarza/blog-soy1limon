@@ -1,0 +1,10 @@
+---
+import { siteConfig } from '@soy1limon/core';
+import { postsIn, siteContent } from '../../lib/content.ts';
+import { paginate } from '../../lib/paginate.ts';
+import BlogIndexView from '../../views/BlogIndexView.astro';
+
+const [first] = paginate(postsIn(await siteContent(), 'en'), siteConfig.blog.postsPerPage);
+---
+
+<BlogIndexView lang="en" posts={first?.items ?? []} page={1} totalPages={first?.totalPages ?? 1} />
