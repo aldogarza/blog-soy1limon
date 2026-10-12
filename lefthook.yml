@@ -1,0 +1,20 @@
+# Git hooks managed by lefthook (installed by `pnpm install` via the root "prepare" script).
+pre-commit:
+  parallel: true
+  commands:
+    secrets:
+      # Blocks commits that contain credentials. Requires gitleaks on PATH (see docs/setup.md).
+      run: |
+        if ! command -v gitleaks >/dev/null 2>&1; then
+          echo "gitleaks is not installed; refusing to commit without a secret scan. See docs/setup.md." >&2
+          exit 1
+        fi
+        gitleaks git --pre-commit --staged --redact --no-banner
+    lint:
+      glob: '*.{js,mjs,cjs,ts,mts,cts,vue,astro}'
+      run: pnpm exec eslint --fix {staged_files}
+      stage_fixed: true
+    format:
+      glob: '*.{js,mjs,cjs,ts,mts,cts,vue,astro,json,md,yml,yaml,css}'
+      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true

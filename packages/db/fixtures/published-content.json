@@ -1,0 +1,54 @@
+{
+  "posts": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "lang": "en",
+      "slug": "hello-world",
+      "title": "Hello, world",
+      "description": "The first post of this blog: what it is about and how it is built.",
+      "bodyMd": "This blog is written in English and Spanish.\n\n## Why\n\nTo share photos and notes.",
+      "publishedAt": "2026-10-01T16:00:00.000000+00:00",
+      "updatedAt": "2026-10-01T16:00:00.000000+00:00",
+      "translationKey": "00000000-0000-4000-8000-0000000000a1",
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000103"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "lang": "es",
+      "slug": "hola-mundo",
+      "title": "Hola, mundo",
+      "description": "La primera entrada de este blog: de qué trata y cómo está hecho.",
+      "bodyMd": "Este blog está escrito en inglés y español.\n\n## Por qué\n\nPara compartir fotos y notas.",
+      "publishedAt": "2026-10-01T16:00:00.000000+00:00",
+      "updatedAt": "2026-10-01T16:00:00.000000+00:00",
+      "translationKey": "00000000-0000-4000-8000-0000000000a1",
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000103"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    }
+  ],
+  "tags": [
+    {
+      "id": "00000000-0000-4000-8000-000000000101",
+      "slug": "photography",
+      "labels": { "en": "Photography", "es": "Fotografía" }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000102",
+      "slug": "travel",
+      "labels": { "en": "Travel", "es": "Viajes" }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000103",
+      "slug": "notes",
+      "labels": { "en": "Notes", "es": "Notas" }
+    }
+  ],
+  "images": []
+}

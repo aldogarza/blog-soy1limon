@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: npm # also handles pnpm lockfiles
+    directory: /
+    schedule:
+      interval: weekly
+    # Supply-chain guard: let new releases age before proposing them.
+    cooldown:
+      default-days: 3
+    groups:
+      dev-tooling:
+        dependency-type: development
+      runtime:
+        dependency-type: production
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3

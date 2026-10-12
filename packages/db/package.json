@@ -1,0 +1,19 @@
+{
+  "name": "@soy1limon/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Supabase clients, typed queries and the offline fixtures content source.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./admin": "./src/admin/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@soy1limon/core": "workspace:*",
+    "@supabase/supabase-js": "^2.117.3",
+    "zod": "^4.6.5"
+  }
+}

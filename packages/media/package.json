@@ -1,0 +1,26 @@
+{
+  "name": "@soy1limon/media",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Image pipeline: validation, metadata read/write, WebP variants, watermark and storage.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "soy1limon-media": "./src/cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "cli": "node src/cli.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1149.0",
+    "@soy1limon/core": "workspace:*",
+    "exiftool-vendored": "^39.0.1",
+    "file-type": "^22.1.1",
+    "heic-decode": "^2.1.0",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.5"
+  }
+}

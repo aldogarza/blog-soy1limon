@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+.turbo/
+coverage/
+
+# Environment files: never commit real values, only *.example templates
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Local data that must never reach the public repo
+backups/
+.media-local/
+supabase/.temp/
+supabase/.branches/
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Output of `pnpm media process`
+media-out/

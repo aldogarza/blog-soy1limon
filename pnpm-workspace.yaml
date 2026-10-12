@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Dependency install scripts are blocked unless listed here as true.
+# lefthook: its postinstall only installs git hooks, which the root "prepare" script already does.
+allowBuilds:
+  lefthook: false
+
+# Supply-chain guard: only install versions published at least 24 hours ago.
+minimumReleaseAge: 1440

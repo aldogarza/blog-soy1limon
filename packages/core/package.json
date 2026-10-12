@@ -1,0 +1,18 @@
+{
+  "name": "@soy1limon/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared schemas, types, configuration and pure helpers used by every app and package.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./src/env.ts",
+    "./site-config": "./src/site-config.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
+}
