@@ -1,30 +1,702 @@
 /*
- * iStyle (site): iOS-inspired look with translucent glass bars, grouped lists and rounded cards.
- * Work in progress: the tokens are final, the component styles arrive in the styling phase.
+ * iStyle (site): iOS-inspired look. A translucent glass bar on top, large titles, grouped lists
+ * of rounded cards on a grey background, and pill-shaped tags and buttons.
+ * Every rule lives in the theme layer; the foundation's a11y layer still wins (docs/themes.md).
  */
 @import '../foundation/site.css';
 @import './tokens.css' layer(theme);
 
 @layer theme {
+  /* ---------------------------------------------------------------------------------------------
+   * Page
+   * ------------------------------------------------------------------------------------------- */
   :root {
     font-family: var(--is-font);
+    font-size: 100%;
     line-height: 1.5;
     background-color: var(--is-bg);
     color: var(--is-label);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
-    margin: 0 auto;
-    max-width: 48rem;
-    padding: 0 var(--is-space) 4rem;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header, main and footer span the window; their content sits on one centred column. */
+  .site-header,
+  main,
+  .site-footer {
+    padding-inline: var(--is-gutter);
+  }
+
+  main {
+    flex: 1;
+    padding-block: 1.5rem 4rem;
+  }
+
+  main:focus {
+    outline: none;
+  }
+
+  ::selection {
+    background: var(--is-accent-tint);
   }
 
   a {
     color: var(--is-accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  /* iOS "large title". */
+  h1 {
+    font-size: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-block: 0.5rem 1rem;
+  }
+
+  h2 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   code,
-  pre {
+  pre,
+  kbd {
     font-family: var(--is-font-mono);
+    font-size: 0.9em;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Header: a translucent glass bar
+   * ------------------------------------------------------------------------------------------- */
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding-block: 0.5rem;
+    background: var(--is-surface);
+    border-block-end: 0.5px solid var(--is-separator);
+  }
+
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .site-header {
+      background: var(--is-glass);
+      -webkit-backdrop-filter: saturate(180%) blur(var(--is-glass-blur));
+      backdrop-filter: saturate(180%) blur(var(--is-glass-blur));
+    }
+  }
+
+  /* Sticky only where the bar fits on one line, so it never hides the focused element. */
+  @media (min-width: 46rem) {
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    html {
+      scroll-padding-top: 4.5rem;
+    }
+  }
+
+  .site-brand {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .site-brand a {
+    color: var(--is-label);
+    text-decoration: none;
+  }
+
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-nav a {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 999px;
+    color: var(--is-label);
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+
+  .site-nav a:hover {
+    background: var(--is-fill);
+  }
+
+  .site-nav a[aria-current='page'] {
+    background: var(--is-accent-tint);
+    color: var(--is-accent);
+    font-weight: 600;
+  }
+
+  .lang-switch {
+    margin-inline-start: 0.25rem;
+    padding-inline-start: 0.5rem;
+    border-inline-start: 0.5px solid var(--is-separator);
+  }
+
+  .site-nav .lang-switch a {
+    color: var(--is-accent);
+  }
+
+  /* Phones: the language switch moves next to the site name; the sections fill the second row. */
+  @media (max-width: 45.99rem) {
+    .site-header {
+      position: relative;
+    }
+
+    /* Always its own row, so the language switch beside the name never covers a section. */
+    .site-nav {
+      flex-basis: 100%;
+    }
+
+    .site-nav ul {
+      margin-inline-start: -0.75rem;
+    }
+
+    .lang-switch {
+      position: absolute;
+      top: 0.375rem;
+      inset-inline-end: var(--is-gutter);
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+
+    .site-nav .lang-switch a {
+      margin-inline-end: -0.75rem;
+    }
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Home and lists of posts: an inset grouped list
+   * ------------------------------------------------------------------------------------------- */
+  .page-intro {
+    margin-block: -0.5rem 2rem;
+    color: var(--is-label-secondary);
+    font-size: 1.0625rem;
+  }
+
+  main > section > h2,
+  .gallery > h2 {
+    margin-block: 2rem 0.75rem;
+  }
+
+  .post-list {
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+    background: var(--is-surface);
+    border-radius: var(--is-radius);
+    box-shadow: var(--is-shadow);
+    overflow: hidden;
+  }
+
+  .post-list > li + li {
+    border-block-start: 0.5px solid var(--is-separator);
+    margin-inline-start: 1rem;
+  }
+
+  .post-list > li + li .post-card {
+    padding-inline-start: 0;
+  }
+
+  .post-card {
+    position: relative;
+    padding: 0.875rem 1rem;
+  }
+
+  .post-card :is(h2, h3) {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .post-card :is(h2, h3) a {
+    color: var(--is-label);
+    text-decoration: none;
+  }
+
+  /* The whole row is the link target, like a table cell on iOS. */
+  .post-card :is(h2, h3) a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .post-card:hover {
+    background: var(--is-fill);
+  }
+
+  .post-card:hover :is(h2, h3) a {
+    text-decoration: underline;
+  }
+
+  .post-card:has(a:focus-visible) {
+    background: var(--is-fill);
+  }
+
+  .post-card p {
+    margin: 0.125rem 0 0;
+  }
+
+  .post-card .post-meta {
+    font-size: 0.8125rem;
+  }
+
+  .post-card p:last-child {
+    color: var(--is-label-secondary);
+    font-size: 0.9375rem;
+  }
+
+  main > section > p:last-child,
+  main > p:last-child {
+    margin-block-start: 1rem;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * A post
+   * ------------------------------------------------------------------------------------------- */
+  .post-header {
+    margin-block-end: 1.5rem;
+  }
+
+  .post-meta {
+    margin: 0;
+    color: var(--is-label-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block-start: 0.75rem;
+    color: var(--is-label-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .post-tags ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .post-tags a,
+  .tag-index a {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    background: var(--is-accent-tint);
+    color: var(--is-accent);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .post-tags a:hover,
+  .tag-index a:hover {
+    text-decoration: underline;
+  }
+
+  .post-translation {
+    margin-block: 0.75rem 0;
+    font-size: 0.9375rem;
+  }
+
+  .post-cover {
+    margin: 0 0 2rem;
+  }
+
+  .post-cover img,
+  .post-body img {
+    display: block;
+    border-radius: var(--is-radius-lg);
+    box-shadow: var(--is-shadow);
+  }
+
+  figcaption {
+    margin-block-start: 0.5rem;
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  .post-body {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+
+  .post-body :is(h2, h3, h4) {
+    margin-block: 2.25rem 0.75rem;
+  }
+
+  .post-body h3 {
+    font-size: 1.1875rem;
+  }
+
+  .post-body figure {
+    margin: 2rem 0;
+  }
+
+  .post-body :is(ul, ol) {
+    padding-inline-start: 1.5rem;
+  }
+
+  .post-body li + li {
+    margin-block-start: 0.25rem;
+  }
+
+  .post-body blockquote {
+    margin: 1.5rem 0;
+    padding: 0.25rem 0 0.25rem 1rem;
+    border-inline-start: 4px solid var(--is-accent);
+    color: var(--is-label-secondary);
+  }
+
+  .post-body :not(pre) > code {
+    padding: 0.1em 0.35em;
+    border-radius: 6px;
+    background: var(--is-fill);
+  }
+
+  .post-body pre {
+    padding: 1rem 1.125rem;
+    border-radius: var(--is-radius);
+    border: 0.5px solid var(--is-separator);
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  .post-body hr {
+    margin: 2.5rem auto;
+    width: 30%;
+    border: none;
+    border-block-start: 0.5px solid var(--is-separator);
+  }
+
+  .post-body table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+
+  .post-body :is(th, td) {
+    padding: 0.5rem 0.75rem;
+    border-block-end: 0.5px solid var(--is-separator);
+    text-align: start;
+  }
+
+  /* Shiki: light colours inline, dark colours from CSS variables. */
+  @media (prefers-color-scheme: dark) {
+    .shiki,
+    .shiki span {
+      color: var(--shiki-dark) !important;
+      background-color: var(--shiki-dark-bg) !important;
+    }
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Gallery: rounded tiles
+   * ------------------------------------------------------------------------------------------- */
+  .gallery ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gallery li figure {
+    margin: 0;
+  }
+
+  .gallery li a {
+    display: block;
+    border-radius: var(--is-radius);
+  }
+
+  .gallery li img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--is-radius);
+    background: var(--is-fill);
+  }
+
+  .gallery li figcaption {
+    text-align: start;
+  }
+
+  /* Photo viewer: black, full screen, controls on glass pills (like the iOS Photos app). */
+  .lightbox {
+    --focus-ring-color: #ffffff;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 1rem var(--is-space) 1.25rem;
+    border: none;
+    background: #000000;
+    color: #ffffff;
+  }
+
+  .lightbox[open] {
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  .lightbox-figure {
+    margin: 0;
+  }
+
+  .lightbox-image {
+    border-radius: var(--is-radius);
+  }
+
+  .lightbox-caption,
+  .lightbox-position {
+    margin: 0.5rem 0 0;
+    color: #ebebf5;
+    font-size: 0.9375rem;
+    text-align: center;
+  }
+
+  .lightbox-position {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lightbox-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .lightbox-controls button {
+    background: rgb(255 255 255 / 0.16);
+    color: #ffffff;
+  }
+
+  .lightbox-controls button:hover {
+    background: rgb(255 255 255 / 0.26);
+  }
+
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .lightbox-controls button {
+      -webkit-backdrop-filter: blur(var(--is-glass-blur));
+      backdrop-filter: blur(var(--is-glass-blur));
+    }
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Pagination, tags page, search
+   * ------------------------------------------------------------------------------------------- */
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .pagination p {
+    margin: 0;
+    color: var(--is-label-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .pagination ul {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pagination a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: var(--is-surface);
+    box-shadow: var(--is-shadow);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .tag-index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tag-index li {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .tag-index a {
+    font-size: 0.9375rem;
+  }
+
+  .tag-count {
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+  }
+
+  .search-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.5rem;
+  }
+
+  .search-form label {
+    flex-basis: 100%;
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+  }
+
+  .search-form input {
+    flex: 1 1 12rem;
+    min-width: 0;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--is-control-border);
+    border-radius: var(--is-radius-sm);
+    background: var(--is-surface);
+    color: var(--is-label);
+    font: inherit;
+    font-size: 1.0625rem;
+  }
+
+  button {
+    padding: 0.5rem 1.125rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--is-accent);
+    color: light-dark(#ffffff, #000000);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .search-status {
+    color: var(--is-label-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .search-results {
+    padding: 0;
+    list-style: none;
+  }
+
+  .search-results li {
+    padding: 0.875rem 1rem;
+    background: var(--is-surface);
+    border-radius: var(--is-radius);
+  }
+
+  .search-results li + li {
+    margin-block-start: 0.5rem;
+  }
+
+  .search-results a {
+    font-weight: 600;
+  }
+
+  .search-results p {
+    margin: 0.25rem 0 0;
+    color: var(--is-label-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .search-results mark {
+    background: var(--is-accent-tint);
+    color: inherit;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Footer
+   * ------------------------------------------------------------------------------------------- */
+  .site-footer {
+    padding-block: 1.5rem 2rem;
+    border-block-start: 0.5px solid var(--is-separator);
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  .site-footer small {
+    font-size: inherit;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Motion, only for visitors who did not ask to reduce it
+   * ------------------------------------------------------------------------------------------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .site-nav a,
+    .post-card,
+    .pagination a,
+    .post-tags a,
+    .tag-index a {
+      transition: background-color 0.2s var(--is-ease);
+    }
   }
 }

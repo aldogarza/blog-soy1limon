@@ -138,7 +138,7 @@ export const siteConfig = {
     postsPerPage: 10,
     timeZone: 'America/Monterrey',
   },
-  theme: 'plain',
+  theme: 'istyle',
   seo: {
     titleMaxLength: 60,
     descriptionMaxLength: 160,

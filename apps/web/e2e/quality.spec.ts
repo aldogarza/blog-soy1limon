@@ -72,11 +72,15 @@ test('the keyboard reaches every control, in order, with a visible focus indicat
 }) => {
   for (const path of pages) {
     await page.goto(path);
-    const focusable = await page
-      .locator(
-        'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])',
-      )
-      .count();
+    // Visible controls only: the closed gallery viewer's buttons are not reachable, by design.
+    const focusable = await page.evaluate(
+      () =>
+        [
+          ...document.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])',
+          ),
+        ].filter((element) => element.checkVisibility({ visibilityProperty: true })).length,
+    );
 
     const reached: string[] = [];
     let leftPage = false;

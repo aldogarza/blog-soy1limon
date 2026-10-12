@@ -15,7 +15,7 @@ requirement: a change that breaks one of the checks below is a bug, not a stylin
   modes such as Windows High Contrast keep working.
 - Animations are switched off under `prefers-reduced-motion` (there are none yet).
 - The public site ships no JavaScript except on the search page, which explains itself and links
-  to the archive when scripts are off.
+  to the archive when scripts are off, and the gallery viewer, which falls back to plain links.
 - No audio or video. Any future embed must ship WebVTT captions and a transcript (hearing access).
 - Admin forms: labels and hints tied to every input, `aria-invalid` plus an error summary that
   takes focus, live regions for progress and status, and focus moved to each upload step's heading.
@@ -51,8 +51,8 @@ and after any big change to the layout.
       language. Focus is always visible and moves in reading order.
 - [ ] Admin: upload two photos through the whole stepper, create a post, add cover, gallery (reorder
       with Move up / Move down) and an inline image, preview, publish, unpublish.
-- [ ] Dialogs (image picker, insert image) open with focus inside, close with Esc and return focus
-      to the button that opened them.
+- [ ] Dialogs (image picker, insert image, the gallery viewer) open with focus inside, close with
+      Esc and return focus to the control that opened them.
 
 **Screen reader** (NVDA + Chrome or Firefox on Windows):
 
@@ -76,8 +76,8 @@ and after any big change to the layout.
 
 - Contrast is verified in Chromium. Light and dark mode use the browser's system colours, which
   differ slightly between browsers; they all pass AA, but the numbers are not identical.
-- A gallery photo opens the raw `.webp` file in the browser's image viewer, which has no alt text
-  of its own. The link text says what it opens. An accessible lightbox arrives in the styling phase.
+- Without JavaScript, a gallery photo opens the raw `.webp` file in the browser's image viewer,
+  which has no alt text of its own. The link text says what it opens.
 - Search needs JavaScript (Pagefind). Without it the page says so and links to the archive.
 - Tooling checks that alt text exists, not that it is good. Describing photos well is up to the
   author (the admin shows guidance and a character counter).
@@ -99,4 +99,6 @@ and after any big change to the layout.
 | 2026-10-12 | Admin: error summary and save state re-announced while typing; static `role="alert"`        | Autosave validates silently; one live region per editor; no alerts on page load           |
 | 2026-10-12 | Admin: errors and live status not tied to their fields; Spanish text without `lang`         | `aria-describedby` for slug, name, body and schedule; `lang` on titles, alt text, options |
 | 2026-10-12 | Admin: preview headings joined the editor outline; Enter in "new tag" saved the post        | Preview starts at `h3`; Enter creates the tag                                             |
+| 2026-10-12 | iStyle: language switch overlapped two nav links on phones (target size, 2.5.8)             | Navigation always gets its own row on phones                                              |
+| 2026-10-12 | iStyle admin: tinted buttons fell to 4.3:1 on hover; diff text was grey on colour           | Lighter hover tint; diff text uses the main label colour                                  |
 | 2026-10-12 | Live site Lighthouse (mobile): 100 in performance, accessibility, best practices and SEO    | —                                                                                         |

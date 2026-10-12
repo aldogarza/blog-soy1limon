@@ -94,4 +94,4 @@ Internal packages export TypeScript source directly (no build step); apps compil
 - [x] Phase 6 — SEO
 - [x] Phase 7 — Deploy & operations
 - [x] Phase 8 — Quality pass (automated; the owner's NVDA pass is in docs/accessibility.md)
-- [ ] Phase 9 — Styling
+- [x] Phase 9 — Styling (iStyle theme, gallery viewer)

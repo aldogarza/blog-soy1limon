@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import { crawl } from './crawl.ts';
 
 test('every page is reachable, accessible, well structured and script-free', async ({
@@ -35,9 +35,10 @@ test('every page is reachable, accessible, well structured and script-free', asy
       }
     }
 
-    // JSON-LD blocks are data, not code.
+    // JSON-LD blocks are data, not code. Only search and the gallery viewer use scripts.
     const scripts = await page.locator('script:not([type="application/ld+json"])').count();
-    if (!path.endsWith('/search/')) expect(scripts, `no JavaScript on ${path}`).toBe(0);
+    const needsScript = path.endsWith('/search/') || (await page.locator('.gallery').count()) > 0;
+    if (!needsScript) expect(scripts, `no JavaScript on ${path}`).toBe(0);
 
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
@@ -55,6 +56,13 @@ test('every page is reachable, accessible, well structured and script-free', asy
     expect(response.status(), `asset ${asset}`).toBe(200);
   }
 });
+
+async function expectNoViolations(page: Page) {
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  expect(results.violations.map((v) => v.id)).toEqual([]);
+}
 
 test('every page has canonical, description, social tags, valid JSON-LD and reciprocal hreflang', async ({
   page,
@@ -167,6 +175,34 @@ test('a gallery links every photo to its largest file, with alt text in the post
     'Un bosque verde que se abre a un claro luminoso',
   );
   await expect(gallery.getByText('Sendero en el bosque')).toBeVisible();
+});
+
+test('a gallery photo opens in an accessible viewer that keeps and returns focus', async ({
+  page,
+}) => {
+  await page.goto('/es/blog/hola-mundo/');
+  const gallery = page.getByRole('region', { name: 'Galería' });
+  const first = gallery.getByRole('link').first();
+  await first.click();
+
+  const viewer = page.getByRole('dialog', { name: 'Galería' });
+  await expect(viewer).toBeVisible();
+  await expect(viewer.getByRole('img')).toHaveAttribute(
+    'alt',
+    'Un bosque verde que se abre a un claro luminoso',
+  );
+  await expect(viewer.getByText('Foto 1 de 2')).toBeVisible();
+  await expect(viewer.getByRole('button', { name: 'Foto siguiente' })).toBeFocused();
+  await expectNoViolations(page);
+
+  await page.keyboard.press('ArrowRight');
+  await expect(viewer.getByText('Foto 2 de 2')).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+  await expect(viewer.getByText('Foto 1 de 2')).toBeVisible();
+
+  await page.keyboard.press('Escape');
+  await expect(viewer).toBeHidden();
+  await expect(first).toBeFocused();
 });
 
 test('an old address redirects to the renamed post', async ({ page }) => {

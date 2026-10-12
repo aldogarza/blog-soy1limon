@@ -1,30 +1,749 @@
 /*
- * iStyle (admin): iOS-inspired look with translucent glass bars, grouped lists and rounded cards.
- * Work in progress: the tokens are final, the component styles arrive in the styling phase.
+ * iStyle (admin): the iOS Settings look. A glass bar on top, large titles, each section a rounded
+ * card on the grouped background, key-value lists as table rows, the image picker as a sheet.
  */
 @import '../foundation/admin.css';
 @import './tokens.css' layer(theme);
 
 @layer theme {
   :root {
+    --is-content: 64rem;
     font-family: var(--is-font);
     line-height: 1.5;
     background-color: var(--is-bg);
     color: var(--is-label);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
-    margin: 0 auto;
-    max-width: 72rem;
-    padding: 0 var(--is-space) 4rem;
+    margin: 0;
+  }
+
+  .admin-header,
+  main {
+    padding-inline: var(--is-gutter);
+  }
+
+  main {
+    padding-block: 1.5rem 4rem;
+  }
+
+  main:focus {
+    outline: none;
   }
 
   a {
     color: var(--is-accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  h1 {
+    margin-block: 0.5rem 1.25rem;
+    font-size: 2.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  h2 {
+    margin-block: 0 0.75rem;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    margin-block: 1.25rem 0.5rem;
+    font-size: 1.0625rem;
   }
 
   code,
   pre {
     font-family: var(--is-font-mono);
+    font-size: 0.875em;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Header
+   * ------------------------------------------------------------------------------------------- */
+  .admin-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding-block: 0.5rem;
+    background: var(--is-surface);
+    border-block-end: 0.5px solid var(--is-separator);
+  }
+
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .admin-header {
+      background: var(--is-glass);
+      -webkit-backdrop-filter: saturate(180%) blur(var(--is-glass-blur));
+      backdrop-filter: saturate(180%) blur(var(--is-glass-blur));
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .admin-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    html {
+      scroll-padding-top: 4.5rem;
+    }
+  }
+
+  .admin-brand {
+    margin: 0;
+  }
+
+  .admin-brand .hint {
+    display: inline;
+    margin-inline-start: 0.5rem;
+  }
+
+  .admin-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .admin-nav a {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 999px;
+    color: var(--is-label);
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+
+  .admin-nav a:hover {
+    background: var(--is-fill);
+  }
+
+  .admin-nav a:is([aria-current='page'], [aria-current='true']) {
+    background: var(--is-accent-tint);
+    color: var(--is-accent);
+    font-weight: 600;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Sections as cards on the grouped background
+   * ------------------------------------------------------------------------------------------- */
+  main section,
+  main > form > fieldset,
+  .error-summary,
+  .warning {
+    margin-block: 0 1.25rem;
+    padding: 1.25rem;
+    background: var(--is-surface);
+    border-radius: var(--is-radius);
+    box-shadow: var(--is-shadow);
+  }
+
+  main section section {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  fieldset {
+    min-width: 0;
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 0.5px solid var(--is-separator);
+    border-radius: var(--is-radius-sm);
+  }
+
+  legend {
+    padding-inline: 0.25rem;
+    font-weight: 600;
+  }
+
+  main > form > fieldset {
+    border: none;
+  }
+
+  main > form > fieldset > legend {
+    float: left;
+    width: 100%;
+    margin-block-end: 0.75rem;
+    padding: 0;
+    font-size: 1.0625rem;
+  }
+
+  main > form > fieldset > legend + * {
+    clear: left;
+  }
+
+  /* Wide tables at the top level of a page get the same card. */
+  main > .table-scroll {
+    padding: 0.5rem 0.75rem;
+    background: var(--is-surface);
+    border-radius: var(--is-radius);
+    box-shadow: var(--is-shadow);
+  }
+
+  /* Filter forms of the lists: one row of label + select pairs. */
+  main > form:not(:has(fieldset)) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-block: 1rem;
+  }
+
+  main > form:not(:has(fieldset)) :is(select, input) {
+    width: auto;
+    min-width: 10rem;
+    margin: 0 0.5rem 0 0;
+  }
+
+  figure {
+    margin-inline: 0;
+  }
+
+  .danger-zone h2 {
+    color: var(--is-danger);
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Forms
+   * ------------------------------------------------------------------------------------------- */
+  label {
+    font-weight: 600;
+  }
+
+  .field {
+    margin-block: 0.875rem;
+  }
+
+  .field > label {
+    display: inline-block;
+    margin-block-end: 0.25rem;
+  }
+
+  .required {
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+  }
+
+  .hint {
+    display: block;
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+  }
+
+  input:is([type='text'], [type='url'], [type='search'], [type='datetime-local']),
+  textarea,
+  select {
+    display: block;
+    width: 100%;
+    max-width: 40rem;
+    margin-block: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--is-control-border);
+    border-radius: var(--is-radius-sm);
+    background: var(--is-surface-raised);
+    color: var(--is-label);
+    font: inherit;
+  }
+
+  input[type='datetime-local'] {
+    width: auto;
+  }
+
+  textarea {
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  textarea[id$='bodyMd'] {
+    max-width: none;
+    font-family: var(--is-font-mono);
+    font-size: 0.9375rem;
+  }
+
+  input[type='file'] {
+    max-width: 100%;
+    font: inherit;
+  }
+
+  input[type='file']::file-selector-button {
+    margin-inline-end: 0.75rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--is-accent);
+    color: light-dark(#ffffff, #000000);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  input:is([type='checkbox'], [type='radio']),
+  meter {
+    accent-color: var(--is-accent);
+  }
+
+  input:is([type='checkbox'], [type='radio']) {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0 0.5rem 0 0;
+    vertical-align: -0.2em;
+  }
+
+  [aria-invalid='true'] {
+    border-color: var(--is-danger);
+    box-shadow: 0 0 0 1px var(--is-danger);
+  }
+
+  .error {
+    color: var(--is-danger);
+    font-weight: 600;
+  }
+
+  .error-summary {
+    border: 2px solid var(--is-danger);
+    box-shadow: none;
+  }
+
+  .error-summary :is(h2, h3) {
+    margin-block-start: 0;
+    color: var(--is-danger);
+  }
+
+  .warning {
+    border-inline-start: 4px solid var(--is-warning);
+  }
+
+  .warning :is(h2, h3) {
+    margin-block-start: 0;
+  }
+
+  details {
+    margin-block: 0.75rem;
+  }
+
+  summary {
+    color: var(--is-accent);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Buttons: filled for the form's main action, tinted otherwise, red in the danger zone
+   * ------------------------------------------------------------------------------------------- */
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--is-accent-tint);
+    color: var(--is-accent);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* 15% keeps the accent text above 4.5:1 on hover. */
+  button:hover {
+    background: color-mix(in srgb, var(--is-accent) 15%, var(--is-surface));
+  }
+
+  button[type='submit'] {
+    background: var(--is-accent);
+    color: light-dark(#ffffff, #000000);
+  }
+
+  button[type='submit']:hover {
+    background: color-mix(in srgb, var(--is-accent) 85%, var(--is-label));
+  }
+
+  .danger-zone button[type='submit'] {
+    background: var(--is-danger);
+    color: light-dark(#ffffff, #000000);
+  }
+
+  button:disabled {
+    background: var(--is-fill);
+    color: var(--is-label-secondary);
+    cursor: not-allowed;
+  }
+
+  .actions,
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block: 1rem;
+  }
+
+  .toolbar {
+    margin-block: 0.5rem;
+  }
+
+  .toolbar button {
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--is-radius-sm);
+    background: var(--is-fill);
+    color: var(--is-label);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .toolbar button .hint {
+    display: inline;
+    font-size: 0.8125rem;
+  }
+
+  .inline-form {
+    display: inline;
+    margin-inline-start: 0.5rem;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Lists, tables and key-value rows
+   * ------------------------------------------------------------------------------------------- */
+  .plain {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .plain li {
+    margin-block: 0.375rem;
+  }
+
+  /* Settings-style rows: label on the left, value on the right. */
+  main dl {
+    display: grid;
+    grid-template-columns: minmax(8rem, max-content) 1fr;
+    margin: 0;
+  }
+
+  main dt,
+  main dd {
+    margin: 0;
+    padding: 0.625rem 0;
+    border-block-end: 0.5px solid var(--is-separator);
+  }
+
+  main dt {
+    padding-inline-end: 1rem;
+  }
+
+  main dd {
+    color: var(--is-label-secondary);
+    text-align: end;
+    overflow-wrap: anywhere;
+  }
+
+  main dl > :nth-last-child(-n + 2) {
+    border-block-end: none;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+
+  caption:not(.visually-hidden) {
+    margin-block-end: 0.5rem;
+    font-weight: 600;
+    text-align: start;
+  }
+
+  th {
+    padding: 0.5rem 0.75rem;
+    color: var(--is-label-secondary);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-align: start;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  td {
+    padding: 0.625rem 0.75rem;
+    border-block-start: 0.5px solid var(--is-separator);
+    vertical-align: top;
+  }
+
+  td code {
+    color: var(--is-label-secondary);
+  }
+
+  .table-scroll {
+    border-radius: var(--is-radius-sm);
+  }
+
+  meter {
+    display: block;
+    width: 100%;
+    max-width: 30rem;
+    height: 0.875rem;
+    margin-block: 0.5rem;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Images: library grid, picker sheet, previews, drop zone
+   * ------------------------------------------------------------------------------------------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid figure {
+    margin: 0;
+  }
+
+  .grid img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--is-radius-sm);
+    background: var(--is-fill);
+  }
+
+  .grid figcaption {
+    margin-block-start: 0.375rem;
+    overflow-wrap: anywhere;
+    font-size: 0.9375rem;
+  }
+
+  .picker {
+    width: min(60rem, calc(100% - 2rem));
+    max-height: 85dvh;
+    padding: 1.5rem;
+    border: none;
+    border-radius: var(--is-radius-lg);
+    background: var(--is-surface);
+    color: var(--is-label);
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.3);
+  }
+
+  .picker::backdrop {
+    background: rgb(0 0 0 / 0.4);
+  }
+
+  .picker fieldset {
+    padding: 0;
+    border: none;
+  }
+
+  /* The checkbox sits on the photo's corner, like selecting in Photos. */
+  .picker .grid li {
+    position: relative;
+  }
+
+  .picker .grid input {
+    position: absolute;
+    top: 0.875rem;
+    inset-inline-start: 0.875rem;
+    z-index: 1;
+    margin: 0;
+  }
+
+  .picker .grid label {
+    display: block;
+    padding: 0.5rem;
+    border: 2px solid transparent;
+    border-radius: var(--is-radius);
+    font-weight: 400;
+    cursor: pointer;
+  }
+
+  .picker .grid input:checked + label {
+    border-color: var(--is-accent);
+    background: var(--is-accent-tint);
+  }
+
+  .picker .grid label span {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .picker .grid label > span:first-of-type {
+    font-weight: 600;
+  }
+
+  .upload-preview,
+  .detail-preview {
+    display: block;
+    width: auto;
+    border-radius: var(--is-radius);
+    box-shadow: var(--is-shadow);
+  }
+
+  .upload-preview {
+    max-height: 50vh;
+  }
+
+  .detail-preview {
+    max-height: 60vh;
+  }
+
+  main > figure {
+    margin: 0 0 1.5rem;
+  }
+
+  figcaption {
+    margin-block-start: 0.5rem;
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+  }
+
+  .drop-zone {
+    padding: 2rem 1.5rem;
+    border: 2px dashed var(--is-control-border);
+    border-radius: var(--is-radius-lg);
+    background: var(--is-bg);
+    text-align: center;
+  }
+
+  .drop-zone input[type='file'] {
+    display: block;
+    margin: 1rem auto 0;
+  }
+
+  .drop-zone.dragging {
+    border-color: var(--is-accent);
+    background: var(--is-accent-tint);
+  }
+
+  .gallery-list {
+    padding: 0;
+    list-style-position: inside;
+  }
+
+  .gallery-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding-block: 0.5rem;
+    border-block-end: 0.5px solid var(--is-separator);
+  }
+
+  .gallery-thumb {
+    width: 4rem;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--is-radius-sm);
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Editor: search preview, post preview, history
+   * ------------------------------------------------------------------------------------------- */
+  .serp {
+    max-width: 40rem;
+    margin: 1rem 0 0;
+    padding: 1rem;
+    border: 0.5px solid var(--is-separator);
+    border-radius: var(--is-radius);
+    background: var(--is-surface-raised);
+  }
+
+  .serp p {
+    margin: 0.125rem 0;
+  }
+
+  .serp-path {
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+  }
+
+  .serp-title {
+    color: var(--is-accent);
+    font-size: 1.1875rem;
+  }
+
+  .serp-description {
+    color: var(--is-label-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .preview {
+    padding: 1.25rem;
+    border: 0.5px solid var(--is-separator);
+    border-radius: var(--is-radius);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+
+  .preview img {
+    border-radius: var(--is-radius);
+  }
+
+  .preview figure {
+    margin-inline: 0;
+  }
+
+  .preview pre {
+    overflow-x: auto;
+    padding: 1rem;
+    border-radius: var(--is-radius-sm);
+  }
+
+  .save-state {
+    color: var(--is-label-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .diff {
+    overflow-x: auto;
+    padding: 1rem;
+    border-radius: var(--is-radius-sm);
+    background: var(--is-bg);
+    white-space: pre-wrap;
+  }
+
+  ins,
+  del {
+    color: var(--is-label);
+  }
+
+  ins {
+    background: light-dark(#d7f5dd, #133d1d);
+    text-decoration: none;
+  }
+
+  del {
+    background: light-dark(#fde0df, #4a1513);
+  }
+
+  /* Shiki in the preview: dark colours from CSS variables. */
+  @media (prefers-color-scheme: dark) {
+    .shiki,
+    .shiki span {
+      color: var(--shiki-dark) !important;
+      background-color: var(--shiki-dark-bg) !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    button,
+    .admin-nav a,
+    .picker .grid label {
+      transition:
+        background-color 0.2s var(--is-ease),
+        border-color 0.2s var(--is-ease);
+    }
   }
 }

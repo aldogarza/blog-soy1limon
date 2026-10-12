@@ -33,6 +33,20 @@
   .skip-link:focus {
     top: 1rem;
   }
+
+  /* Gallery viewer (a <dialog> added by the gallery script): the photo always fits the window. */
+  .lightbox-image {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100dvh - 10rem);
+    width: auto;
+    height: auto;
+    margin-inline: auto;
+  }
+
+  html:has(.lightbox[open]) {
+    overflow: hidden;
+  }
 }
 
 @layer a11y {

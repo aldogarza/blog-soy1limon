@@ -15,6 +15,11 @@
   --is-glass-blur: 20px;
   --is-separator: light-dark(rgb(60 60 67 / 0.29), rgb(84 84 88 / 0.6));
 
+  /* Fills behind controls and pills; borders of inputs reach 3:1 against their background. */
+  --is-fill: light-dark(rgb(120 120 128 / 0.12), rgb(120 120 128 / 0.24));
+  --is-accent-tint: light-dark(rgb(0 98 204 / 0.1), rgb(77 163 255 / 0.18));
+  --is-control-border: light-dark(#8a8a8e, #8e8e93);
+
   /* Text */
   --is-label: light-dark(#000000, #ffffff);
   --is-label-secondary: light-dark(#6c6c70, #aeaeb2);
@@ -27,7 +32,11 @@
   --is-radius: 12px;
   --is-radius-lg: 20px;
   --is-space: 1rem;
+  --is-content: 44rem;
+  /* Side padding that centres a full-width bar's content on the same column as the page. */
+  --is-gutter: max(var(--is-space), (100% - var(--is-content)) / 2);
   --is-shadow: 0 1px 3px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.06);
+  --is-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
 
   /* System font stack: San Francisco on Apple devices, no font download anywhere. */
   --is-font:

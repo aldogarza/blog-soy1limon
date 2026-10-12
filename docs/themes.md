@@ -3,10 +3,10 @@
 The public site and the admin share one markup and can wear different themes. Why it works this
 way: [ADR 0006](adr/0006-themes-over-semantic-html.md).
 
-| Theme    | Status                                                          |
-| -------- | --------------------------------------------------------------- |
-| `plain`  | Active. System colours, no decoration; the reference theme      |
-| `istyle` | In progress (styling phase): design tokens done, styles to come |
+| Theme    | Status                                                                   |
+| -------- | ------------------------------------------------------------------------ |
+| `istyle` | **Active.** iOS-inspired: glass bars, large titles, grouped cards, pills |
+| `plain`  | System colours, no decoration; the reference theme                       |
 
 ## Choosing and previewing a theme
 
@@ -14,8 +14,8 @@ The active theme is `theme` in `packages/core/src/site-config.ts`. To try anothe
 changing it:
 
 ```sh
-THEME=istyle pnpm web      # public site
-THEME=istyle pnpm admin    # admin
+THEME=plain pnpm web       # public site
+THEME=plain pnpm admin     # admin
 ```
 
 An unknown name stops the build with the list of available themes.
@@ -64,26 +64,27 @@ one here first.
 
 ### Public site
 
-| Hook                                                | Element and meaning                                                                        |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `.skip-link`                                        | First link of every page                                                                   |
-| `.site-header`, `.site-brand`                       | Page banner and the site name inside it                                                    |
-| `.site-nav`, `.lang-switch`                         | Main navigation; the item that switches language                                           |
-| `[aria-current="page"]`                             | The navigation link of the current page                                                    |
-| `.page-intro`                                       | Introductory paragraph under the home `h1`                                                 |
-| `.post-list`, `.post-card`                          | List of posts (`ul`) and each post summary (`article`)                                     |
-| `.post`                                             | The `article` on a post page                                                               |
-| `.post-header`, `.post-meta`                        | Title block; date and reading time line (also in cards)                                    |
-| `.post-tags`                                        | Label plus `ul` of tag links (`a[rel="tag"]`)                                              |
-| `.post-translation`                                 | Link to the post in the other language                                                     |
-| `.post-cover`                                       | Cover `figure`                                                                             |
-| `.post-body`                                        | The rendered Markdown (headings start at `h2`, `figure`, `pre.shiki`, tables, blockquotes) |
-| `.gallery`                                          | Gallery `section` with an `h2` and a `ul` of `figure`s                                     |
-| `.pagination`                                       | Pagination `nav`; links carry `rel="prev"` / `rel="next"`                                  |
-| `.tag-index`, `.tag-count`                          | List of all tags; the post count next to each                                              |
-| `.search-form`, `.search-status`, `.search-results` | Search page                                                                                |
-| `.site-footer`                                      | Page footer (`small` holds the copyright)                                                  |
-| `.visually-hidden`                                  | Text for screen readers only (never restyle)                                               |
+| Hook                                                                                                                | Element and meaning                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `.skip-link`                                                                                                        | First link of every page                                                                                   |
+| `.site-header`, `.site-brand`                                                                                       | Page banner and the site name inside it                                                                    |
+| `.site-nav`, `.lang-switch`                                                                                         | Main navigation; the item that switches language                                                           |
+| `[aria-current="page"]`                                                                                             | The navigation link of the current page                                                                    |
+| `.page-intro`                                                                                                       | Introductory paragraph under the home `h1`                                                                 |
+| `.post-list`, `.post-card`                                                                                          | List of posts (`ul`) and each post summary (`article`)                                                     |
+| `.post`                                                                                                             | The `article` on a post page                                                                               |
+| `.post-header`, `.post-meta`                                                                                        | Title block; date and reading time line (also in cards)                                                    |
+| `.post-tags`                                                                                                        | Label plus `ul` of tag links (`a[rel="tag"]`)                                                              |
+| `.post-translation`                                                                                                 | Link to the post in the other language                                                                     |
+| `.post-cover`                                                                                                       | Cover `figure`                                                                                             |
+| `.post-body`                                                                                                        | The rendered Markdown (headings start at `h2`, `figure`, `pre.shiki`, tables, blockquotes)                 |
+| `.gallery`                                                                                                          | Gallery `section` with an `h2` and a `ul` of `figure`s                                                     |
+| `.pagination`                                                                                                       | Pagination `nav`; links carry `rel="prev"` / `rel="next"`                                                  |
+| `.tag-index`, `.tag-count`                                                                                          | List of all tags; the post count next to each                                                              |
+| `.search-form`, `.search-status`, `.search-results`                                                                 | Search page                                                                                                |
+| `.site-footer`                                                                                                      | Page footer (`small` holds the copyright)                                                                  |
+| `.lightbox`, `.lightbox-figure`, `.lightbox-image`, `.lightbox-caption`, `.lightbox-position`, `.lightbox-controls` | Gallery viewer `dialog` and its parts (buttons: `.lightbox-previous`, `.lightbox-next`, `.lightbox-close`) |
+| `.visually-hidden`                                                                                                  | Text for screen readers only (never restyle)                                                               |
 
 ### Admin
 
@@ -105,6 +106,7 @@ one here first.
 | `.save-state`                                             | "All changes saved" line                                      |
 | `.comparison`, `.diff`                                    | Revision comparison and the body diff (`ins`/`del`)           |
 | `.table-scroll`                                           | Scrollable region around wide tables                          |
+| `.danger-zone`                                            | Section with destructive actions (deleting)                   |
 | `.inline-form`                                            | A one-button form inside a line of text                       |
 
 Native elements to cover in an admin theme: `fieldset`/`legend`, `details`/`summary`,

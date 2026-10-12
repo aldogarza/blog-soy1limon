@@ -341,6 +341,7 @@ Rules for the implementing agent:
   - An accessible lightbox for galleries (focus trap, Esc, arrow keys).
 - Constraints: contrast ≥ 4.5:1 (text) and 3:1 (UI) verified in both themes; visible focus is kept; motion respects reduced-motion.
 - **Verify:** re-run the axe, Lighthouse and visual checks from Phase 8 in both themes; no regressions.
+- _(Implemented in plain CSS, no Tailwind: iStyle for the site and the admin, now the active theme. Native checkboxes and radios with the accent colour instead of switches and segmented controls (fewer custom widgets to keep accessible). The gallery viewer is a `<dialog>` added by a small script, so the site is no longer script-free on gallery pages.)_
 
 ---
 

@@ -1,7 +1,7 @@
 # Public site
 
 `apps/web` is a static Astro site deployed to GitHub Pages. It ships **no JavaScript** except on
-the search page.
+the search page and on posts with a gallery (the photo viewer).
 
 ## Running it
 
@@ -77,13 +77,21 @@ It creates one index per `<html lang>`, so English search only finds English pos
   so results can be linked.
 - Without JavaScript it explains why and links to the archive.
 
+## Gallery viewer
+
+Gallery photos are plain links to the largest file. A small script in `Gallery.astro` upgrades
+them: a click opens the photo in a modal `<dialog>` (focus stays inside, Esc closes and returns
+focus to the photo, arrow keys and Previous/Next move between photos, the position is announced).
+Without JavaScript, or with Ctrl/Cmd-click, the link opens the file as before. Themes style it
+through the `.lightbox*` hooks.
+
 ## Tests
 
 `e2e/site.spec.ts` builds from fixtures, serves `dist` with a tiny GitHub-Pages-like server
 (`e2e/serve.mjs`), and then checks:
 
 - Every page reachable from the two home pages loads, with the right `lang`, exactly one `h1`, alt
-  text and dimensions on every image, no scripts outside search, and **no axe violations (WCAG 2.2 AA)**.
+  text and dimensions on every image, no scripts outside search and gallery pages, and **no axe violations (WCAG 2.2 AA)**.
 - Every referenced image file exists.
 - Covers, inline images, galleries, translations, the old-address redirect, per-language search,
   the 404 page and both RSS feeds behave as described above.

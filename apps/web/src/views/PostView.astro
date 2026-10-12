@@ -59,7 +59,7 @@ const seo = {
   <article class="post" data-pagefind-body>
     <header class="post-header">
       <h1>{post.title}</h1>
-      <p class="post-meta">
+      <p class="post-meta" data-pagefind-ignore>
         {t.publishedOn} <time datetime={post.publishedAt}>{published}</time>
         {updated !== published && (
           <>
@@ -71,7 +71,7 @@ const seo = {
         {t.readingTime(post.readingMinutes)}
       </p>
       {post.tags.length > 0 && (
-        <div class="post-tags">
+        <div class="post-tags" data-pagefind-ignore>
           <span id="post-tags-label">{t.taggedWith}:</span>
           <ul aria-labelledby="post-tags-label">
             {post.tags.map((tag) => (
@@ -85,7 +85,7 @@ const seo = {
         </div>
       )}
       {post.translation && (
-        <p class="post-translation">
+        <p class="post-translation" data-pagefind-ignore>
           <a
             href={post.translation.path}
             hreflang={post.translation.lang}

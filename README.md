@@ -2,7 +2,7 @@
 
 A personal, bilingual (English / Spanish) blog that costs nothing to run beyond the domain.
 
-- **Public site**: static [Astro](https://astro.build) build on GitHub Pages. Zero JavaScript by default,
+- **Public site**: static [Astro](https://astro.build) build on GitHub Pages. Zero JavaScript by default (search and the photo viewer only),
   accessible (WCAG 2.2 AA) and built for search engines (structured data, sitemaps, `hreflang`).
 - **Admin**: runs only on the author's machine. Writes posts, uploads photos, edits image metadata.
 - **Content**: Supabase Postgres with Row Level Security; the public build can only read published posts.
