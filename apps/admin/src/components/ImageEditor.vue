@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { actions } from 'astro:actions';
 import { ref } from 'vue';
+import { deployParam } from '../lib/deploy.ts';
 import {
   fieldErrors,
   type ImageFormValues,
@@ -36,13 +37,14 @@ async function save() {
   errors.value = {};
   saving.value = true;
   message.value = 'Saving and generating new files…';
-  const { error } = await actions.media.update({ id: props.imageId, values: parsed.data });
+  const { data, error } = await actions.media.update({ id: props.imageId, values: parsed.data });
   saving.value = false;
   if (error) {
     message.value = error.message;
     return;
   }
-  window.location.assign(`/media/${props.imageId}?saved`);
+  const deploy = deployParam(data.deploy);
+  window.location.assign(`/media/${props.imageId}?saved${deploy ? `&${deploy}` : ''}`);
 }
 </script>
 

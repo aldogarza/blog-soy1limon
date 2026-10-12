@@ -2,6 +2,8 @@ import { ConflictError } from '@soy1limon/db';
 import { LOCALES, slugify } from '@soy1limon/core';
 import {
   createTag,
+  getImage,
+  getPost,
   ImageInUseError,
   isPostSlugAvailable,
   isSeoNameAvailable,
@@ -33,6 +35,12 @@ import {
   savePost,
   unpublishPost,
 } from '../lib/server/post-service.ts';
+import {
+  assertRetiredFilesUnused,
+  isImageLive,
+  rebuildIfLive,
+  requestRebuild,
+} from '../lib/server/deploy-service.ts';
 import { getDb } from '../lib/server/services.ts';
 
 /** Turns known failures into messages the form can show; everything else is a 500 with its text. */
@@ -70,6 +78,14 @@ async function run<T>(task: () => Promise<T>): Promise<T> {
   }
 }
 
+/** Image edits change the files and HTML of every post that shows the image. */
+async function rebuildIfImageLive(id: string) {
+  return (await isImageLive(id)) ? requestRebuild('image') : null;
+}
+
+/** Post state just before an edit, to know whether the public site changes. */
+const postBefore = (id: string) => getPost(getDb(), id);
+
 export const server = {
   media: {
     inspect: defineAction({
@@ -103,7 +119,11 @@ export const server = {
       handler: ({ id, values }) =>
         run(async () => {
           const image = await updateFromForm(id, values);
-          return { id: image.id, seoName: image.seoName };
+          return {
+            id: image.id,
+            seoName: image.seoName,
+            deploy: await rebuildIfImageLive(image.id),
+          };
         }),
     }),
 
@@ -116,7 +136,12 @@ export const server = {
     cleanupRetired: defineAction({
       accept: 'form',
       input: z.object({ id: z.uuid() }),
-      handler: ({ id }) => run(async () => ({ deleted: await cleanupRetired(id) })),
+      handler: ({ id }) =>
+        run(async () => {
+          const image = await getImage(getDb(), id);
+          if (image) await assertRetiredFilesUnused(image);
+          return { deleted: await cleanupRetired(id) };
+        }),
     }),
 
     restoreRevision: defineAction({
@@ -125,7 +150,7 @@ export const server = {
       handler: ({ revisionId }) =>
         run(async () => {
           const image = await restoreRevision(revisionId);
-          return { id: image.id };
+          return { id: image.id, deploy: await rebuildIfImageLive(image.id) };
         }),
     }),
   },
@@ -152,7 +177,11 @@ export const server = {
       handler: ({ id, values, manual }) =>
         run(async () => {
           const post = await savePost(id, values, { manual });
-          return { updatedAt: post.updatedAt, previousSlugs: post.previousSlugs };
+          return {
+            updatedAt: post.updatedAt,
+            previousSlugs: post.previousSlugs,
+            deploy: manual ? await rebuildIfLive('update', post) : null,
+          };
         }),
     }),
 
@@ -179,29 +208,46 @@ export const server = {
       }),
       handler: ({ id, values, publishAt }) =>
         run(async () => {
+          const before = await postBefore(id);
           const post = await publishPost(id, values, publishAt);
           return {
             status: post.status,
             publishedAt: post.publishedAt,
             previousSlugs: post.previousSlugs,
+            deploy: await rebuildIfLive('publish', before, post),
           };
         }),
     }),
 
     unpublish: defineAction({
       input: z.object({ id: z.uuid() }),
-      handler: ({ id }) => run(async () => ({ status: (await unpublishPost(id)).status })),
+      handler: ({ id }) =>
+        run(async () => {
+          const before = await postBefore(id);
+          const post = await unpublishPost(id);
+          return { status: post.status, deploy: await rebuildIfLive('unpublish', before) };
+        }),
     }),
 
     archive: defineAction({
       input: z.object({ id: z.uuid() }),
-      handler: ({ id }) => run(async () => ({ status: (await archivePost(id)).status })),
+      handler: ({ id }) =>
+        run(async () => {
+          const before = await postBefore(id);
+          const post = await archivePost(id);
+          return { status: post.status, deploy: await rebuildIfLive('archive', before) };
+        }),
     }),
 
     delete: defineAction({
       accept: 'form',
       input: z.object({ id: z.uuid() }),
-      handler: ({ id }) => run(() => removePost(id)),
+      handler: ({ id }) =>
+        run(async () => {
+          const before = await postBefore(id);
+          await removePost(id);
+          return { deploy: await rebuildIfLive('delete', before) };
+        }),
     }),
 
     revision: defineAction({
@@ -212,7 +258,18 @@ export const server = {
     restoreRevision: defineAction({
       input: z.object({ revisionId: z.uuid() }),
       handler: ({ revisionId }) =>
-        run(async () => ({ id: (await restorePostRevision(revisionId)).id })),
+        run(async () => {
+          const post = await restorePostRevision(revisionId);
+          return { id: post.id, deploy: await rebuildIfLive('update', post) };
+        }),
+    }),
+  },
+
+  site: {
+    /** Manual rebuild, e.g. after editing an image or when a deploy failed. */
+    rebuild: defineAction({
+      accept: 'form',
+      handler: () => run(() => requestRebuild('manual')),
     }),
   },
 

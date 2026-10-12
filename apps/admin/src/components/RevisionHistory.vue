@@ -2,6 +2,7 @@
 import { actions } from 'astro:actions';
 import { diffLines } from 'diff';
 import { ref } from 'vue';
+import { deployParam } from '../lib/deploy.ts';
 import type { PostFormValues } from '../lib/post-form.ts';
 
 const props = defineProps<{
@@ -39,12 +40,14 @@ async function compare(revisionId: string) {
 
 async function restore(revisionId: string) {
   message.value = 'Restoring…';
-  const { error } = await actions.posts.restoreRevision({ revisionId });
+  const { data, error } = await actions.posts.restoreRevision({ revisionId });
   if (error) {
     message.value = error.message;
     return;
   }
-  window.location.reload();
+  const deploy = deployParam(data.deploy);
+  if (deploy) window.location.assign(`${window.location.pathname}?${deploy}`);
+  else window.location.reload();
 }
 </script>
 

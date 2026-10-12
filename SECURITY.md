@@ -14,5 +14,8 @@ Include steps to reproduce and the impact you expect. You will get an answer as 
   Security limits that key to published posts and non-sensitive image columns.
 - Secrets live only in local `.env` files (git-ignored) and GitHub Actions secrets. A gitleaks
   pre-commit hook and a CI job scan for leaked credentials.
-- Original photos (which may contain GPS data) are stored in a private R2 bucket. Public image
-  variants have GPS metadata stripped by default.
+- Original photos are stored in a private R2 bucket that has no public URL. Public variants carry
+  only the metadata chosen in the admin: location, device and capture time can be removed per
+  photo, and the admin warns when the author's name appears in a file's metadata.
+- Deploys use a fine-grained GitHub token limited to this repository, kept in the admin's local
+  `.env`. Deploy logs are public, so the workflow only ever uses the publishable database key.

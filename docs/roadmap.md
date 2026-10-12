@@ -300,18 +300,18 @@ Rules for the implementing agent:
 - Cloudflare:
   - R2 buckets `media` (public via custom domain `img.<domain>`) and `originals` (private).
   - A scoped R2 API token (Object Read & Write on those 2 buckets only).
-  - A cache rule for `img.<domain>`.
+  - A cache rule for `img.<domain>`. _(Not needed: `.webp` is cached by Cloudflare's default rules and every object is uploaded with an immutable `Cache-Control`.)_
   - DNS for GitHub Pages: apex A/AAAA records + `www` CNAME, DNS-only so Pages can issue its certificate.
 - `.github/workflows/deploy.yml`:
   - Triggers: push to `main`, `repository_dispatch` (`content-changed`), daily `schedule`, and `workflow_dispatch`.
-  - `concurrency` with cancel-in-progress.
+  - `concurrency` with cancel-in-progress. _(Changed: one `pages` group without cancelling, so a deploy is never cut halfway; GitHub keeps only the newest pending run. See ADR 0005.)_
   - Builds with the `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` secrets (the only CI secrets), then `actions/upload-pages-artifact` → `actions/deploy-pages`.
   - Minimal permissions: `pages: write`, `id-token: write`, `contents: read`.
   - If Supabase is down or paused, the build fails and Pages keeps serving the last good deploy.
 - Admin:
-  - "Publish" and "Rebuild site" fire `repository_dispatch` with a fine-grained PAT (this repo only), stored in the admin's local `.env`.
+  - "Publish" and "Rebuild site" fire `repository_dispatch` with a fine-grained PAT (this repo only), stored in the admin's local `.env`. _(Implemented more broadly: any change visible on the live site — publish, unpublish, archive, delete, editing a live post or an image it uses — triggers it. Cleaning up retired image files is refused until a deploy that started after the edit succeeded.)_
   - The admin shows the latest deploy run status.
-  - On startup it checks whether the scheduled workflow was disabled (GitHub disables crons after 60 days without repo activity) and re-enables it via the API.
+  - On startup it checks whether the scheduled workflow was disabled (GitHub disables crons after 60 days without repo activity) and re-enables it via the API. _(Done on the first dashboard load of each admin process.)_
 - Repo settings: enable secret scanning + push protection, branch protection on `main`, Pages source = GitHub Actions, custom domain + enforce HTTPS.
 - Docs:
   - `docs/setup.md`: step by step from zero (Supabase project, disable sign-ups, run migrations, R2, domain, tokens, GitHub settings).

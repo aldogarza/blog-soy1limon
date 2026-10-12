@@ -4,6 +4,7 @@ import { findImageReferences, getImage, listPosts, listRevisions } from '@soy1li
 import { actions } from 'astro:actions';
 import ImageEditor from '../../components/ImageEditor.vue';
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import { messageFromParam } from '../../lib/deploy.ts';
 import { valuesFromRecord } from '../../lib/image-form.ts';
 import { technicalFromOriginal } from '../../lib/server/media-service.ts';
 import { getDb, getStorage } from '../../lib/server/services.ts';
@@ -22,6 +23,7 @@ if (deleteResult && !deleteResult.error) {
 const cleanupResult = Astro.getActionResult(actions.media.cleanupRetired);
 const restoreResult = Astro.getActionResult(actions.media.restoreRevision);
 const saved = Astro.url.searchParams.has('saved');
+const deployMessage = messageFromParam(Astro.url.searchParams.get('deploy'));
 
 const image = /^[0-9a-f-]{36}$/.test(id) ? await getImage(db, id) : null;
 if (!image) {
@@ -54,6 +56,7 @@ const actionMessage =
     <p role="status">Deleted {cleanupResult.data.deleted} retired file(s).</p>
   )}
   {restoreResult?.data && <p role="status">Revision restored.</p>}
+  {deployMessage && <p role="status">{deployMessage}</p>}
   {actionMessage && (
     <p role="alert" class="error">
       {actionMessage}
@@ -138,7 +141,9 @@ const actionMessage =
         <input type="hidden" name="id" value={image.id} />
         <p>
           {image.retiredKeys.length} older file(s) from previous versions are still online so
-          existing links keep working.
+          existing links keep working. If a published post shows this image, delete them only after
+          the public site was rebuilt with your latest changes; the admin checks this when GitHub is
+          configured.
         </p>
         <button type="submit">Delete {image.retiredKeys.length} retired file(s)</button>
       </form>

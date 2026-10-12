@@ -1,0 +1,79 @@
+name: Deploy site
+
+# Builds the public site from the published rows in Supabase and deploys it to GitHub Pages.
+# Triggers:
+# - push to main: code changes.
+# - repository_dispatch (content-changed): sent by the local admin after publishing.
+# - schedule: daily, to publish scheduled posts and keep the free Supabase project from pausing.
+# - workflow_dispatch: manual run from the Actions tab.
+# Uses only the publishable Supabase key, which RLS limits to published content. Never add the
+# secret key here: this repository and its logs are public.
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [content-changed]
+  schedule:
+    # 12:17 UTC = 06:17 in Monterrey. Off the hour, when GitHub's scheduler is less congested.
+    - cron: '17 12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time. A running deploy is never cancelled halfway; GitHub keeps only the newest
+# pending run, so a burst of publishes ends with a single build of the latest content.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # If Supabase is down or paused this fails, and Pages keeps serving the last good deploy.
+      - name: Build the public site
+        run: pnpm --filter @soy1limon/web build
+        env:
+          CONTENT_SOURCE: supabase
+          DEPLOY_ENV: production
+          SITE_URL: ${{ vars.SITE_URL }}
+          MEDIA_BASE_URL: ${{ vars.MEDIA_BASE_URL }}
+          CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
+          GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: apps/web/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

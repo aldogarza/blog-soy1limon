@@ -31,6 +31,8 @@ in an admin app that only runs on the owner's machine (localhost). Full plan: `d
   control keyboard-operable, every image has alt text in the page language.
 - Only `DEPLOY_ENV=production` builds (deploy workflow) may be indexed or load analytics; never
   set it locally or in tests.
+- Tests never talk to the real GitHub repository: the admin e2e server blanks `GITHUB_REPO` and
+  `GITHUB_TOKEN`. Deploy logs are public, so the deploy workflow only uses the publishable key.
 - Comments explain _why_, not _what_. Keep them short.
 - Commit at the end of every phase (owner's standing instruction), after all checks pass.
   Never push unless asked. Commit messages: short, clear, English.
@@ -73,7 +75,7 @@ packages/db     Supabase clients, queries, fixtures   — phase 1+
 packages/media  Image pipeline + CLI                  — phase 2+
 packages/markdown  Shared Markdown pipeline           — phase 4+
 supabase/       Migrations and local stack config     — phase 1+
-docs/           Roadmap, setup, architecture, ADRs
+docs/           Roadmap, setup, operations, ADRs (docs/adr)
 ```
 
 Internal packages export TypeScript source directly (no build step); apps compile them.
@@ -87,6 +89,6 @@ Internal packages export TypeScript source directly (no build step); apps compil
 - [x] Phase 4 — Admin: posts
 - [x] Phase 5 — Public site
 - [x] Phase 6 — SEO
-- [ ] Phase 7 — Deploy & operations
+- [ ] Phase 7 — Deploy & operations (code and docs done; live verification after the first push)
 - [ ] Phase 8 — Quality pass
 - [ ] Phase 9 — Styling

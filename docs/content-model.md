@@ -34,7 +34,8 @@ These hold no matter which code writes the data:
   The same slug may exist once in English and once in Spanish.
 - **Publishing**: a `published` post must have `published_at`, a title and a description.
 - **Scheduling**: a `published` post with a future `published_at` stays invisible to the public
-  until that moment. The daily build picks it up (phase 7).
+  until that moment. The first build after it (normally the daily one) publishes it; see
+  [operations](operations.md#scheduled-posts).
 - **Translations**: posts sharing a `translation_key` are translations of each other. A group can
   hold at most one post per language. Used for `hreflang` links.
 - **Old URLs**: when a published post changes slug, the old one goes to `previous_slugs` and keeps

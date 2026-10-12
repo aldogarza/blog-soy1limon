@@ -20,7 +20,7 @@ visit and can never be indexed even if they end up online by mistake.
 [Cloudflare Web Analytics](https://developers.cloudflare.com/web-analytics/) is free, cookieless
 (no consent banner needed) and does not track people across sites. The site token is public by
 design: it appears in the page source. Create the site in the Cloudflare dashboard and put the
-token in the `CLOUDFLARE_WEB_ANALYTICS_TOKEN` repository variable (phase 7).
+token in the `CLOUDFLARE_WEB_ANALYTICS_TOKEN` repository variable.
 
 **Excluding your own visits on the real site:**
 

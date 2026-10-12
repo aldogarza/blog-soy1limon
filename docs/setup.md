@@ -110,4 +110,116 @@ pnpm db:push     # applies pending migrations to the linked project
 
 Always back up before pushing. `SUPABASE_DB_PASSWORD` can be exported to avoid the prompt.
 
-## 5. Cloud services: Supabase, Cloudflare R2, domain, GitHub _(phase 7)_
+## 5. Cloud services
+
+Everything below fits the free tiers. The only cost is the domain. Examples use `example.com`;
+this blog uses `soy1limon.com`.
+
+### 5.1 Supabase project
+
+1. Create a project at <https://supabase.com/dashboard> (free plan, region close to you).
+2. **Authentication → Sign In / Providers**: turn off **Allow new users to sign up**. Nothing uses
+   auth; a closed door is safer.
+3. Link the CLI and apply the migrations (see [section 4](#4-supabase)):
+   ```sh
+   pnpm exec supabase link --project-ref <project-ref>
+   pnpm db:push
+   ```
+4. **Project Settings → API Keys**: copy the project URL, the publishable key and the secret key.
+   The secret key goes only in `apps/admin/.env`.
+
+Free projects pause after a week without activity. The daily deploy reads the database, which
+counts as activity. If it ever pauses anyway, see [operations](operations.md#supabase-paused).
+
+### 5.2 Domain on Cloudflare
+
+The domain's DNS must be managed by Cloudflare (free plan) so R2 can use a subdomain. Add the site in
+Cloudflare and point the registrar's nameservers to the ones Cloudflare shows.
+
+DNS records for GitHub Pages (**DNS only**, grey cloud: GitHub must see the real requests to issue
+the HTTPS certificate):
+
+| Type  | Name  | Content                                                                                    |
+| ----- | ----- | ------------------------------------------------------------------------------------------ |
+| A     | `@`   | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`                 |
+| AAAA  | `@`   | `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153` |
+| CNAME | `www` | `<github-user>.github.io`                                                                  |
+
+The `img` record is created by R2 in the next step and stays proxied (orange cloud): that is what
+puts Cloudflare's cache in front of the images.
+
+### 5.3 Cloudflare R2
+
+1. **R2 → Overview**: enable R2. The free tier needs a payment method on file but charges nothing
+   within 10 GB of storage and 1 million writes per month; downloads (egress) are always free.
+2. Create two buckets with the default location:
+   - `<name>-media`: public variants.
+   - `<name>-originals`: original uploads. **Never** give it public access.
+3. In the media bucket, **Settings → Custom Domains → Connect domain**: `img.example.com`. Do not
+   enable the `r2.dev` development URL.
+4. **R2 → Manage API tokens → Create User API token** (not an account-wide token):
+   - Permission: **Object Read & Write**.
+   - Specify buckets: only the two buckets above.
+   - Copy the **Access Key ID** and **Secret Access Key** (shown once) and the **Account ID**
+     (32 hex characters, on the R2 overview page).
+
+Caching: every variant is uploaded with `Cache-Control: public, max-age=31536000, immutable` and a
+content-addressed name, so Cloudflare's default cache rules already keep `.webp` files at the edge
+and browsers never revalidate them. No extra cache rule is needed. Check it with
+`curl -sI https://img.example.com/<key>` twice: the second answer shows `cf-cache-status: HIT`.
+
+### 5.4 GitHub repository
+
+1. Create the repository (public) and push `main`.
+2. **Settings → Pages**: Source **GitHub Actions**; custom domain `example.com`; wait for the
+   certificate and tick **Enforce HTTPS**.
+3. Recommended: **your profile Settings → Pages → Add a verified domain**. GitHub gives a TXT record
+   for Cloudflare. A verified domain cannot be taken over by another account's Pages site.
+4. **Settings → Secrets and variables → Actions**:
+
+   | Kind     | Name                             | Value                                         |
+   | -------- | -------------------------------- | --------------------------------------------- |
+   | Secret   | `SUPABASE_URL`                   | `https://<project-ref>.supabase.co`           |
+   | Secret   | `SUPABASE_PUBLISHABLE_KEY`       | `sb_publishable_…` (**never** the secret key) |
+   | Variable | `SITE_URL`                       | `https://example.com`                         |
+   | Variable | `MEDIA_BASE_URL`                 | `https://img.example.com`                     |
+   | Variable | `CLOUDFLARE_WEB_ANALYTICS_TOKEN` | Optional; see [SEO](seo.md#analytics)         |
+   | Variable | `GOOGLE_SITE_VERIFICATION`       | Optional; only for meta-tag verification      |
+
+   The publishable key is not secret in the strict sense (RLS limits it to published rows); it is a
+   secret only to keep it out of logs and forks.
+
+5. **Settings → Actions → General → Workflow permissions**: **Read repository contents**. Each
+   workflow asks for more only where needed.
+6. **Settings → Code security**: secret scanning, push protection, Dependabot alerts and security
+   updates, private vulnerability reporting.
+7. **Settings → Rules → Rulesets**: protect `main` against deletion and force pushes.
+
+### 5.5 Admin `.env` for the real services
+
+```sh
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_…
+STORAGE_DRIVER=r2
+MEDIA_BASE_URL=https://img.example.com
+R2_ACCOUNT_ID=<32 hex characters>
+R2_ACCESS_KEY_ID=…
+R2_SECRET_ACCESS_KEY=…
+R2_MEDIA_BUCKET=<name>-media
+R2_ORIGINALS_BUCKET=<name>-originals
+GITHUB_REPO=<owner>/<repo>
+GITHUB_TOKEN=github_pat_…
+```
+
+`GITHUB_TOKEN` is a **fine-grained personal access token** (GitHub **Settings → Developer settings**):
+
+- Repository access: **only this repository**.
+- Permissions: **Actions: Read and write** (deploy status, re-enable the daily build) and
+  **Contents: Read and write** (required by GitHub to send `repository_dispatch`).
+- Expiration: up to a year; put a reminder to rotate it (see [operations](operations.md#rotating-keys)).
+
+### 5.6 First deploy
+
+Push to `main` or run **Actions → Deploy site → Run workflow**. Then open the admin dashboard:
+the **Public site** section lists the latest deploys. How deploys work day to day:
+[operations](operations.md).

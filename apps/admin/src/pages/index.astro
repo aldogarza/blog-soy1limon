@@ -1,11 +1,25 @@
 ---
 import { listImages, listPosts } from '@soy1limon/db/admin';
+import { actions } from 'astro:actions';
 import AdminLayout from '../layouts/AdminLayout.astro';
+import { deployParam, eventLabel, messageFromParam, runLabel } from '../lib/deploy.ts';
+import { deployOverview } from '../lib/server/deploy-service.ts';
 import { getDb } from '../lib/server/services.ts';
 import { formatBytes, R2_FREE_BYTES, storageUsage } from '../lib/stats.ts';
 
+// Redirect after the form post so reloading the page does not trigger another rebuild.
+const rebuildResult = Astro.getActionResult(actions.site.rebuild);
+if (rebuildResult?.data) return Astro.redirect(`/?${deployParam(rebuildResult.data)}`);
+const rebuildMessage =
+  rebuildResult?.error?.message ?? messageFromParam(Astro.url.searchParams.get('deploy'));
+
 const db = getDb();
-const [posts, images] = await Promise.all([listPosts(db), listImages(db)]);
+const [posts, images, deploys] = await Promise.all([
+  listPosts(db),
+  listImages(db),
+  deployOverview(),
+]);
+const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
 const now = Date.now();
 const counts = {
   drafts: posts.filter((post) => post.status === 'draft').length,
@@ -22,6 +36,76 @@ const percent = Math.min(100, usage.freeTierShare * 100);
 ---
 
 <AdminLayout title="Dashboard">
+  <section aria-labelledby="site-heading">
+    <h2 id="site-heading">Public site</h2>
+    {rebuildMessage && <p role="status">{rebuildMessage}</p>}
+    {deploys.configured ? (
+      <>
+        {deploys.error && (
+          <p role="alert" class="error">
+            {deploys.error}
+          </p>
+        )}
+        {deploys.schedule?.reenabled && (
+          <p role="status">
+            GitHub had paused the daily build after 60 days without activity in the repository. It
+            is active again.
+          </p>
+        )}
+        {deploys.schedule && deploys.schedule.state !== 'active' && (
+          <p role="alert" class="error">
+            The deploy workflow is {deploys.schedule.state.replaceAll('_', ' ')}: scheduled posts
+            will not go live. <a href={deploys.schedule.url}>Enable it on GitHub</a>.
+          </p>
+        )}
+        {deploys.runs.length === 0 ? (
+          <p>No deploys yet.</p>
+        ) : (
+          <table>
+            <caption>Latest deploys</caption>
+            <thead>
+              <tr>
+                <th scope="col">Started</th>
+                <th scope="col">Trigger</th>
+                <th scope="col">Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {deploys.runs.map((run) => (
+                <tr>
+                  <td>
+                    <time datetime={run.createdAt}>
+                      {dateFormat.format(new Date(run.createdAt))}
+                    </time>
+                  </td>
+                  <td>{eventLabel(run.event)}</td>
+                  <td>
+                    <a href={run.url}>{runLabel(run)}</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <p>
+          <a href="/">Refresh the status</a>
+        </p>
+        <form method="POST" action={actions.site.rebuild}>
+          <p class="hint">
+            Publishing, unpublishing and editing published posts rebuild the site on their own. Use
+            this after a failed deploy or to publish changes sooner.
+          </p>
+          <button type="submit">Rebuild site</button>
+        </form>
+      </>
+    ) : (
+      <p>
+        Automatic deploys are off: set GITHUB_REPO and GITHUB_TOKEN in apps/admin/.env (see
+        docs/setup.md). The public site still rebuilds daily and on every push.
+      </p>
+    )}
+  </section>
+
   <section aria-labelledby="posts-heading">
     <h2 id="posts-heading">Posts</h2>
     <dl>

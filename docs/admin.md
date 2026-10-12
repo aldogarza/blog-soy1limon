@@ -16,7 +16,9 @@ Configuration comes from `apps/admin/.env` (see `.env.example`):
 
 - `SUPABASE_URL` and `SUPABASE_SECRET_KEY` choose the database: local stack or the real project.
 - `STORAGE_DRIVER=local-fs` keeps images in `.media-local/` and serves them at `/files/*`.
-- `STORAGE_DRIVER=r2` uses Cloudflare R2 (phase 7).
+- `STORAGE_DRIVER=r2` uses Cloudflare R2 (the real setup; see [setup](setup.md#55-admin-env-for-the-real-services)).
+- `GITHUB_REPO` and `GITHUB_TOKEN` let the admin start deploys and show their status. Without them
+  the site still rebuilds daily and on every push.
 
 ## Security model
 
@@ -100,6 +102,7 @@ The editor (`/posts/<id>`):
 - **Publishing**:
   - Publish now, schedule (local date and time), update, unpublish or archive.
   - Publishing always validates on the server first.
+  - Any change visible on the live site starts a rebuild, and the editor says so (see below).
 - **Saving**:
   - **Drafts save automatically** (3 s after you stop typing).
   - Published and scheduled posts only change when you press **Update**, so a half-finished edit can
@@ -110,6 +113,20 @@ The editor (`/posts/<id>`):
   - You can compare any revision with the editor (accessible diff) or restore it.
   - Revisions are ordered by insertion (`revisions.seq`), so two saves in the same instant never
     swap places.
+
+## Deploying the public site
+
+The dashboard's **Public site** section shows the last five runs of the deploy workflow (when,
+why and the result, linked to the logs) and a **Rebuild site** button. The admin starts a rebuild on
+its own after publishing, unpublishing, archiving or deleting a post that was online, after updating
+a published post and after editing an image that a published post shows. Scheduled posts wait for
+the daily build. Details and troubleshooting: [operations](operations.md).
+
+Two safety rules:
+
+- **Retired image files** (old names left after editing an image) can only be deleted once a deploy
+  that started after the edit has succeeded, so the live site never points at missing files.
+- The end-to-end tests blank `GITHUB_REPO` and `GITHUB_TOKEN`, so they can never start a real deploy.
 
 ## Accessibility
 

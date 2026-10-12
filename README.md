@@ -7,7 +7,8 @@ A personal, bilingual (English / Spanish) blog that costs nothing to run beyond 
 - **Admin**: runs only on the author's machine. Writes posts, uploads photos, edits image metadata.
 - **Content**: Supabase Postgres with Row Level Security; the public build can only read published posts.
 - **Images**: converted locally to responsive WebP with optional watermark and correct embedded
-  metadata (creator, copyright, license, alt text; GPS removed), served from Cloudflare R2.
+  metadata (creator, copyright, license, alt text; location kept or removed per photo), served from
+  Cloudflare R2.
 
 ## Architecture
 
@@ -50,8 +51,6 @@ flowchart LR
 | `supabase`          | Database migrations and local stack config                 |
 | `docs`              | Roadmap, setup guide, architecture decisions               |
 
-Some of these appear in later phases; see [`docs/roadmap.md`](docs/roadmap.md).
-
 ## Getting started
 
 Requirements: Node.js 24 (see `.node-version`), pnpm 11, Docker, and [gitleaks](https://github.com/gitleaks/gitleaks)
@@ -73,6 +72,8 @@ pnpm test
 - [Admin](docs/admin.md) — running the local admin, its security model and the upload flow
 - [Public site](docs/site.md) — URLs, how content becomes pages, search and tests
 - [SEO, analytics and environments](docs/seo.md) — meta tags, structured data, sitemap, Search Console, visit counting
+- [Operations](docs/operations.md) — deploys, scheduled posts, backups, key rotation, free-tier limits
+- [Architecture decisions](docs/adr/README.md) — why the project is built this way
 - [Security policy](SECURITY.md)
 
 ## License

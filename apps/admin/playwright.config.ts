@@ -54,6 +54,9 @@ export default defineConfig({
       STORAGE_DRIVER: 'local-fs',
       MEDIA_BASE_URL: `${baseURL}/files`,
       LOCAL_MEDIA_ROOT: mediaRoot,
+      // Empty values win over apps/admin/.env: tests must never trigger a real deploy.
+      GITHUB_REPO: '',
+      GITHUB_TOKEN: '',
     },
   },
 });

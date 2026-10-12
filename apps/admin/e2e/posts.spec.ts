@@ -176,6 +176,10 @@ test('write, validate and publish an English post with cover, gallery, inline im
 
   await page.getByRole('button', { name: 'Publish now' }).click();
   await expect(page.getByText(/Status:\s*published/)).toBeVisible();
+  // The tests blank the GitHub settings: publishing says so instead of starting a real deploy.
+  await expect(
+    page.getByRole('status').filter({ hasText: 'was not rebuilt automatically' }),
+  ).toBeVisible();
 
   const post = await getPost(adminDb(), englishId);
   expect(post).toMatchObject({

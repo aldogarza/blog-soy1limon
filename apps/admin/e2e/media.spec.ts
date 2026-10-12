@@ -39,6 +39,8 @@ test('the first Tab press reaches the skip link', async ({ page }) => {
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeFocused();
   await expectNoA11yViolations(page);
+  // Never the real repository: the e2e server runs without GITHUB_REPO / GITHUB_TOKEN.
+  await expect(page.getByText('Automatic deploys are off')).toBeVisible();
 });
 
 test('upload three images, describe them one by one, and process them', async ({ page }) => {

@@ -2,6 +2,7 @@
 import { slugify } from '@soy1limon/core';
 import { actions } from 'astro:actions';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { triggerMessage } from '../lib/deploy.ts';
 import { fieldErrors } from '../lib/image-form.ts';
 import { move, type PostFormValues, postFormSchema, publicPath } from '../lib/post-form.ts';
 import ErrorSummary from './ErrorSummary.vue';
@@ -41,6 +42,8 @@ const focusSummary = ref(0);
 const live = ref('');
 const saveState = ref<'saved' | 'unsaved' | 'saving' | 'failed'>('saved');
 const serverErrors = ref<string[]>([]);
+/** Whether the public site is being rebuilt after the last change; empty when nothing went live. */
+const deployMessage = ref('');
 const scheduleAt = ref('');
 const restoreOffer = ref<{ values: PostFormValues; savedAt: string } | null>(null);
 
@@ -133,6 +136,7 @@ async function save(manual: boolean) {
   saveState.value = 'saved';
   localStorage.removeItem(storageKey);
   live.value = manual ? 'Saved.' : 'Draft saved automatically.';
+  if (manual) deployMessage.value = triggerMessage(data.deploy) ?? '';
 }
 
 watch(
@@ -225,6 +229,11 @@ async function publish(publishAt: string | null) {
   status.value =
     data.publishedAt && Date.parse(data.publishedAt) > Date.now() ? 'scheduled' : 'published';
   live.value = status.value === 'scheduled' ? 'Post scheduled.' : 'Post published.';
+  deployMessage.value =
+    triggerMessage(data.deploy) ??
+    (status.value === 'scheduled'
+      ? 'It appears on the public site with the first daily build after that time.'
+      : '');
 }
 
 function schedule() {
@@ -245,6 +254,7 @@ async function changeStatus(action: 'unpublish' | 'archive') {
   status.value = data.status === 'archived' ? 'archived' : 'draft';
   if (action === 'unpublish') publishedAt.value = null;
   live.value = action === 'unpublish' ? 'Post unpublished; it is a draft again.' : 'Post archived.';
+  deployMessage.value = triggerMessage(data.deploy) ?? '';
 }
 
 const publishedLabel = computed(() =>
@@ -624,6 +634,7 @@ const saveLabel = computed(
         </template>
       </p>
       <p role="status">{{ saveLabel }}</p>
+      <p role="status">{{ deployMessage }}</p>
       <div v-if="serverErrors.length > 0" role="alert" class="error-summary">
         <ul>
           <li v-for="message in serverErrors" :key="message">{{ message }}</li>
