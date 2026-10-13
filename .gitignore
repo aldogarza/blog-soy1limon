@@ -31,6 +31,14 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 
+# Original photos dropped at the root to be processed (they carry GPS and camera serials); only
+# processed, metadata-free copies are committed
+/*.jpg
+/*.jpeg
+/*.JPG
+/*.heic
+/*.HEIC
+
 # Output of `pnpm media process`
 media-out/
 

@@ -147,6 +147,11 @@ export const webEnvSchema = z
       .optional(),
     SUPABASE_URL: httpUrl('SUPABASE_URL').optional(),
     SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
+    /**
+     * Overrides siteConfig.blog.postsPerPage. Only for tests and previews, so the few sample posts
+     * still span several pages.
+     */
+    POSTS_PER_PAGE: z.coerce.number().int().positive().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.DEPLOY_ENV === 'production' && env.CONTENT_SOURCE !== 'supabase') {

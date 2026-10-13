@@ -2,24 +2,29 @@
 import { type Locale, ui } from '@soy1limon/core';
 import { formatDate } from '../lib/format.ts';
 import type { SitePost } from '../lib/content.ts';
+import ResponsiveImage from './ResponsiveImage.astro';
 
 interface Props {
   posts: SitePost[];
   lang: Locale;
   /** Heading level of each post title, so the outline stays correct on every page. */
   headingLevel?: 2 | 3;
+  /** The first cover is usually on screen at load; not when the list starts further down. */
+  eagerFirst?: boolean;
 }
 
-const { posts, lang, headingLevel = 2 } = Astro.props;
+const { posts, lang, headingLevel = 2, eagerFirst = true } = Astro.props;
 const t = ui(lang);
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
+// Cards sit in a grid; the first one may span the whole row, so it gets the larger size hint.
+const sizes = '(min-width: 68rem) 42rem, 100vw';
 ---
 
 {posts.length === 0 ? (
   <p>{t.noPosts}</p>
 ) : (
   <ul class="post-list">
-    {posts.map((post) => (
+    {posts.map((post, index) => (
       <li>
         <article class="post-card">
           <Heading>
@@ -30,6 +35,15 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
             {t.readingTime(post.readingMinutes)}
           </p>
           <p>{post.description}</p>
+          {post.cover && (
+            <ResponsiveImage
+              image={post.cover}
+              lang={lang}
+              sizes={sizes}
+              priority={eagerFirst && index === 0}
+              decorative
+            />
+          )}
         </article>
       </li>
     ))}

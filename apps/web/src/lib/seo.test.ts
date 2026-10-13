@@ -45,7 +45,7 @@ describe('structured data', () => {
       datePublished: post.publishedAt,
       dateModified: post.updatedAt,
       keywords: 'Notes',
-      author: { '@type': 'Person', name: 'Aldo' },
+      author: { '@type': 'Person', name: 'Aldo Garza' },
     });
     expect(JSON.stringify(data)).toContain(
       'https://img.example.com/images/2026/river-at-dawn-86ec97ff-800.webp',
@@ -62,15 +62,15 @@ describe('structured data', () => {
       metadata: {
         ...image.metadata,
         licenseUrl: 'https://example.com/license/',
-        creditText: 'Aldo',
+        creditText: 'Aldo Garza',
       },
     };
     expect(imageJsonLd(licensed, 'en', '/m', SITE)).toMatchObject({
       license: 'https://example.com/license/',
       acquireLicensePage: 'https://example.com/license/',
-      creditText: 'Aldo',
-      creator: { '@type': 'Person', name: 'Aldo' },
-      copyrightNotice: '© 2026 Aldo. All rights reserved.',
+      creditText: 'Aldo Garza',
+      creator: { '@type': 'Person', name: 'Aldo Garza' },
+      copyrightNotice: '© 2026 Aldo Garza. All rights reserved.',
     });
   });
 
@@ -115,8 +115,13 @@ describe('structured data', () => {
 describe('sitemap', () => {
   it('lists indexable pages with lastmod, hreflang pairs and images, and nothing else', async () => {
     const content = await buildSiteContent(loadFixtureContent(), '/m');
-    const xml = renderSitemap(sitemapEntries(content, '/m', SITE), SITE);
+    const xml = renderSitemap(sitemapEntries(content, '/m', SITE, 2), SITE);
     const locs = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
+    // 8 Spanish posts: 3 on the home page, then pages of 2 (the home page shows page 1).
+    expect(locs).toContain('https://example.com/page/3/');
+    expect(locs).not.toContain('https://example.com/page/4/');
+    expect(locs).not.toContain('https://example.com/blog/');
+    expect(locs).not.toContain('https://example.com/tags/');
     expect(locs).toContain('https://example.com/en/blog/hello-world/');
     expect(locs).toContain('https://example.com/tags/travel/');
     expect(locs).not.toContain('https://example.com/en/blog/hello/');

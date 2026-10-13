@@ -1,7 +1,8 @@
 /*
- * iStyle design tokens, shared by the site and the admin. Inspired by the iOS system palette, but
- * every text colour is adjusted to reach WCAG AA contrast (iOS systemBlue #007aff on white is only
- * 4.0:1, so links use a darker blue).
+ * iStyle design tokens, shared by the site and the admin. Inspired by the iOS system palette, with
+ * a lime green accent for soy1limon. Every text colour is checked for WCAG AA contrast on the plain
+ * background, on cards and on the strongest point of the coloured ambient light behind the site
+ * (iOS systemGreen #34c759 on white is only 2.2:1, so text uses a much darker green).
  */
 :root {
   color-scheme: light dark;
@@ -17,25 +18,32 @@
 
   /* Fills behind controls and pills; borders of inputs reach 3:1 against their background. */
   --is-fill: light-dark(rgb(120 120 128 / 0.12), rgb(120 120 128 / 0.24));
-  --is-accent-tint: light-dark(rgb(0 98 204 / 0.1), rgb(77 163 255 / 0.18));
+  --is-accent-tint: light-dark(rgb(27 110 47 / 0.1), rgb(139 229 150 / 0.16));
   --is-control-border: light-dark(#8a8a8e, #8e8e93);
 
   /* Text */
   --is-label: light-dark(#000000, #ffffff);
-  --is-label-secondary: light-dark(#6c6c70, #aeaeb2);
-  --is-accent: light-dark(#0062cc, #4da3ff);
+  --is-label-secondary: light-dark(#5e5e63, #b4b4b9);
+  --is-accent: light-dark(#1b6e2f, #8be596);
   --is-danger: light-dark(#c4161c, #ff6961);
   --is-warning: light-dark(#a05a00, #ffb340);
+
+  /* Brand colours, only for decoration (ambient light, placeholders); never behind text alone. */
+  --is-lime: #a8e05f;
+  --is-lemon: #ffe066;
+  --is-mint: #5fd4b4;
 
   /* Shape and rhythm */
   --is-radius-sm: 8px;
   --is-radius: 12px;
   --is-radius-lg: 20px;
+  --is-radius-xl: 28px;
   --is-space: 1rem;
   --is-content: 44rem;
   /* Side padding that centres a full-width bar's content on the same column as the page. */
   --is-gutter: max(var(--is-space), (100% - var(--is-content)) / 2);
   --is-shadow: 0 1px 3px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.06);
+  --is-shadow-lg: 0 2px 6px rgb(0 0 0 / 0.06), 0 18px 48px rgb(0 0 0 / 0.12);
   --is-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
 
   /* System font stack: San Francisco on Apple devices, no font download anywhere. */

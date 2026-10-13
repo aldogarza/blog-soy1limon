@@ -1,10 +1,8 @@
 ---
-import { siteConfig } from '@soy1limon/core';
-import { postsIn, siteContent } from '../../lib/content.ts';
-import { paginate } from '../../lib/paginate.ts';
-import BlogIndexView from '../../views/BlogIndexView.astro';
+import { homePath } from '@soy1limon/core';
+import RedirectView from '../../views/RedirectView.astro';
 
-const [first] = paginate(postsIn(await siteContent(), 'es'), siteConfig.blog.postsPerPage);
+// The blog index became the home page; old links and trimmed post addresses land there.
 ---
 
-<BlogIndexView lang="es" posts={first?.items ?? []} page={1} totalPages={first?.totalPages ?? 1} />
+<RedirectView lang="es" to={homePath('es')} />

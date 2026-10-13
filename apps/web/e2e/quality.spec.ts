@@ -12,6 +12,16 @@ test.beforeAll(async ({ browser }) => {
   await page.close();
 });
 
+/** Loads the rest of the archive on the home page, so the page stops changing during a test. */
+async function loadEveryPost(page: Page) {
+  const button = page.locator('.load-more button');
+  await expect(async () => {
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    expect(await button.count()).toBe(0);
+  }).toPass({ timeout: 10_000 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+}
+
 /** Elements wider than the viewport, to explain a horizontal scroll bar. */
 function overflowing(page: Page) {
   return page.evaluate(() => {
@@ -72,6 +82,7 @@ test('the keyboard reaches every control, in order, with a visible focus indicat
 }) => {
   for (const path of pages) {
     await page.goto(path);
+    await loadEveryPost(page);
     // Visible controls only: the closed gallery viewer's buttons are not reachable, by design.
     const focusable = await page.evaluate(
       () =>

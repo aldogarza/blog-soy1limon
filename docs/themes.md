@@ -3,10 +3,10 @@
 The public site and the admin share one markup and can wear different themes. Why it works this
 way: [ADR 0006](adr/0006-themes-over-semantic-html.md).
 
-| Theme    | Status                                                                   |
-| -------- | ------------------------------------------------------------------------ |
-| `istyle` | **Active.** iOS-inspired: glass bars, large titles, grouped cards, pills |
-| `plain`  | System colours, no decoration; the reference theme                       |
+| Theme    | Status                                                                             |
+| -------- | ---------------------------------------------------------------------------------- |
+| `istyle` | **Active.** iOS-inspired: background photo, glass bar, cards and post sheet, pills |
+| `plain`  | System colours, no decoration; the reference theme                                 |
 
 ## Choosing and previewing a theme
 
@@ -32,6 +32,7 @@ packages/themes/src/
   istyle/tokens.css     a theme may split its files freely
   istyle/site.css
   istyle/admin.css
+  istyle/assets/        images a theme uses (url() in its CSS; Vite fingerprints them)
 ```
 
 Each `site.css` / `admin.css` must import its foundation first. The foundation declares three
@@ -68,10 +69,12 @@ one here first.
 | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `.skip-link`                                                                                                        | First link of every page                                                                                   |
 | `.site-header`, `.site-brand`                                                                                       | Page banner and the site name inside it                                                                    |
-| `.site-nav`, `.lang-switch`                                                                                         | Main navigation; the item that switches language                                                           |
-| `[aria-current="page"]`                                                                                             | The navigation link of the current page                                                                    |
+| `.site-search`, `.search-panel`                                                                                     | Header search form (`input[type="search"]`) and its live results panel (`ol` of links, "all results" link) |
+| `.lang-switch`                                                                                                      | Paragraph with the link to the other language                                                              |
 | `.page-intro`                                                                                                       | Introductory paragraph under the home `h1`                                                                 |
-| `.post-list`, `.post-card`                                                                                          | List of posts (`ul`) and each post summary (`article`)                                                     |
+| `.latest-posts`                                                                                                     | Home section with the newest posts (its first card may be featured)                                        |
+| `.more-posts`, `.load-more`                                                                                         | Home section with every other post; the "Load more" link (a `button` once scripts run)                     |
+| `.post-list`, `.post-card`                                                                                          | List of posts (`ul`) and each post summary (`article`; its cover `img` comes last and has empty alt)       |
 | `.post`                                                                                                             | The `article` on a post page                                                                               |
 | `.post-header`, `.post-meta`                                                                                        | Title block; date and reading time line (also in cards)                                                    |
 | `.post-tags`                                                                                                        | Label plus `ul` of tag links (`a[rel="tag"]`)                                                              |
@@ -80,8 +83,7 @@ one here first.
 | `.post-body`                                                                                                        | The rendered Markdown (headings start at `h2`, `figure`, `pre.shiki`, tables, blockquotes)                 |
 | `.gallery`                                                                                                          | Gallery `section` with an `h2` and a `ul` of `figure`s                                                     |
 | `.pagination`                                                                                                       | Pagination `nav`; links carry `rel="prev"` / `rel="next"`                                                  |
-| `.tag-index`, `.tag-count`                                                                                          | List of all tags; the post count next to each                                                              |
-| `.search-form`, `.search-status`, `.search-results`                                                                 | Search page                                                                                                |
+| `.search-status`, `.search-results`                                                                                 | Search results page                                                                                        |
 | `.site-footer`                                                                                                      | Page footer (`small` holds the copyright)                                                                  |
 | `.lightbox`, `.lightbox-figure`, `.lightbox-image`, `.lightbox-caption`, `.lightbox-position`, `.lightbox-controls` | Gallery viewer `dialog` and its parts (buttons: `.lightbox-previous`, `.lightbox-next`, `.lightbox-close`) |
 | `.visually-hidden`                                                                                                  | Text for screen readers only (never restyle)                                                               |
@@ -112,6 +114,15 @@ one here first.
 Native elements to cover in an admin theme: `fieldset`/`legend`, `details`/`summary`,
 `dialog` (and `::backdrop`), `meter`, `dl`, `table`, every input type including
 `datetime-local`, and buttons in `:disabled` state.
+
+## iStyle background photo
+
+`istyle/assets/background-1280.webp` (phones) and `background-2560.webp` (wider screens) are the
+Cerro de la Silla photo, made with Sharp from the original: auto-rotated, resized, slightly blurred
+(σ 2 and 3.5, which also shrinks them to about 33 KB and 81 KB), WebP quality 60 and **no
+metadata** (the original carries GPS and camera serial numbers; it is never committed). To replace
+it, keep both widths, check that no metadata remains (`exiftool`), and redo the contrast check
+described in [accessibility](accessibility.md#known-limitations).
 
 ## Adding a theme
 

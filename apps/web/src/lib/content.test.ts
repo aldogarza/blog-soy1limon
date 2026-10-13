@@ -6,7 +6,8 @@ import { paginate } from './paginate.ts';
 describe('buildSiteContent (fixtures)', () => {
   it('renders every post, newest first, with paths and resolved images', async () => {
     const content = await buildSiteContent(loadFixtureContent(), '/fixtures-media');
-    expect(content.posts.map((post) => post.path)).toEqual([
+    expect(content.posts).toHaveLength(16);
+    expect(content.posts.slice(0, 4).map((post) => post.path)).toEqual([
       '/blog/notas-de-viaje/',
       '/en/blog/a-weekend-in-the-city/',
       '/en/blog/hello-world/',
@@ -26,10 +27,11 @@ describe('buildSiteContent (fixtures)', () => {
   it('groups tags per language and leaves out tags without posts', async () => {
     const content = await buildSiteContent(loadFixtureContent(), '/fixtures-media');
     expect(tagsIn(content, 'en').map((entry) => [entry.tag.slug, entry.posts.length])).toEqual([
-      ['notes', 1],
-      ['travel', 1],
+      ['notes', 3],
+      ['photography', 2],
+      ['travel', 4],
     ]);
-    expect(postsIn(content, 'es')).toHaveLength(2);
+    expect(postsIn(content, 'es')).toHaveLength(8);
   });
 
   it('stops the build when a published image lacks alt text in the post language', async () => {

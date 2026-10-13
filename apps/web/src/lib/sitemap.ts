@@ -1,5 +1,5 @@
 import {
-  blogPath,
+  archivePath,
   homePath,
   type Locale,
   LOCALES,
@@ -7,10 +7,9 @@ import {
   otherLocale,
   siteConfig,
   tagPath,
-  tagsPath,
 } from '@soy1limon/core';
+import { splitArchive } from './archive.ts';
 import { postsIn, type SiteContent, tagsIn } from './content.ts';
-import { paginate } from './paginate.ts';
 import { absoluteUrl, alternates } from './seo.ts';
 
 export interface SitemapEntry {
@@ -24,13 +23,14 @@ export interface SitemapEntry {
 const newest = (dates: string[]) => dates.sort().at(-1);
 
 /**
- * Every indexable page: homes, archive pages, tag pages and posts. Search pages, redirect pages
+ * Every indexable page: homes, later archive pages, tag pages and posts. Search pages, redirect pages
  * and the 404 page are deliberately left out.
  */
 export function sitemapEntries(
   content: SiteContent,
   mediaBase: string,
   site: URL | string,
+  postsPerPage: number = siteConfig.blog.postsPerPage,
 ): SitemapEntry[] {
   const entries: SitemapEntry[] = [];
   const both = (build: (lang: Locale) => string) =>
@@ -46,21 +46,17 @@ export function sitemapEntries(
       versions: both(homePath),
       images: [],
     });
-    for (const page of paginate(posts, siteConfig.blog.postsPerPage)) {
+    // Page 1 of the archive is the home page itself.
+    for (const page of splitArchive(posts, siteConfig.blog.recentPosts, postsPerPage).pages.slice(
+      1,
+    )) {
       entries.push({
-        path: blogPath(lang, page.page),
+        path: archivePath(lang, page.page),
         lastmod: newest(page.items.map((post) => post.updatedAt)),
-        versions: page.page === 1 ? both((l) => blogPath(l)) : {},
+        versions: {},
         images: [],
       });
     }
-
-    entries.push({
-      path: tagsPath(lang),
-      lastmod: lastPostUpdate,
-      versions: both(tagsPath),
-      images: [],
-    });
     const otherTags = new Set(tagsIn(content, otherLocale(lang)).map((entry) => entry.tag.id));
     for (const { tag, posts: tagged } of tagsIn(content, lang)) {
       entries.push({

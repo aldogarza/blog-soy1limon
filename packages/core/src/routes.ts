@@ -8,11 +8,16 @@ export const homePath = (lang: Locale) => `${localePrefix(lang)}/`;
 
 export const postPath = (lang: Locale, slug: string) => `${localePrefix(lang)}/blog/${slug}/`;
 
-/** Page 1 is the blog index itself; later pages live under /blog/page/N/. */
-export const blogPath = (lang: Locale, page = 1) =>
-  page <= 1 ? `${localePrefix(lang)}/blog/` : `${localePrefix(lang)}/blog/page/${page}/`;
+/**
+ * The list of every post starts on the home page; its later pages live under /page/N/ (the home
+ * page loads them in place while scrolling, these addresses serve crawlers and visitors without
+ * JavaScript).
+ */
+export const archivePath = (lang: Locale, page = 1) =>
+  page <= 1 ? homePath(lang) : `${localePrefix(lang)}/page/${page}/`;
 
-export const tagsPath = (lang: Locale) => `${localePrefix(lang)}/tags/`;
+/** The old blog index; it only redirects to the home page now. */
+export const legacyBlogPath = (lang: Locale) => `${localePrefix(lang)}/blog/`;
 
 export const tagPath = (lang: Locale, slug: string) => `${localePrefix(lang)}/tags/${slug}/`;
 

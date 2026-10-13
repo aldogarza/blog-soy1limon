@@ -86,7 +86,7 @@ describe('suggestMetadata', () => {
     );
     expect(suggestion.metadata.creator).toBe('Someone Else');
     expect(suggestion.metadata.creditText).toBe(siteConfig.imageDefaults.creditText);
-    expect(suggestion.metadata.copyrightNotice).toBe('© 2024 Aldo. All rights reserved.');
+    expect(suggestion.metadata.copyrightNotice).toBe('© 2024 Aldo Garza. All rights reserved.');
     expect(suggestion.seoName).toBe('mi-foto');
   });
 
@@ -111,8 +111,8 @@ describe('suggestMetadata', () => {
 describe('buildWriteTags', () => {
   const metadata = {
     title: 'Sunset',
-    creator: 'Aldo',
-    copyrightNotice: '© 2026 Aldo',
+    creator: 'Aldo Garza',
+    copyrightNotice: '© 2026 Aldo Garza',
     licenseUrl: 'https://example.com/license',
     keywords: ['sun', 'sky'],
     dateTaken: '2026-03-14T18:22:05-06:00',
@@ -121,7 +121,7 @@ describe('buildWriteTags', () => {
 
   it('writes only authorship, copyright and license in the compact profile', () => {
     const written = buildWriteTags(metadata, 'alt', 'compact');
-    expect(written['XMP-dc:Creator']).toEqual(['Aldo']);
+    expect(written['XMP-dc:Creator']).toEqual(['Aldo Garza']);
     expect(written['XMP-plus:LicensorURL']).toBe('https://example.com/license');
     expect(written['XMP-dc:Title']).toBeUndefined();
     expect(written.GPSLatitude).toBeUndefined();

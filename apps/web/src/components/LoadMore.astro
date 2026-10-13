@@ -1,0 +1,129 @@
+---
+import { type Locale, ui } from '@soy1limon/core';
+
+interface Props {
+  lang: Locale;
+  /** The next page of the archive. */
+  next: string;
+}
+
+const { lang, next } = Astro.props;
+const t = ui(lang);
+const messages = {
+  loading: t.loadingPosts,
+  loaded: t.loadedPosts,
+  loadedOne: t.loadedPost,
+  done: t.allPostsLoaded,
+};
+---
+
+<div class="load-more" data-messages={JSON.stringify(messages)}>
+  <a href={next} rel="next">
+    {t.loadMore}
+  </a>
+  <p class="visually-hidden" role="status"></p>
+</div>
+
+<script>
+  // Progressive enhancement: without JavaScript the link opens the next page of the archive. With
+  // it, the link becomes a button that appends that page's posts to the list. The next pages also
+  // load on their own while scrolling, but only a few times, so the footer stays reachable.
+  interface Messages {
+    loading: string;
+    loaded: string;
+    loadedOne: string;
+    done: string;
+  }
+
+  const AUTOMATIC_LOADS = 3;
+
+  function enhance(container: HTMLElement) {
+    const link = container.querySelector<HTMLAnchorElement>('a[rel="next"]');
+    const status = container.querySelector<HTMLElement>('[role="status"]');
+    const list = container.parentElement?.querySelector<HTMLElement>('.post-list');
+    if (!link || !status || !list) return;
+    const messages = JSON.parse(container.dataset.messages ?? '{}') as Messages;
+    const label = link.textContent ?? '';
+    let next: string | undefined = link.href;
+    let automaticLoads = 0;
+    let busy = false;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    link.replaceWith(button);
+
+    const load = async (fromClick: boolean) => {
+      if (busy || !next) return;
+      busy = true;
+      // aria-disabled (not disabled) keeps the focus on the button while it works.
+      button.setAttribute('aria-disabled', 'true');
+      button.textContent = messages.loading;
+      const url = next;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+        const items = [...page.querySelectorAll<HTMLLIElement>('main .post-list > li')];
+        for (const item of items) {
+          // On their own page posts are h2; in this section of the home page they are h3.
+          for (const heading of item.querySelectorAll('h2')) {
+            const replacement = document.createElement('h3');
+            replacement.append(...heading.childNodes);
+            heading.replaceWith(replacement);
+          }
+          for (const image of item.querySelectorAll('img')) {
+            image.loading = 'lazy';
+            image.removeAttribute('fetchpriority');
+          }
+        }
+        list.append(...items);
+        const nextHref = page.querySelector('.pagination a[rel="next"]')?.getAttribute('href');
+        next = nextHref ? new URL(nextHref, response.url).href : undefined;
+        status.textContent =
+          items.length === 1
+            ? messages.loadedOne
+            : messages.loaded.replace('{n}', String(items.length));
+        // Someone who pressed the button (or was on it when the posts arrived) continues reading
+        // from the first new post, instead of below posts they never reached or on a removed button.
+        if (fromClick || document.activeElement === button) items[0]?.querySelector('a')?.focus();
+        if (!next) {
+          observer?.disconnect();
+          button.remove();
+          status.textContent += ` ${messages.done}`;
+        } else if (observer && automaticLoads < AUTOMATIC_LOADS) {
+          // The observer only reports changes; if the button is still close (a tall screen),
+          // observing it again reports it once more and the next page loads too.
+          observer.unobserve(button);
+          observer.observe(button);
+        }
+      } catch {
+        // Fall back to the plain page, which always works.
+        location.assign(url);
+      } finally {
+        busy = false;
+        button.removeAttribute('aria-disabled');
+        button.textContent = label;
+      }
+    };
+
+    button.addEventListener('click', () => void load(true));
+
+    const observer =
+      'IntersectionObserver' in window
+        ? new IntersectionObserver(
+            (entries) => {
+              if (busy || !entries.some((entry) => entry.isIntersecting)) return;
+              automaticLoads += 1;
+              if (automaticLoads >= AUTOMATIC_LOADS) observer?.disconnect();
+              void load(false);
+            },
+            // Start a little before the button is on screen, so the scroll does not stop.
+            { rootMargin: '0px 0px 400px 0px' },
+          )
+        : undefined;
+    observer?.observe(button);
+  }
+
+  document.querySelectorAll<HTMLElement>('.load-more[data-messages]').forEach(enhance);
+</script>

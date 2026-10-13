@@ -66,23 +66,224 @@
       "tagIds": ["00000000-0000-4000-8000-000000000102"],
       "galleryImageIds": [],
       "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000011",
+      "lang": "en",
+      "slug": "packing-light",
+      "title": "Packing light",
+      "description": "What fits in one backpack for a week on the road.",
+      "bodyMd": "A short sample post.\n\n## Notes\n\nWritten to fill the archive in tests and previews.\n",
+      "publishedAt": "2026-09-28T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-28T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": "00000000-0000-4000-8000-000000000202",
+      "tagIds": ["00000000-0000-4000-8000-000000000102"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000012",
+      "lang": "en",
+      "slug": "a-rainy-afternoon",
+      "title": "A rainy afternoon",
+      "description": "Short notes from a day spent waiting for the sun.",
+      "bodyMd": "A short sample post.\n\n## Notes\n\nWritten to fill the archive in tests and previews.\n",
+      "publishedAt": "2026-09-24T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-24T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000103"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000013",
+      "lang": "en",
+      "slug": "night-photos-without-a-tripod",
+      "title": "Night photos without a tripod",
+      "description": "Steady hands, walls and a few other tricks.",
+      "bodyMd": "A short sample post.\n\n## Notes\n\nWritten to fill the archive in tests and previews.\n",
+      "publishedAt": "2026-09-20T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-20T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": "00000000-0000-4000-8000-000000000203",
+      "tagIds": ["00000000-0000-4000-8000-000000000101"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000014",
+      "lang": "en",
+      "slug": "the-market-on-sunday",
+      "title": "The market on Sunday",
+      "description": "Colours, voices and the best breakfast in town.",
+      "bodyMd": "A short sample post.\n\n## Notes\n\nWritten to fill the archive in tests and previews.\n",
+      "publishedAt": "2026-09-16T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-16T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000102"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000015",
+      "lang": "en",
+      "slug": "trains-versus-buses",
+      "title": "Trains versus buses",
+      "description": "Which one to pick for a long trip, and why it depends.",
+      "bodyMd": "A short sample post.\n\n## Notes\n\nWritten to fill the archive in tests and previews.\n",
+      "publishedAt": "2026-09-12T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-12T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000102", "00000000-0000-4000-8000-000000000103"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000016",
+      "lang": "en",
+      "slug": "first-roll-of-film",
+      "title": "My first roll of film",
+      "description": "Thirty-six photos, no screen and a lot of patience.",
+      "bodyMd": "A short sample post.\n\n## Notes\n\nWritten to fill the archive in tests and previews.\n",
+      "publishedAt": "2026-09-08T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-08T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000101"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000017",
+      "lang": "es",
+      "slug": "viajar-ligero",
+      "title": "Viajar ligero",
+      "description": "Lo que cabe en una mochila para una semana de camino.",
+      "bodyMd": "Una entrada corta de ejemplo.\n\n## Notas\n\nEscrita para llenar el archivo en pruebas y vistas previas.\n",
+      "publishedAt": "2026-09-28T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-28T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": "00000000-0000-4000-8000-000000000202",
+      "tagIds": ["00000000-0000-4000-8000-000000000102"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000018",
+      "lang": "es",
+      "slug": "una-tarde-de-lluvia",
+      "title": "Una tarde de lluvia",
+      "description": "Notas cortas de un día esperando a que saliera el sol.",
+      "bodyMd": "Una entrada corta de ejemplo.\n\n## Notas\n\nEscrita para llenar el archivo en pruebas y vistas previas.\n",
+      "publishedAt": "2026-09-24T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-24T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000103"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000019",
+      "lang": "es",
+      "slug": "fotos-nocturnas-sin-tripie",
+      "title": "Fotos nocturnas sin tripié",
+      "description": "Manos firmes, paredes y otros trucos.",
+      "bodyMd": "Una entrada corta de ejemplo.\n\n## Notas\n\nEscrita para llenar el archivo en pruebas y vistas previas.\n",
+      "publishedAt": "2026-09-20T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-20T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": "00000000-0000-4000-8000-000000000203",
+      "tagIds": ["00000000-0000-4000-8000-000000000101"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-00000000001a",
+      "lang": "es",
+      "slug": "el-mercado-del-domingo",
+      "title": "El mercado del domingo",
+      "description": "Colores, voces y el mejor desayuno de la ciudad.",
+      "bodyMd": "Una entrada corta de ejemplo.\n\n## Notas\n\nEscrita para llenar el archivo en pruebas y vistas previas.\n",
+      "publishedAt": "2026-09-16T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-16T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000102"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-00000000001b",
+      "lang": "es",
+      "slug": "tren-o-autobus",
+      "title": "Tren o autobús",
+      "description": "Cuál elegir para un viaje largo y por qué depende.",
+      "bodyMd": "Una entrada corta de ejemplo.\n\n## Notas\n\nEscrita para llenar el archivo en pruebas y vistas previas.\n",
+      "publishedAt": "2026-09-12T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-12T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000102", "00000000-0000-4000-8000-000000000103"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-00000000001c",
+      "lang": "es",
+      "slug": "mi-primer-rollo",
+      "title": "Mi primer rollo de película",
+      "description": "Treinta y seis fotos, sin pantalla y con mucha paciencia.",
+      "bodyMd": "Una entrada corta de ejemplo.\n\n## Notas\n\nEscrita para llenar el archivo en pruebas y vistas previas.\n",
+      "publishedAt": "2026-09-08T15:00:00.000000+00:00",
+      "updatedAt": "2026-09-08T15:00:00.000000+00:00",
+      "translationKey": null,
+      "previousSlugs": [],
+      "coverImageId": null,
+      "tagIds": ["00000000-0000-4000-8000-000000000101"],
+      "galleryImageIds": [],
+      "inlineImageIds": []
     }
   ],
   "tags": [
     {
       "id": "00000000-0000-4000-8000-000000000101",
       "slug": "photography",
-      "labels": { "en": "Photography", "es": "Fotografía" }
+      "labels": {
+        "en": "Photography",
+        "es": "Fotografía"
+      }
     },
     {
       "id": "00000000-0000-4000-8000-000000000102",
       "slug": "travel",
-      "labels": { "en": "Travel", "es": "Viajes" }
+      "labels": {
+        "en": "Travel",
+        "es": "Viajes"
+      }
     },
     {
       "id": "00000000-0000-4000-8000-000000000103",
       "slug": "notes",
-      "labels": { "en": "Notes", "es": "Notas" }
+      "labels": {
+        "en": "Notes",
+        "es": "Notas"
+      }
     }
   ],
   "images": [
@@ -93,15 +294,31 @@
       "height": 533,
       "dominantColor": "#0f4c81",
       "variants": [
-        { "w": 400, "h": 267, "bytes": 1018, "key": "images/2026/river-at-dawn-32eb47ac-400.webp" },
-        { "w": 800, "h": 533, "bytes": 2404, "key": "images/2026/river-at-dawn-86ec97ff-800.webp" }
+        {
+          "w": 400,
+          "h": 267,
+          "bytes": 1018,
+          "key": "images/2026/river-at-dawn-32eb47ac-400.webp"
+        },
+        {
+          "w": 800,
+          "h": 533,
+          "bytes": 2404,
+          "key": "images/2026/river-at-dawn-86ec97ff-800.webp"
+        }
       ],
-      "metadata": { "creator": "Aldo", "copyrightNotice": "© 2026 Aldo. All rights reserved." },
+      "metadata": {
+        "creator": "Aldo Garza",
+        "copyrightNotice": "© 2026 Aldo Garza. All rights reserved."
+      },
       "alt": {
         "en": "A calm blue river under a pale morning sun",
         "es": "Un río azul y tranquilo bajo el sol de la mañana"
       },
-      "caption": { "en": "The river at dawn", "es": "El río al amanecer" },
+      "caption": {
+        "en": "The river at dawn",
+        "es": "El río al amanecer"
+      },
       "updatedAt": "2026-10-01T16:00:00.000000+00:00"
     },
     {
@@ -111,15 +328,29 @@
       "height": 533,
       "dominantColor": "#1b4332",
       "variants": [
-        { "w": 400, "h": 267, "bytes": 968, "key": "images/2026/forest-trail-d89c97d9-400.webp" },
-        { "w": 800, "h": 533, "bytes": 2166, "key": "images/2026/forest-trail-382ebc01-800.webp" }
+        {
+          "w": 400,
+          "h": 267,
+          "bytes": 968,
+          "key": "images/2026/forest-trail-d89c97d9-400.webp"
+        },
+        {
+          "w": 800,
+          "h": 533,
+          "bytes": 2166,
+          "key": "images/2026/forest-trail-382ebc01-800.webp"
+        }
       ],
-      "metadata": { "creator": "Aldo" },
+      "metadata": {
+        "creator": "Aldo Garza"
+      },
       "alt": {
         "en": "A green forest fading into a bright clearing",
         "es": "Un bosque verde que se abre a un claro luminoso"
       },
-      "caption": { "es": "Sendero en el bosque" },
+      "caption": {
+        "es": "Sendero en el bosque"
+      },
       "updatedAt": "2026-10-01T16:00:00.000000+00:00"
     },
     {
@@ -129,10 +360,22 @@
       "height": 533,
       "dominantColor": "#14213d",
       "variants": [
-        { "w": 400, "h": 267, "bytes": 1276, "key": "images/2026/city-at-night-14f41a5e-400.webp" },
-        { "w": 800, "h": 533, "bytes": 3590, "key": "images/2026/city-at-night-93f06b82-800.webp" }
+        {
+          "w": 400,
+          "h": 267,
+          "bytes": 1276,
+          "key": "images/2026/city-at-night-14f41a5e-400.webp"
+        },
+        {
+          "w": 800,
+          "h": 533,
+          "bytes": 3590,
+          "key": "images/2026/city-at-night-93f06b82-800.webp"
+        }
       ],
-      "metadata": { "creator": "Aldo" },
+      "metadata": {
+        "creator": "Aldo Garza"
+      },
       "alt": {
         "en": "Night sky turning orange over the city",
         "es": "Cielo nocturno que se vuelve naranja sobre la ciudad"

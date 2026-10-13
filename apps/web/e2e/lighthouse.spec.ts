@@ -5,7 +5,7 @@ import lighthouse from 'lighthouse';
 // Lighthouse budgets from the roadmap, on representative pages of the fixtures build. Uses the
 // default mobile profile (slow 4G, mid-range phone), which is the stricter of the two.
 const BUDGETS = { accessibility: 1, seo: 1, performance: 0.95, 'best-practices': 1 };
-const PAGES = ['/', '/blog/hola-mundo/', '/en/blog/hello-world/', '/tags/', '/en/blog/'];
+const PAGES = ['/', '/blog/hola-mundo/', '/en/blog/hello-world/', '/tags/notes/', '/en/page/2/'];
 
 // Test builds always carry `noindex` (only the deploy workflow builds for production), so the
 // crawlability audit is expected to fail here and is checked on the live site instead.

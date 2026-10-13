@@ -15,9 +15,17 @@ interface Props {
   /** Above the fold (e.g. the cover): load immediately and with high priority. */
   priority?: boolean;
   sizes?: string;
+  /** Repeats information already given in text next to it (e.g. a card's cover): empty alt. */
+  decorative?: boolean;
 }
 
-const { image, lang, priority = false, sizes = CONTENT_IMAGE_SIZES } = Astro.props;
+const {
+  image,
+  lang,
+  priority = false,
+  sizes = CONTENT_IMAGE_SIZES,
+  decorative = false,
+} = Astro.props;
 const base = mediaBaseUrl();
 const fallback = pickVariant(image.variants, 800);
 ---
@@ -26,7 +34,7 @@ const fallback = pickVariant(image.variants, 800);
   src={fallback ? mediaUrl(base, fallback.key) : undefined}
   srcset={buildSrcset(image.variants, base)}
   sizes={sizes}
-  alt={image.alt[lang] ?? ''}
+  alt={decorative ? '' : (image.alt[lang] ?? '')}
   width={image.width}
   height={image.height}
   loading={priority ? 'eager' : 'lazy'}

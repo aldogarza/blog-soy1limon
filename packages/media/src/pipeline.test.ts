@@ -134,8 +134,8 @@ describe('processImage', () => {
     for (const variant of result.variants) {
       const tags = await readTags(variant.key);
       expect(tags['XMP-dc:Creator']).toBe(siteConfig.imageDefaults.creator);
-      expect(tags['XMP-dc:Rights']).toBe('© 2026 Aldo. All rights reserved.');
-      expect(tags['IFD0:Copyright']).toBe('© 2026 Aldo. All rights reserved.');
+      expect(tags['XMP-dc:Rights']).toBe('© 2026 Aldo Garza. All rights reserved.');
+      expect(tags['IFD0:Copyright']).toBe('© 2026 Aldo Garza. All rights reserved.');
       expect(tags['ExifIFD:ColorSpace']).toBe('sRGB');
       if (profileForWidth(variant.w) === 'full') {
         expect(tags['XMP-dc:Title']).toBe('Atardecer en Monterrey');

@@ -1,11 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page, test } from '@playwright/test';
+import { siteConfig } from '@soy1limon/core';
 import { crawl } from './crawl.ts';
 
-test('every page is reachable, accessible, well structured and script-free', async ({
-  page,
-  request,
-}) => {
+test('every page is reachable, accessible and well structured', async ({ page, request }) => {
   const pages = await crawl(page);
   expect(pages.length).toBeGreaterThanOrEqual(16);
 
@@ -19,6 +17,8 @@ test('every page is reachable, accessible, well structured and script-free', asy
     const images = await page.locator('img').evaluateAll((imgs) =>
       imgs.map((img) => ({
         alt: img.getAttribute('alt'),
+        // A card's cover repeats the post title next to it, so it is decorative (empty alt).
+        decorative: img.closest('.post-card') !== null,
         width: img.getAttribute('width'),
         height: img.getAttribute('height'),
         src: (img as HTMLImageElement).currentSrc || (img as HTMLImageElement).src,
@@ -26,7 +26,8 @@ test('every page is reachable, accessible, well structured and script-free', asy
       })),
     );
     for (const image of images) {
-      expect(image.alt, `alt on ${image.src}`).toBeTruthy();
+      if (image.decorative) expect(image.alt, `empty alt on ${image.src}`).toBe('');
+      else expect(image.alt, `alt on ${image.src}`).toBeTruthy();
       expect(image.width && image.height, `dimensions on ${image.src}`).toBeTruthy();
       assets.add(new URL(image.src, page.url()).pathname);
       for (const candidate of image.srcset.split(',')) {
@@ -34,11 +35,6 @@ test('every page is reachable, accessible, well structured and script-free', asy
         if (url) assets.add(new URL(url, page.url()).pathname);
       }
     }
-
-    // JSON-LD blocks are data, not code. Only search and the gallery viewer use scripts.
-    const scripts = await page.locator('script:not([type="application/ld+json"])').count();
-    const needsScript = path.endsWith('/search/') || (await page.locator('.gallery').count()) > 0;
-    if (!needsScript) expect(scripts, `no JavaScript on ${path}`).toBe(0);
 
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
@@ -213,16 +209,117 @@ test('an old address redirects to the renamed post', async ({ page }) => {
   await expect(page).toHaveURL(/\/blog\/hello-world\/$/);
 });
 
-test('search finds posts in the language of the page only', async ({ page }) => {
-  await page.goto('/en/search/');
-  await page.getByLabel('Search the blog').fill('river');
-  await page.getByRole('button', { name: 'Search' }).click();
-  await expect(page.getByRole('status')).toHaveText('1 result');
-  await expect(page.getByRole('link', { name: 'Hello, world' })).toBeVisible();
+test('the search box in the bar shows results in the page language while typing', async ({
+  page,
+}) => {
+  await page.goto('/en/');
+  const box = page.getByRole('searchbox', { name: 'Search the blog' });
+  const panel = page.locator('.search-panel');
+  await box.fill('river');
+  await expect(panel.getByRole('link', { name: 'Hello, world' })).toBeVisible();
+  await expect(page.locator('.site-search [role="status"]')).toHaveText('1 result');
+  await expectNoViolations(page);
+
+  await page.keyboard.press('ArrowDown');
+  await expect(panel.getByRole('link', { name: 'Hello, world' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(panel).toBeHidden();
+  await expect(box).toBeFocused();
+
+  // Enter opens the full results, and the box keeps the query.
+  await box.press('Enter');
+  await expect(page).toHaveURL(/\/en\/search\/\?q=river$/);
+  await expect(page.locator('.search-status')).toHaveText('1 result');
+  await expect(
+    page.locator('.search-results').getByRole('link', { name: 'Hello, world' }),
+  ).toBeVisible();
+  await expect(box).toHaveValue('river');
 
   await page.goto('/search/?q=compartir');
-  await expect(page.getByRole('status')).toHaveText('1 resultado');
-  await expect(page.getByRole('link', { name: 'Hola, mundo' })).toBeVisible();
+  await expect(page.locator('.search-status')).toHaveText('1 resultado');
+  await expect(
+    page.locator('.search-results').getByRole('link', { name: 'Hola, mundo' }),
+  ).toBeVisible();
+});
+
+test('on a phone the search box is a magnifying glass that grows while in use', async ({
+  page,
+}) => {
+  // A design of the iStyle theme; other themes may show the whole box.
+  test.skip((process.env.THEME ?? siteConfig.theme) !== 'istyle', 'iStyle only');
+  await page.setViewportSize({ width: 375, height: 740 });
+  await page.goto('/');
+  const box = page.getByRole('searchbox', { name: 'Buscar en el blog' });
+  expect((await box.boundingBox())?.width).toBeLessThan(48);
+  await box.focus();
+  expect((await box.boundingBox())?.width).toBeGreaterThan(300);
+  await box.fill('mercado');
+  await expect(
+    page.locator('.search-panel').getByRole('link', { name: 'El mercado del domingo' }),
+  ).toBeVisible();
+  await expectNoViolations(page);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Tab');
+  expect((await box.boundingBox())?.width).toBeLessThan(48);
+});
+
+test('the home page shows the newest posts, then loads every other one in place', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const latest = page.getByRole('region', { name: 'Entradas recientes' });
+  await expect(latest.getByRole('article')).toHaveCount(3);
+  const more = page.getByRole('region', { name: 'Más entradas' });
+  await expect(more.getByRole('article')).toHaveCount(2);
+
+  // A press loads the next page and moves the focus to its first post.
+  await more.getByRole('button', { name: 'Cargar más entradas' }).click();
+  await expect(more.getByRole('link', { name: 'El mercado del domingo' })).toBeFocused();
+
+  // Near the end of the list the rest loads on its own.
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(more.getByRole('article')).toHaveCount(5);
+  await expect(more.getByRole('heading', { level: 3 })).toHaveCount(5);
+  await expect(more.getByRole('button')).toHaveCount(0);
+  await expect(more.getByRole('status')).toHaveText(
+    'Se cargó 1 entrada más. Ya están todas las entradas.',
+  );
+  await expectNoViolations(page);
+});
+
+test('without JavaScript, search and the archive still work as plain pages', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('/');
+  const next = page.getByRole('link', { name: 'Cargar más entradas' });
+  await expect(next).toHaveAttribute('href', '/page/2/');
+  await next.click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Más entradas · Página 2 de 3');
+  await expect(page.getByRole('article')).toHaveCount(2);
+  await page.getByRole('link', { name: 'Entradas anteriores' }).click();
+  await expect(page).toHaveURL(/\/page\/3\/$/);
+  await page.getByRole('link', { name: 'Entradas más nuevas' }).click();
+  await page.getByRole('link', { name: 'Entradas más nuevas' }).click();
+  await expect(page).toHaveURL(/:\d+\/$/);
+
+  await page.getByRole('searchbox', { name: 'Buscar en el blog' }).fill('río');
+  await page.getByRole('searchbox', { name: 'Buscar en el blog' }).press('Enter');
+  await expect(page).toHaveURL(/\/search\/\?q=r%C3%ADo$/);
+  await context.close();
+});
+
+test('the old blog index sends visitors to the home page, and the tag index is gone', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/blog/');
+  await expect(page).toHaveURL(/:\d+\/$/);
+  await page.goto('/en/blog/');
+  await expect(page).toHaveURL(/\/en\/$/);
+  expect((await request.get('/tags/')).status()).toBe(404);
+  expect((await request.get('/en/tags/notes/')).status()).toBe(200);
 });
 
 test('unknown pages get a bilingual 404', async ({ page }) => {

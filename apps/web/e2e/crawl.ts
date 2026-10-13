@@ -1,8 +1,11 @@
 import { expect, type Page } from '@playwright/test';
 
-/** Every internal page reachable from the home pages, discovered by following links. */
+/**
+ * Every internal page reachable from the home pages, discovered by following links. The search
+ * pages are opened from a form and page 2 of the archive by a button, so they are starting points.
+ */
 export async function crawl(page: Page): Promise<string[]> {
-  const queue = ['/', '/en/'];
+  const queue = ['/', '/en/', '/search/', '/en/search/', '/page/2/', '/en/page/2/'];
   const seen = new Set(queue);
   // for-of over an array also visits items pushed while iterating: a breadth-first crawl.
   for (const path of queue) {

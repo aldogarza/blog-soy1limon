@@ -2,11 +2,11 @@
 
 ## Context
 
-Aldo wants a **personal public blog that costs $0 to run** (only the domain he already owns). Requirements gathered in conversation:
+Aldo Garza wants a **personal public blog that costs $0 to run** (only the domain he already owns). Requirements gathered in conversation:
 
 - Public site: **static**, hosted on **GitHub Pages**, **public repository** (no secrets may ever land in git).
 - Images on **Cloudflare R2** (free egress) to minimize transfer.
-- A **private admin panel that runs only on Aldo's machine (localhost)** to write posts and upload images.
+- A **private admin panel that runs only on Aldo Garza's machine (localhost)** to write posts and upload images.
 - Content (posts, drafts, image metadata, revisions) stored in **Supabase (Postgres)** so drafts never appear in the public repo.
 - Image pipeline: any input format → **WebP in multiple widths**, optional **watermark**, **correct embedded metadata** (EXIF/XMP) when a visitor downloads the image, **per-image metadata form prefilled from the file**, editable/removable fields, **SEO file name**, processed **one image at a time** for multi-image uploads.
 - Posts may have **zero, one or many images**; full **SEO** (Google indexing done right).
@@ -39,7 +39,7 @@ Per-image control of GPS/device/time (kept by default for travel photos; one swi
 ## Architecture
 
 ```
- Aldo's PC (localhost only)                     Cloud (free tiers)
+ Aldo Garza's PC (localhost only)               Cloud (free tiers)
 ┌──────────────────────────────┐   secret key   ┌──────────────────────┐
 │ apps/admin (Astro SSR, Node) │──────────────▶ │ Supabase Postgres    │
 │  - Vue islands for forms     │                │  posts, tags, images,│
@@ -171,7 +171,7 @@ revisions    id uuid pk, entity_type text check (post|image), entity_id uuid,
 ## Phases
 
 Rules for the implementing agent:
-- Do **one phase at a time**. At the end of each phase run its verification, update the related `docs/`, and stop for Aldo's review.
+- Do **one phase at a time**. At the end of each phase run its verification, update the related `docs/`, and stop for Aldo Garza's review.
 - **Never commit or push unless asked.** Commit messages are in English.
 - Everything in English. Never use npm.
 
@@ -179,7 +179,7 @@ Rules for the implementing agent:
 - `mkdir blog-soy1limon`, `git init`. Copy this plan to `docs/roadmap.md` (source of truth for future sessions/models). pnpm workspace, Turborepo (`build`, `dev`, `lint`, `typecheck`, `test`), `tsconfig.base.json` (strict).
 - ESLint + Prettier, Vitest workspace, lefthook pre-commit (lint-staged + **gitleaks**).
 - `.gitignore`: `.env*` except `*.example`, `backups/`, `.media-local/`, `dist`, `.astro`.
-- `CLAUDE.md`: project conventions overriding Aldo's global defaults — English comments and commits, pnpm only, commands, phase rules.
+- `CLAUDE.md`: project conventions overriding Aldo Garza's global defaults — English comments and commits, pnpm only, commands, phase rules.
 - `README.md` skeleton with an architecture mermaid diagram, `LICENSE` (MIT for code; state that blog content and images are **not** covered), `SECURITY.md`.
 - `packages/core`: env schemas with zod (fail fast with clear messages), `site.config.ts` (site name per locale, author, default image metadata, watermark config, media base URL, widths).
 - `.github/workflows/ci.yml`: install with frozen lockfile → lint → typecheck → test. Uses `pull_request` (never `pull_request_target`), no secrets, actions pinned by SHA. Add `dependabot.yml`.

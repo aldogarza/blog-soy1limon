@@ -18,7 +18,11 @@ const technical = {
 };
 
 const base: ImageFormValues = valuesFromSuggestion(
-  { seoName: 'coffee-on-the-counter', metadata: { creator: 'Aldo' }, altText: 'A coffee cup' },
+  {
+    seoName: 'coffee-on-the-counter',
+    metadata: { creator: 'Aldo Garza' },
+    altText: 'A coffee cup',
+  },
   siteConfig,
 );
 
@@ -53,7 +57,7 @@ describe('toEmbeddedMetadata', () => {
     const metadata = toEmbeddedMetadata({ ...base, title: '', creditText: '' }, {});
     expect(metadata).not.toHaveProperty('title');
     expect(metadata).not.toHaveProperty('creditText');
-    expect(metadata.creator).toBe('Aldo');
+    expect(metadata.creator).toBe('Aldo Garza');
   });
 
   it('keeps location, device and time when chosen', () => {
@@ -92,7 +96,7 @@ describe('valuesFromRecord', () => {
   it('reproduces the keep switches from what is stored', () => {
     const values = valuesFromRecord({
       seoName: 'coffee',
-      metadata: { creator: 'Aldo', location: technical.location },
+      metadata: { creator: 'Aldo Garza', location: technical.location },
       alt: { es: 'Café' },
       caption: {},
       watermark: false,

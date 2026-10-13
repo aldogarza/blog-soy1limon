@@ -18,6 +18,7 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: false,
     timeout: 180_000,
-    env: { CONTENT_SOURCE: 'fixtures', SITE_URL: baseURL },
+    // Two posts per page, so the sixteen sample posts span several archive pages.
+    env: { CONTENT_SOURCE: 'fixtures', SITE_URL: baseURL, POSTS_PER_PAGE: '2' },
   },
 });

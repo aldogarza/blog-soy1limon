@@ -1,5 +1,5 @@
 ---
-import { blogPath, homePath, type Locale, tagPath, ui } from '@soy1limon/core';
+import { homePath, type Locale, tagPath, ui } from '@soy1limon/core';
 import Gallery from '../components/Gallery.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -40,7 +40,6 @@ const seo = {
     breadcrumbJsonLd(
       [
         { name: t.home, path: homePath(lang) },
-        { name: t.blog, path: blogPath(lang) },
         { name: post.title, path: post.path },
       ],
       site,

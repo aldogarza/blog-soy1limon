@@ -71,6 +71,9 @@ export const siteConfigSchema = z.object({
     sensitiveTerms: z.array(z.string().min(2)),
   }),
   blog: z.object({
+    /** Posts in the home page's "latest" group; the first one is featured. */
+    recentPosts: z.number().int().positive(),
+    /** Posts loaded at a time in the list of every post below them. */
     postsPerPage: z.number().int().positive(),
     /** IANA zone used to display dates, so a build running in UTC does not shift the day. */
     timeZone: z.string().min(1),
@@ -98,17 +101,17 @@ export const siteConfig = {
   defaultLocale: DEFAULT_LOCALE,
   title: { en: 'soy1limon', es: 'soy1limon' },
   description: {
-    en: 'Personal blog by Aldo.',
-    es: 'Blog personal de Aldo.',
+    en: 'Personal blog by Aldo Garza.',
+    es: 'Blog personal de Aldo Garza.',
   },
   author: {
-    name: 'Aldo',
+    name: 'Aldo Garza',
     url: null,
   },
   imageDefaults: {
-    creator: 'Aldo',
-    copyrightNotice: '© {year} Aldo. All rights reserved.',
-    creditText: 'Aldo / soy1limon',
+    creator: 'Aldo Garza',
+    copyrightNotice: '© {year} Aldo Garza. All rights reserved.',
+    creditText: 'Aldo Garza / soy1limon',
     licenseUrl: null,
     keepCameraInfo: true,
     // Photos are mostly travel and public places; locations may later feed a map of the photos.
@@ -135,7 +138,8 @@ export const siteConfig = {
     sensitiveTerms: ['Aldo'],
   },
   blog: {
-    postsPerPage: 10,
+    recentPosts: 3,
+    postsPerPage: 12,
     timeZone: 'America/Monterrey',
   },
   theme: 'istyle',

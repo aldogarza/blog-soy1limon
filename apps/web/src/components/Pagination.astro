@@ -1,5 +1,5 @@
 ---
-import { blogPath, type Locale, ui } from '@soy1limon/core';
+import { archivePath, type Locale, ui } from '@soy1limon/core';
 
 interface Props {
   lang: Locale;
@@ -17,14 +17,14 @@ const t = ui(lang);
     <ul>
       {page > 1 && (
         <li>
-          <a href={blogPath(lang, page - 1)} rel="prev">
+          <a href={archivePath(lang, page - 1)} rel="prev">
             {t.newer}
           </a>
         </li>
       )}
       {page < totalPages && (
         <li>
-          <a href={blogPath(lang, page + 1)} rel="next">
+          <a href={archivePath(lang, page + 1)} rel="next">
             {t.older}
           </a>
         </li>

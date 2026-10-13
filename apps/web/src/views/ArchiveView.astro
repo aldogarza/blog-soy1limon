@@ -1,25 +1,25 @@
 ---
-import { blogPath, homePath, type Locale, otherLocale, siteConfig, ui } from '@soy1limon/core';
+import { archivePath, homePath, type Locale, siteConfig, ui } from '@soy1limon/core';
 import Pagination from '../components/Pagination.astro';
 import PostList from '../components/PostList.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import type { SitePost } from '../lib/content.ts';
+import type { Page } from '../lib/paginate.ts';
 import { breadcrumbJsonLd } from '../lib/seo.ts';
 
 interface Props {
   lang: Locale;
-  posts: SitePost[];
-  page: number;
-  totalPages: number;
+  /** Page 2 or later of the archive (page 1 is the home page). */
+  page: Page<SitePost>;
 }
 
-const { lang, posts, page, totalPages } = Astro.props;
+const { lang, page } = Astro.props;
 const t = ui(lang);
-const title = page > 1 ? `${t.blog} · ${t.page(page, totalPages)}` : t.blog;
+const title = `${t.morePosts} · ${t.page(page.page, page.totalPages)}`;
 const breadcrumb = breadcrumbJsonLd(
   [
     { name: t.home, path: homePath(lang) },
-    { name: t.blog, path: blogPath(lang) },
+    { name: title, path: archivePath(lang, page.page) },
   ],
   Astro.site ?? '',
 );
@@ -29,10 +29,9 @@ const breadcrumb = breadcrumbJsonLd(
   lang={lang}
   title={title}
   description={siteConfig.description[lang]}
-  translationPath={page === 1 ? blogPath(otherLocale(lang)) : undefined}
   seo={{ jsonLd: [breadcrumb] }}
 >
   <h1>{title}</h1>
-  <PostList posts={posts} lang={lang} />
-  <Pagination lang={lang} page={page} totalPages={totalPages} />
+  <PostList posts={page.items} lang={lang} />
+  <Pagination lang={lang} page={page.page} totalPages={page.totalPages} />
 </BaseLayout>

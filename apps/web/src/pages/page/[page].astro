@@ -1,0 +1,17 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { siteArchive } from '../../lib/archive.ts';
+import { postsIn, type SitePost, siteContent } from '../../lib/content.ts';
+import type { Page } from '../../lib/paginate.ts';
+import ArchiveView from '../../views/ArchiveView.astro';
+
+// Page 1 of the archive is the home page; this route only emits pages 2 and later.
+export const getStaticPaths = (async () => {
+  const { pages } = siteArchive(postsIn(await siteContent(), 'es'));
+  return pages.slice(1).map((page) => ({ params: { page: String(page.page) }, props: { page } }));
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<SitePost> };
+---
+
+<ArchiveView lang="es" page={page} />

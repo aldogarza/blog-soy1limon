@@ -29,7 +29,31 @@
     margin-inline: 0;
   }
 
-  .site-nav ul,
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+
+  .site-brand {
+    margin-inline-end: auto;
+  }
+
+  .site-search {
+    position: relative;
+  }
+
+  /* Live results float over the page instead of pushing it down. */
+  .search-panel {
+    position: absolute;
+    z-index: 1;
+    width: min(24rem, 100vw - 2rem);
+    padding: 0 1rem;
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
   .post-tags ul,
   .pagination ul {
     list-style: none;

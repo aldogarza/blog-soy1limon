@@ -14,8 +14,16 @@ requirement: a change that breaks one of the checks below is a bug, not a stylin
 - Light and dark mode use system colours (`Canvas`, `CanvasText`, `Highlight`), so forced-colour
   modes such as Windows High Contrast keep working.
 - Animations are switched off under `prefers-reduced-motion` (there are none yet).
-- The public site ships no JavaScript except on the search page, which explains itself and links
-  to the archive when scripts are off, and the gallery viewer, which falls back to plain links.
+- Every page of the public site works without JavaScript. The three enhancements fall back to
+  plain links and forms: the header search (opens the search page), "Load more" on the home page
+  (opens the next archive page) and the gallery viewer (opens the photo file).
+- Header search: a labelled `role="search"` form. Results appear in a panel right after the box
+  in the Tab order; the down arrow moves into them, Escape closes the panel and returns to the box,
+  and a status message announces the number of results. On phones (iStyle) the box shows as a
+  magnifying glass and widens while it has focus.
+- "Load more" on the home page: a status message announces each load; the focus moves to the
+  first new post after a press. Automatic loading while scrolling stops after three pages so the
+  footer stays reachable.
 - No audio or video. Any future embed must ship WebVTT captions and a transcript (hearing access).
 - Admin forms: labels and hints tied to every input, `aria-invalid` plus an error summary that
   takes focus, live regions for progress and status, and focus moved to each upload step's heading.
@@ -78,7 +86,13 @@ and after any big change to the layout.
   differ slightly between browsers; they all pass AA, but the numbers are not identical.
 - Without JavaScript, a gallery photo opens the raw `.webp` file in the browser's image viewer,
   which has no alt text of its own. The link text says what it opens.
-- Search needs JavaScript (Pagefind). Without it the page says so and links to the archive.
+- Search needs JavaScript (Pagefind). Without it the page says so and links to the home page.
+- iStyle draws the site over a background photo. axe cannot measure text over an image (it reports
+  those checks as "incomplete", not as passes), so the theme's veil and glass were sized by hand from
+  the photo's measured luminance (near-black to white): 70% veil in light mode and 60% in dark mode
+  keep text on the photo and on the 60% glass at 4.5:1 or more over the photo's darkest and
+  brightest spots. Text straight on the photo only uses the label colours; links there are
+  underlined text-coloured links. A new background photo must be checked the same way.
 - Tooling checks that alt text exists, not that it is good. Describing photos well is up to the
   author (the admin shows guidance and a character counter).
 - The admin is designed for a desktop screen. Below about 500 px its data tables scroll sideways
@@ -90,15 +104,17 @@ and after any big change to the layout.
 
 ## Findings log
 
-| Date       | Found                                                                                       | Fix                                                                                       |
-| ---------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| 2026-10-12 | Dark mode: pages had no explicit background, so tools (and some readers) assumed white      | `background-color: Canvas; color: CanvasText` on the root                                 |
-| 2026-10-12 | Admin: the calendar button inside the schedule field took focus without a visible ring      | Outline on `input[type='datetime-local']:focus-within`                                    |
-| 2026-10-12 | Admin: the posts, variants and deploys tables made the whole page scroll sideways at 320 px | Tables scroll inside a labelled, focusable region                                         |
-| 2026-10-12 | Semantic review: tags as a comma string, unlabelled tag counts, missing space in the footer | Tags are a labelled list; counts say "posts"; `<small>` copyright                         |
-| 2026-10-12 | Admin: error summary and save state re-announced while typing; static `role="alert"`        | Autosave validates silently; one live region per editor; no alerts on page load           |
-| 2026-10-12 | Admin: errors and live status not tied to their fields; Spanish text without `lang`         | `aria-describedby` for slug, name, body and schedule; `lang` on titles, alt text, options |
-| 2026-10-12 | Admin: preview headings joined the editor outline; Enter in "new tag" saved the post        | Preview starts at `h3`; Enter creates the tag                                             |
-| 2026-10-12 | iStyle: language switch overlapped two nav links on phones (target size, 2.5.8)             | Navigation always gets its own row on phones                                              |
-| 2026-10-12 | iStyle admin: tinted buttons fell to 4.3:1 on hover; diff text was grey on colour           | Lighter hover tint; diff text uses the main label colour                                  |
-| 2026-10-12 | Live site Lighthouse (mobile): 100 in performance, accessibility, best practices and SEO    | —                                                                                         |
+| Date       | Found                                                                                                                                | Fix                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| 2026-10-12 | Dark mode: pages had no explicit background, so tools (and some readers) assumed white                                               | `background-color: Canvas; color: CanvasText` on the root                                          |
+| 2026-10-12 | Admin: the calendar button inside the schedule field took focus without a visible ring                                               | Outline on `input[type='datetime-local']:focus-within`                                             |
+| 2026-10-12 | Admin: the posts, variants and deploys tables made the whole page scroll sideways at 320 px                                          | Tables scroll inside a labelled, focusable region                                                  |
+| 2026-10-12 | Semantic review: tags as a comma string, unlabelled tag counts, missing space in the footer                                          | Tags are a labelled list; counts say "posts"; `<small>` copyright                                  |
+| 2026-10-12 | Admin: error summary and save state re-announced while typing; static `role="alert"`                                                 | Autosave validates silently; one live region per editor; no alerts on page load                    |
+| 2026-10-12 | Admin: errors and live status not tied to their fields; Spanish text without `lang`                                                  | `aria-describedby` for slug, name, body and schedule; `lang` on titles, alt text, options          |
+| 2026-10-12 | Admin: preview headings joined the editor outline; Enter in "new tag" saved the post                                                 | Preview starts at `h3`; Enter creates the tag                                                      |
+| 2026-10-12 | iStyle: language switch overlapped two nav links on phones (target size, 2.5.8)                                                      | Navigation always gets its own row on phones                                                       |
+| 2026-10-12 | iStyle at 60% glass: photos under the bar could drop its text to 4.2:1 and the focus ring to 2.2:1; the search placeholder was 3.4:1 | The bar evens out its backdrop (lifts it in light mode, dims it in dark mode); opaque search field |
+| 2026-10-12 | iStyle: a "Load more" button that had focus when posts arrived left the focus behind the new posts                                   | The focus moves to the first new post                                                              |
+| 2026-10-12 | iStyle admin: tinted buttons fell to 4.3:1 on hover; diff text was grey on colour                                                    | Lighter hover tint; diff text uses the main label colour                                           |
+| 2026-10-12 | Live site Lighthouse (mobile): 100 in performance, accessibility, best practices and SEO                                             | —                                                                                                  |

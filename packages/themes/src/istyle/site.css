@@ -1,6 +1,6 @@
 /*
- * iStyle (site): iOS-inspired look. A translucent glass bar on top, large titles, grouped lists
- * of rounded cards on a grey background, and pill-shaped tags and buttons.
+ * iStyle (site): iOS-inspired look. Soft lime and lemon light behind everything, a floating glass
+ * capsule as the navigation bar, large titles, photo cards in a grid and pill-shaped controls.
  * Every rule lives in the theme layer; the foundation's a11y layer still wins (docs/themes.md).
  */
 @import '../foundation/site.css';
@@ -11,6 +11,25 @@
    * Page
    * ------------------------------------------------------------------------------------------- */
   :root {
+    /* Lists of posts use a wide column; reading text keeps a comfortable measure inside it. */
+    --site-wide: 68rem;
+    --site-measure: 42rem;
+    --site-gutter: max(1rem, (100% - var(--site-wide)) / 2);
+    /* Veil over the background photo. Measured on the photo (from near-black trees to white
+       sky): with 70% in light mode and 60% in dark mode, text on the page and on the 60% glass
+       keeps at least 4.5:1 even over its darkest or brightest spot. */
+    --site-veil: light-dark(rgb(242 242 247 / 0.7), rgb(0 0 0 / 0.6));
+    --site-glass: light-dark(rgb(255 255 255 / 0.6), rgb(36 36 38 / 0.6));
+    /* What the bar does to the page under it (filters cannot use light-dark(), see below). Light
+       mode lifts dark photos and dark mode dims bright ones, so the bar's text and focus ring keep
+       their contrast whatever scrolls underneath (checked with black and white photos). */
+    --site-bar-backdrop: saturate(180%) contrast(0.47) brightness(1.3) blur(var(--is-glass-blur));
+    /* The search box is opaque, so its placeholder never depends on the backdrop. */
+    --site-field: light-dark(#e9e9ee, #2c2c2e);
+    --site-glass-edge: light-dark(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.1));
+    /* Magnifying glass in --is-label-secondary (images cannot use light-dark(), see below). */
+    --site-search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235e5e63' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 5 5'/%3E%3C/svg%3E");
+
     font-family: var(--is-font);
     font-size: 100%;
     line-height: 1.5;
@@ -20,6 +39,13 @@
     text-size-adjust: 100%;
   }
 
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --site-bar-backdrop: saturate(180%) brightness(0.6) blur(var(--is-glass-blur));
+      --site-search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b4b4b9' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 5 5'/%3E%3C/svg%3E");
+    }
+  }
+
   body {
     margin: 0;
     min-height: 100vh;
@@ -27,11 +53,29 @@
     flex-direction: column;
   }
 
-  /* Header, main and footer span the window; their content sits on one centred column. */
-  .site-header,
+  /* Background photo (Cerro de la Silla, Monterrey) that stays put while the page scrolls; the
+     glass of the bar, the cards and the post shows it through. Phones get the smaller file. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--site-veil), var(--site-veil)),
+      url('./assets/background-1280.webp') center / cover no-repeat var(--is-bg);
+  }
+
+  @media (min-width: 48rem) {
+    body::before {
+      background-image:
+        linear-gradient(var(--site-veil), var(--site-veil)), url('./assets/background-2560.webp');
+    }
+  }
+
   main,
   .site-footer {
-    padding-inline: var(--is-gutter);
+    padding-inline: var(--site-gutter);
   }
 
   main {
@@ -61,22 +105,22 @@
   h2,
   h3,
   h4 {
-    line-height: 1.2;
+    line-height: 1.15;
     text-wrap: balance;
   }
 
   /* iOS "large title". */
   h1 {
-    font-size: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-block: 0.5rem 1rem;
+    font-size: clamp(2rem, 1.5rem + 2.2vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-block: 1rem 1rem;
   }
 
   h2 {
-    font-size: 1.375rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   p {
@@ -91,162 +135,334 @@
   }
 
   /* ---------------------------------------------------------------------------------------------
-   * Header: a translucent glass bar
+   * Header: a floating glass capsule with the name, the search box and the language switch
    * ------------------------------------------------------------------------------------------- */
   .site-header {
+    position: sticky;
+    top: 0.75rem;
+    z-index: 10;
     display: flex;
+    /* One line normally; wraps only when text is enlarged or spaced out (WCAG 1.4.10, 1.4.12). */
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.25rem 1rem;
-    padding-block: 0.5rem;
+    gap: 0.75rem;
+    width: min(100% - 1.5rem, var(--site-wide) + 1.5rem);
+    min-height: 3.5rem;
+    margin: 0.75rem auto 0;
+    padding: 0.4375rem 0.4375rem 0.4375rem 1.25rem;
+    border: 0.5px solid var(--is-separator);
+    border-radius: 999px;
     background: var(--is-surface);
-    border-block-end: 0.5px solid var(--is-separator);
+    box-shadow: var(--is-shadow);
   }
 
-  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-    .site-header {
-      background: var(--is-glass);
-      -webkit-backdrop-filter: saturate(180%) blur(var(--is-glass-blur));
-      backdrop-filter: saturate(180%) blur(var(--is-glass-blur));
-    }
-  }
-
-  /* Sticky only where the bar fits on one line, so it never hides the focused element. */
-  @media (min-width: 46rem) {
-    .site-header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    html {
-      scroll-padding-top: 4.5rem;
-    }
+  /* The bar is one line on every screen, so a focused element scrolled under it stays visible. */
+  html {
+    scroll-padding-top: 5.5rem;
   }
 
   .site-brand {
-    margin: 0;
-    font-size: 1.0625rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    margin: 0 auto 0 0;
+    font-size: 1.125rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 
   .site-brand a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     color: var(--is-label);
     text-decoration: none;
   }
 
-  .site-nav ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
+  /* A small lime, purely decorative. */
+  .site-brand a::before {
+    content: '';
+    width: 1.125rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 32% 30%, rgb(255 255 255 / 0.7), transparent 38%),
+      linear-gradient(140deg, var(--is-lemon), var(--is-lime) 55%, #5aa832);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+  }
+
+  .lang-switch {
+    margin: 0;
+  }
+
+  .lang-switch a {
+    display: block;
+    padding: 0.4375rem 0.875rem;
+    border: 1px solid var(--is-separator);
+    border-radius: 999px;
+    color: var(--is-label);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .lang-switch a:hover {
+    background: var(--is-fill);
+  }
+
+  /* Search box: a filled pill with a magnifying glass, like the iOS search bar. */
+  .site-search {
+    position: relative;
+    flex: 0 1 17rem;
+  }
+
+  .site-search input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 2.5rem;
+    padding: 0 1rem 0 2.375rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--site-field) var(--site-search-icon) no-repeat 0.875rem center / 1.0625rem;
+    color: var(--is-label);
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  .site-search input::placeholder {
+    color: var(--is-label-secondary);
+    opacity: 1;
+  }
+
+  /* Results appear in a sheet under the bar. */
+  .search-panel {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    inset-inline-end: 0;
+    width: min(26rem, 100vw - 1.5rem);
+    max-height: min(70vh, 32rem);
+    overflow-y: auto;
+    padding: 0.5rem;
+    border: 0.5px solid var(--is-separator);
+    border-radius: var(--is-radius-lg);
+    background: var(--is-surface);
+    box-shadow: var(--is-shadow-lg);
+  }
+
+  .search-panel:focus {
+    outline: none;
+  }
+
+  .search-panel ol {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .site-nav a {
-    display: inline-block;
-    padding: 0.375rem 0.75rem;
-    border-radius: 999px;
-    color: var(--is-label);
+  .search-panel li {
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--is-radius);
+    color: var(--is-label-secondary);
     font-size: 0.9375rem;
-    text-decoration: none;
   }
 
-  .site-nav a:hover {
+  .search-panel li:hover,
+  .search-panel li:has(a:focus-visible) {
     background: var(--is-fill);
   }
 
-  .site-nav a[aria-current='page'] {
+  .search-panel li a {
+    color: var(--is-label);
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .search-panel li a:hover {
+    text-decoration: underline;
+  }
+
+  .search-panel li p {
+    margin: 0.125rem 0 0;
+    color: var(--is-label-secondary);
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  .search-panel mark {
     background: var(--is-accent-tint);
-    color: var(--is-accent);
+    color: inherit;
     font-weight: 600;
   }
 
-  .lang-switch {
-    margin-inline-start: 0.25rem;
-    padding-inline-start: 0.5rem;
-    border-inline-start: 0.5px solid var(--is-separator);
+  .search-panel > p {
+    margin: 0.25rem 0 0;
+    padding: 0.5rem 0.75rem 0.25rem;
+    border-block-start: 0.5px solid var(--is-separator);
   }
 
-  .site-nav .lang-switch a {
-    color: var(--is-accent);
+  .search-panel > p a {
+    font-size: 0.9375rem;
+    font-weight: 600;
   }
 
-  /* Phones: the language switch moves next to the site name; the sections fill the second row. */
+  /* Phones: only the magnifying glass shows; the box grows over the bar while it has focus. */
   @media (max-width: 45.99rem) {
     .site-header {
-      position: relative;
+      gap: 0.5rem;
+      padding-inline-start: 1rem;
+      border-radius: var(--is-radius-xl);
     }
 
-    /* Always its own row, so the language switch beside the name never covers a section. */
-    .site-nav {
-      flex-basis: 100%;
+    .site-search {
+      position: static;
+      flex: 0 0 auto;
     }
 
-    .site-nav ul {
-      margin-inline-start: -0.75rem;
-    }
-
-    .lang-switch {
-      position: absolute;
-      top: 0.375rem;
-      inset-inline-end: var(--is-gutter);
-      margin: 0;
+    .site-search input {
+      width: 2.5rem;
       padding: 0;
-      border: none;
+      background-position: center;
+      cursor: pointer;
     }
 
-    .site-nav .lang-switch a {
-      margin-inline-end: -0.75rem;
+    .site-search input::placeholder {
+      color: transparent;
+    }
+
+    .site-search:focus-within input {
+      position: absolute;
+      inset-block-start: 0.4375rem;
+      inset-inline: 0.4375rem;
+      z-index: 1;
+      width: auto;
+      padding-inline: 2.375rem 1rem;
+      background-color: var(--is-surface);
+      background-position: 0.875rem center;
+      box-shadow: 0 0 0 0.4375rem var(--is-surface);
+      cursor: text;
+    }
+
+    .site-search:focus-within input::placeholder {
+      color: var(--is-label-secondary);
+    }
+
+    .search-panel {
+      inset-inline: 0;
+      width: auto;
+    }
+
+    .lang-switch a {
+      padding-inline: 0.75rem;
+      font-size: 0.875rem;
     }
   }
 
   /* ---------------------------------------------------------------------------------------------
-   * Home and lists of posts: an inset grouped list
+   * Home: a hero title and the latest posts
    * ------------------------------------------------------------------------------------------- */
-  .page-intro {
-    margin-block: -0.5rem 2rem;
-    color: var(--is-label-secondary);
-    font-size: 1.0625rem;
-  }
-
-  main > section > h2,
-  .gallery > h2 {
+  h1:has(+ .page-intro) {
     margin-block: 2rem 0.75rem;
+    font-size: clamp(2.75rem, 1.75rem + 5vw, 5rem);
+    letter-spacing: -0.045em;
+    line-height: 1;
   }
 
+  .page-intro {
+    max-width: 36rem;
+    margin-block: 0 2.5rem;
+    color: var(--is-label);
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
+    line-height: 1.4;
+  }
+
+  main > section > h2 {
+    margin-block: 2.5rem 1rem;
+  }
+
+  /* "Load more": a large pill under the list; posts also load on their own while scrolling. */
+  .load-more {
+    display: flex;
+    justify-content: center;
+    margin-block-start: 0.5rem;
+  }
+
+  .load-more :is(a, button) {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--is-surface);
+    box-shadow: var(--is-shadow);
+    color: var(--is-accent);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .load-more :is(a, button):hover {
+    text-decoration: underline;
+  }
+
+  .load-more button[aria-disabled='true'] {
+    color: var(--is-label-secondary);
+    cursor: progress;
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Lists of posts: photo cards in a grid
+   * ------------------------------------------------------------------------------------------- */
   .post-list {
-    margin: 0 0 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    /* Each card is as tall as its content: a text-only card next to one with a photo stays short. */
+    align-items: start;
+    gap: 1.25rem;
+    margin: 0 0 2rem;
     padding: 0;
     list-style: none;
-    background: var(--is-surface);
-    border-radius: var(--is-radius);
-    box-shadow: var(--is-shadow);
-    overflow: hidden;
   }
 
-  .post-list > li + li {
-    border-block-start: 0.5px solid var(--is-separator);
-    margin-inline-start: 1rem;
-  }
-
-  .post-list > li + li .post-card {
-    padding-inline-start: 0;
+  .post-list > li {
+    display: flex;
   }
 
   .post-card {
     position: relative;
-    padding: 0.875rem 1rem;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    padding-block-end: 1.25rem;
+    border: 0.5px solid var(--is-separator);
+    border-radius: var(--is-radius-xl);
+    background: var(--is-surface);
+    box-shadow: var(--is-shadow);
+  }
+
+  /* The cover comes last in the markup (the title is read first) but shows on top. */
+  .post-card > img {
+    order: -2;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    margin-block-end: 1rem;
+    object-fit: cover;
+    background: var(--is-fill);
+  }
+
+  /* Posts without a cover are text-only cards. */
+  .post-card:not(:has(> img)) {
+    padding-block-start: 1.25rem;
+  }
+
+  .post-card > :not(img) {
+    margin-inline: 1.25rem;
   }
 
   .post-card :is(h2, h3) {
-    margin: 0;
-    font-size: 1.0625rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    margin-block: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   .post-card :is(h2, h3) a {
@@ -254,48 +470,121 @@
     text-decoration: none;
   }
 
-  /* The whole row is the link target, like a table cell on iOS. */
+  /* The whole card is the link target. */
   .post-card :is(h2, h3) a::after {
     content: '';
     position: absolute;
     inset: 0;
-  }
-
-  .post-card:hover {
-    background: var(--is-fill);
+    z-index: 1;
   }
 
   .post-card:hover :is(h2, h3) a {
     text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   .post-card:has(a:focus-visible) {
-    background: var(--is-fill);
+    box-shadow:
+      0 0 0 var(--focus-ring-width) var(--focus-ring-color),
+      var(--is-shadow-lg);
   }
 
   .post-card p {
-    margin: 0.125rem 0 0;
+    margin-block: 0.375rem 0;
   }
 
+  /* The date sits above the title, like the eyebrow line of an iOS card. */
   .post-card .post-meta {
+    order: -1;
+    margin-block: 0 0.375rem;
     font-size: 0.8125rem;
+    font-weight: 600;
   }
 
-  .post-card p:last-child {
+  .post-card .post-meta + p {
     color: var(--is-label-secondary);
     font-size: 0.9375rem;
   }
 
-  main > section > p:last-child,
-  main > p:last-child {
-    margin-block-start: 1rem;
+  /* Home: the newest post is featured across the whole row. */
+  .latest-posts .post-list > li:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .latest-posts .post-list > li:first-child :is(h2, h3) {
+    font-size: clamp(1.625rem, 1rem + 1.5vw, 2.25rem);
+    letter-spacing: -0.03em;
+  }
+
+  .latest-posts .post-list > li:first-child .post-meta + p {
+    font-size: 1.0625rem;
+  }
+
+  @media (min-width: 48rem) {
+    .latest-posts .post-list > li:first-child .post-card:has(> img) {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      grid-template-rows: 1fr auto auto auto 1fr;
+      column-gap: 0.5rem;
+      padding-block-end: 0;
+    }
+
+    .latest-posts .post-list > li:first-child .post-card > img {
+      grid-row: 1 / -1;
+      grid-column: 1;
+      height: 100%;
+      min-height: 20rem;
+      aspect-ratio: auto;
+      margin: 0;
+    }
+
+    .latest-posts .post-list > li:first-child .post-card:has(> img) > :not(img) {
+      grid-column: 2;
+      margin-inline: 1.5rem 2rem;
+    }
+
+    .latest-posts .post-list > li:first-child .post-card:has(> img) .post-meta {
+      grid-row: 2;
+    }
+
+    .latest-posts .post-list > li:first-child .post-card:has(> img) :is(h2, h3) {
+      grid-row: 3;
+    }
+
+    .latest-posts .post-list > li:first-child .post-card:has(> img) .post-meta + p {
+      grid-row: 4;
+      margin-block-start: 0.75rem;
+    }
+
+    .latest-posts .post-list > li:first-child .post-card:not(:has(> img)) {
+      padding: 2rem 0.75rem;
+    }
   }
 
   /* ---------------------------------------------------------------------------------------------
-   * A post
+   * A post: a glass sheet over the background photo, with a comfortable reading measure
    * ------------------------------------------------------------------------------------------- */
+  .post {
+    box-sizing: border-box;
+    max-width: calc(var(--site-measure) + 2 * var(--site-sheet-padding));
+    margin-inline: auto;
+    padding: 0.5rem var(--site-sheet-padding) var(--site-sheet-padding);
+    border: 0.5px solid var(--is-separator);
+    border-radius: var(--is-radius-xl);
+    background: var(--is-surface);
+    box-shadow: var(--is-shadow-lg);
+    --site-sheet-padding: clamp(1.25rem, 4vw, 2.5rem);
+  }
+
   .post-header {
-    margin-block-end: 1.5rem;
+    margin-block: 1rem 2rem;
+  }
+
+  .post-header h1 {
+    margin-block: 0 1rem;
+    font-size: clamp(2.25rem, 1.5rem + 3.4vw, 3.75rem);
+    letter-spacing: -0.04em;
+    line-height: 1.05;
   }
 
   .post-meta {
@@ -309,7 +598,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
-    margin-block-start: 0.75rem;
+    margin-block-start: 1rem;
     color: var(--is-label-secondary);
     font-size: 0.9375rem;
   }
@@ -323,61 +612,73 @@
     list-style: none;
   }
 
-  .post-tags a,
-  .tag-index a {
+  .post-tags a {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 0.3125rem 0.875rem;
     border-radius: 999px;
-    background: var(--is-accent-tint);
+    background: var(--is-surface);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
     color: var(--is-accent);
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
   }
 
-  .post-tags a:hover,
-  .tag-index a:hover {
+  .post-tags a:hover {
     text-decoration: underline;
   }
 
   .post-translation {
-    margin-block: 0.75rem 0;
+    margin-block: 1rem 0;
     font-size: 0.9375rem;
   }
 
+  .post-translation a {
+    font-weight: 600;
+  }
+
   .post-cover {
-    margin: 0 0 2rem;
+    margin-block: 0 2.5rem;
   }
 
   .post-cover img,
   .post-body img {
     display: block;
-    border-radius: var(--is-radius-lg);
-    box-shadow: var(--is-shadow);
+    width: 100%;
+    border-radius: var(--is-radius-xl);
+    box-shadow: var(--is-shadow-lg);
   }
 
   figcaption {
-    margin-block-start: 0.5rem;
+    margin-block-start: 0.625rem;
     color: var(--is-label-secondary);
     font-size: 0.875rem;
     text-align: center;
   }
 
   .post-body {
-    font-size: 1.0625rem;
-    line-height: 1.65;
+    font-size: 1.125rem;
+    line-height: 1.7;
+  }
+
+  .post-body > :first-child {
+    margin-block-start: 0;
   }
 
   .post-body :is(h2, h3, h4) {
-    margin-block: 2.25rem 0.75rem;
+    margin-block: 2.5rem 0.75rem;
+  }
+
+  .post-body h2 {
+    font-size: 1.625rem;
   }
 
   .post-body h3 {
-    font-size: 1.1875rem;
+    font-size: 1.25rem;
   }
 
   .post-body figure {
-    margin: 2rem 0;
+    margin: 2.5rem 0;
   }
 
   .post-body :is(ul, ol) {
@@ -385,14 +686,28 @@
   }
 
   .post-body li + li {
-    margin-block-start: 0.25rem;
+    margin-block-start: 0.375rem;
+  }
+
+  .post-body li::marker {
+    color: var(--is-accent);
   }
 
   .post-body blockquote {
-    margin: 1.5rem 0;
-    padding: 0.25rem 0 0.25rem 1rem;
+    margin: 2rem 0;
+    padding: 1rem 1.25rem;
     border-inline-start: 4px solid var(--is-accent);
+    border-radius: 0 var(--is-radius) var(--is-radius) 0;
+    background: var(--is-surface);
     color: var(--is-label-secondary);
+  }
+
+  .post-body blockquote > :first-child {
+    margin-block-start: 0;
+  }
+
+  .post-body blockquote > :last-child {
+    margin-block-end: 0;
   }
 
   .post-body :not(pre) > code {
@@ -402,15 +717,15 @@
   }
 
   .post-body pre {
-    padding: 1rem 1.125rem;
-    border-radius: var(--is-radius);
+    padding: 1rem 1.25rem;
+    border-radius: var(--is-radius-lg);
     border: 0.5px solid var(--is-separator);
     font-size: 0.875rem;
     line-height: 1.55;
   }
 
   .post-body hr {
-    margin: 2.5rem auto;
+    margin: 3rem auto;
     width: 30%;
     border: none;
     border-block-start: 0.5px solid var(--is-separator);
@@ -442,10 +757,14 @@
   /* ---------------------------------------------------------------------------------------------
    * Gallery: rounded tiles
    * ------------------------------------------------------------------------------------------- */
+  .gallery > h2 {
+    margin-block: 3rem 1rem;
+  }
+
   .gallery ul {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -457,7 +776,9 @@
 
   .gallery li a {
     display: block;
-    border-radius: var(--is-radius);
+    overflow: hidden;
+    border-radius: var(--is-radius-lg);
+    box-shadow: var(--is-shadow);
   }
 
   .gallery li img {
@@ -465,7 +786,6 @@
     width: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-    border-radius: var(--is-radius);
     background: var(--is-fill);
   }
 
@@ -544,7 +864,7 @@
   }
 
   /* ---------------------------------------------------------------------------------------------
-   * Pagination, tags page, search
+   * Archive pages, loading more posts, search results
    * ------------------------------------------------------------------------------------------- */
   .pagination {
     display: flex;
@@ -556,7 +876,7 @@
 
   .pagination p {
     margin: 0;
-    color: var(--is-label-secondary);
+    color: var(--is-label);
     font-size: 0.9375rem;
   }
 
@@ -570,7 +890,7 @@
 
   .pagination a {
     display: inline-block;
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1.25rem;
     border-radius: 999px;
     background: var(--is-surface);
     box-shadow: var(--is-shadow);
@@ -578,56 +898,13 @@
     text-decoration: none;
   }
 
-  .tag-index {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .tag-index li {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .tag-index a {
-    font-size: 0.9375rem;
-  }
-
-  .tag-count {
-    color: var(--is-label-secondary);
-    font-size: 0.875rem;
-  }
-
-  .search-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: end;
-    gap: 0.5rem;
-  }
-
-  .search-form label {
-    flex-basis: 100%;
-    color: var(--is-label-secondary);
-    font-size: 0.875rem;
-  }
-
-  .search-form input {
-    flex: 1 1 12rem;
-    min-width: 0;
-    padding: 0.5rem 0.875rem;
-    border: 1px solid var(--is-control-border);
-    border-radius: var(--is-radius-sm);
-    background: var(--is-surface);
-    color: var(--is-label);
-    font: inherit;
-    font-size: 1.0625rem;
+  .search-status,
+  .search-results {
+    max-width: var(--site-measure);
   }
 
   button {
-    padding: 0.5rem 1.125rem;
+    padding: 0.625rem 1.25rem;
     border: none;
     border-radius: 999px;
     background: var(--is-accent);
@@ -638,7 +915,7 @@
   }
 
   .search-status {
-    color: var(--is-label-secondary);
+    color: var(--is-label);
     font-size: 0.9375rem;
   }
 
@@ -648,13 +925,14 @@
   }
 
   .search-results li {
-    padding: 0.875rem 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--is-radius-lg);
     background: var(--is-surface);
-    border-radius: var(--is-radius);
+    box-shadow: var(--is-shadow);
   }
 
   .search-results li + li {
-    margin-block-start: 0.5rem;
+    margin-block-start: 0.75rem;
   }
 
   .search-results a {
@@ -676,9 +954,8 @@
    * Footer
    * ------------------------------------------------------------------------------------------- */
   .site-footer {
-    padding-block: 1.5rem 2rem;
-    border-block-start: 0.5px solid var(--is-separator);
-    color: var(--is-label-secondary);
+    padding-block: 1.5rem 2.5rem;
+    color: var(--is-label);
     font-size: 0.875rem;
     text-align: center;
   }
@@ -687,16 +964,77 @@
     font-size: inherit;
   }
 
+  /* Links straight on the photo: the green accent would not keep its contrast there, so they use
+     the text colour and stay recognisable by their underline. */
+  main > p a,
+  main > section > p a,
+  .site-footer a {
+    color: var(--is-label);
+  }
+
+  /* ---------------------------------------------------------------------------------------------
+   * Glass. Last in the file on purpose: it overrides the solid surfaces declared above, which stay
+   * as the fallback where backdrop-filter is not supported.
+   * ------------------------------------------------------------------------------------------- */
+  /* Glass material (60% opaque) of the bar, the post cards and the post sheet. Without
+     backdrop-filter they fall back to the solid surface. Cards and the sheet only ever have the
+     veiled background photo behind them; post photos scroll under the bar, so it also evens out
+     its backdrop (--site-bar-backdrop). */
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .site-header,
+    .post-card,
+    .post {
+      border-color: var(--site-glass-edge);
+      background: var(--site-glass);
+      -webkit-backdrop-filter: saturate(180%) blur(var(--is-glass-blur));
+      backdrop-filter: saturate(180%) blur(var(--is-glass-blur));
+    }
+
+    .site-header {
+      -webkit-backdrop-filter: var(--site-bar-backdrop);
+      backdrop-filter: var(--site-bar-backdrop);
+    }
+  }
+
   /* ---------------------------------------------------------------------------------------------
    * Motion, only for visitors who did not ask to reduce it
    * ------------------------------------------------------------------------------------------- */
   @media (prefers-reduced-motion: no-preference) {
-    .site-nav a,
-    .post-card,
+    .lang-switch a,
     .pagination a,
     .post-tags a,
-    .tag-index a {
-      transition: background-color 0.2s var(--is-ease);
+    .load-more :is(a, button),
+    .search-panel li {
+      transition:
+        background-color 0.2s var(--is-ease),
+        box-shadow 0.2s var(--is-ease);
+    }
+
+    .post-card {
+      transition:
+        transform 0.3s var(--is-ease),
+        box-shadow 0.3s var(--is-ease);
+    }
+
+    .post-card > img {
+      transition: scale 0.5s var(--is-ease);
+    }
+
+    .post-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--is-shadow-lg);
+    }
+
+    .post-card:hover > img {
+      scale: 1.03;
+    }
+
+    .gallery li img {
+      transition: scale 0.4s var(--is-ease);
+    }
+
+    .gallery li a:hover img {
+      scale: 1.04;
     }
   }
 }

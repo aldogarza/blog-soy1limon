@@ -1,5 +1,5 @@
 ---
-import { blogPath, homePath, ui } from '@soy1limon/core';
+import { homePath, ui } from '@soy1limon/core';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 // GitHub Pages serves this file for every unknown path in both languages, so it speaks both.
@@ -15,14 +15,12 @@ const en = ui('en');
 >
   <h1>{es.notFoundTitle}</h1>
   <p>
-    {es.notFoundBody} <a href={homePath('es')}>{es.home}</a> ·{' '}
-    <a href={blogPath('es')}>{es.allPosts}</a>
+    {es.notFoundBody} <a href={homePath('es')}>{es.home}</a>
   </p>
   <section lang="en" aria-labelledby="not-found-en">
     <h2 id="not-found-en">{en.notFoundTitle}</h2>
     <p>
-      {en.notFoundBody} <a href={homePath('en')}>{en.home}</a> ·{' '}
-      <a href={blogPath('en')}>{en.allPosts}</a>
+      {en.notFoundBody} <a href={homePath('en')}>{en.home}</a>
     </p>
   </section>
 </BaseLayout>

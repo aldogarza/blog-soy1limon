@@ -1,7 +1,13 @@
 # Public site
 
-`apps/web` is a static Astro site deployed to GitHub Pages. It ships **no JavaScript** except on
-the search page and on posts with a gallery (the photo viewer).
+`apps/web` is a static Astro site deployed to GitHub Pages. Every page works without JavaScript;
+small scripts only enhance three things, each with a plain fallback:
+
+- **Search box in the header**: results appear under the bar while typing. Pagefind is downloaded
+  only when the box gets focus. Without scripts, the form opens the search page.
+- **Home page archive**: more posts load in place (see below). Without scripts, the "Load more"
+  link opens the next archive page.
+- **Gallery viewer** on posts with a gallery. Without scripts, each photo links to its file.
 
 ## Running it
 
@@ -27,15 +33,34 @@ from `packages/core/src/routes.ts` (the prefix rule is `DEFAULT_LOCALE` in
 | Page                          | Spanish                                | English                           |
 | ----------------------------- | -------------------------------------- | --------------------------------- |
 | Home                          | `/`                                    | `/en/`                            |
-| Archive (10 per page)         | `/blog/`, `/blog/page/2/`              | `/en/blog/`, `/en/blog/page/2/`   |
+| Archive, page 2 and later     | `/page/2/`                             | `/en/page/2/`                     |
 | Post                          | `/blog/<slug>/`                        | `/en/blog/<slug>/`                |
 | Old address of a renamed post | `/blog/<old-slug>/` → redirect         | `/en/blog/<old-slug>/` → redirect |
-| Tags / one tag                | `/tags/`, `/tags/<tag>/`               | `/en/tags/`, `/en/tags/<tag>/`    |
-| Search                        | `/search/`                             | `/en/search/`                     |
+| One tag                       | `/tags/<tag>/`                         | `/en/tags/<tag>/`                 |
+| Search results (`?q=`)        | `/search/`                             | `/en/search/`                     |
+| Old blog index                | `/blog/` → redirect to `/`             | `/en/blog/` → redirect to `/en/`  |
 | RSS                           | `/rss.xml`                             | `/en/rss.xml`                     |
 | Not found                     | `/404.html` (bilingual, Spanish first) | —                                 |
 
-A tag page exists in a language only if that language has posts with the tag.
+A tag page exists in a language only if that language has posts with the tag. There is no list of
+all tags: tags are reached from the posts that use them.
+
+## Home page and archive
+
+The home page is also the start of the list of every post:
+
+1. **Latest posts**: the newest `siteConfig.blog.recentPosts` (3); the first one is featured.
+2. **More posts**: the next `siteConfig.blog.postsPerPage` (12). Below them, a "Load more"
+   button fetches the next archive page (`/page/N/`) and appends its posts. Moving the focus or
+   scrolling near the end loads the next page on its own, at most three times, so the footer stays
+   reachable; after that the button loads on demand.
+
+Accessibility of the loading: a status message announces how many posts arrived, a press moves the
+focus to the first new post, and so does a load that finishes while the button has focus.
+
+`/page/N/` pages are complete pages (with previous/next links) for crawlers and visitors without
+JavaScript, and they are in the sitemap. `POSTS_PER_PAGE` overrides the page size for tests and
+previews, so the sixteen sample posts span several pages.
 
 GitHub Pages cannot send HTTP redirects, so an old address is a tiny page with these elements:
 
@@ -67,6 +92,9 @@ in one testable place.
   Inline and gallery images load lazily.
 - **Images**: every one has `srcset`, `sizes`, `width` and `height` (no layout shift) and alt text
   in the post language.
+- **Post cards** (home, archive, tags) show the post's cover with empty alt: the title next to it
+  already names the card, so screen readers do not hear the photo twice. The first card's cover
+  loads eagerly.
 - **Gallery**: a list of figures; each photo links to its largest file and has an optional caption.
 
 ## Search
@@ -74,9 +102,11 @@ in one testable place.
 [Pagefind](https://pagefind.app) indexes only post bodies (`data-pagefind-body`) after the build.
 It creates one index per `<html lang>`, so English search only finds English posts and vice versa.
 
-- The search page is a plain form plus a small script with live result counts. It also reads `?q=`
-  so results can be linked.
-- Without JavaScript it explains why and links to the archive.
+- The search box lives in the header of every page (`Header.astro`): up to six results appear in
+  a panel while typing, and Enter opens the search page with every result.
+- The search page (`/search/?q=`) shows up to 20 results for the query and keeps it in the header
+  box, so results can be linked and refined.
+- Without JavaScript the search page explains why and links to the home page.
 
 ## Gallery viewer
 
@@ -92,10 +122,11 @@ through the `.lightbox*` hooks.
 (`e2e/serve.mjs`), and then checks:
 
 - Every page reachable from the two home pages loads, with the right `lang`, exactly one `h1`, alt
-  text and dimensions on every image, no scripts outside search and gallery pages, and **no axe violations (WCAG 2.2 AA)**.
+  text (empty only on card covers) and dimensions on every image, and **no axe violations (WCAG 2.2 AA)**.
 - Every referenced image file exists.
-- Covers, inline images, galleries, translations, the old-address redirect, per-language search,
-  the 404 page and both RSS feeds behave as described above.
+- Covers, inline images, galleries, translations, the old-address redirects, the header search
+  (keyboard, per-language results, the phone magnifying glass), loading more posts on the home page,
+  the same features without JavaScript, the 404 page and both RSS feeds behave as described above.
 
 `e2e/quality.spec.ts` adds the automated part of the quality pass (dark mode, 320 px reflow, text
 spacing, keyboard, reduced motion, internal links and fragments), and `e2e/lighthouse.spec.ts`
