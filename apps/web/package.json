@@ -17,7 +17,7 @@
     "@soy1limon/db": "workspace:*",
     "@soy1limon/markdown": "workspace:*",
     "@soy1limon/themes": "workspace:*",
-    "astro": "^7.3.8"
+    "astro": "^7.4.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

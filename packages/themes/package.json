@@ -11,10 +11,10 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "astro": "^7.3.8"
+    "astro": "^7.4.0"
   },
   "devDependencies": {
     "@soy1limon/core": "workspace:*",
-    "astro": "^7.3.8"
+    "astro": "^7.4.0"
   }
 }
