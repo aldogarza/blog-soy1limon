@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@shikijs/rehype": "^4.5.0",
+    "@shikijs/rehype": "^4.6.0",
     "@soy1limon/core": "workspace:*",
     "hast-util-to-string": "^3.0.1",
     "mdast-util-to-string": "^4.0.0",
@@ -21,9 +21,9 @@
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.5.0",
+    "shiki": "^4.6.0",
     "unified": "^11.0.5",
-    "unist-util-visit": "^5.1.0",
+    "unist-util-visit": "^5.2.0",
     "vfile": "^6.0.3"
   },
   "devDependencies": {
